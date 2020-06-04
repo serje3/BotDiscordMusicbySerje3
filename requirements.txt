@@ -1,0 +1,17 @@
+aiohttp
+async-timeout
+attrs
+cffi
+chardet
+discord
+discord.py
+idna
+multidict
+pip
+pycparser
+PyNaCl
+setuptools
+six
+websockets
+yarl
+youtube-dl
