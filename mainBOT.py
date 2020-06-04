@@ -305,4 +305,4 @@ async def on_member_update(before, after):
 
 bot.add_cog(Music(bot))
 bot.add_cog(NotMentionedCommands(bot))
-bot.run("NzE2MDQxNjY5Mzg0MDc3MzQz.XtGA1g.B-VeUMs9LeMRJoB9Iy6v92E6ogs")
+bot.run("TOKEN")
