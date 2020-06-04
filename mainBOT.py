@@ -236,7 +236,7 @@ class NotMentionedCommands(commands.Cog):
         "\t!join + <имя голосового канала>"+"\n"
         "\t!yt + <ссылка на видео Youtube>"+"\n"+
         "\t!stop остановить бота и выкинуть его из voice чата"+"\n"+
-        "\t!volume + <громкость от 1 до 100>"
+        "\t!volume + <громкость от 1 до 100>\n"
         "\t!golosovanie\n"+
         "\t!relax\n"+
         "\t!zawarudo")
