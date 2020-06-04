@@ -307,3 +307,4 @@ async def on_member_update(before, after):
 bot.add_cog(Music(bot))
 bot.add_cog(NotMentionedCommands(bot))
 token = os.environ.get('TOKEN')
+bot.run(str(token))
