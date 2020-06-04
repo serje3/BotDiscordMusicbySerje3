@@ -170,7 +170,10 @@ class Music(commands.Cog):
     @commands.command()
     async def golosovanie(self,ctx):
         await self.yt(ctx,url="https://www.youtube.com/watch?v=dhhTNEJbEQ4")
-
+    
+    @commands.command()
+    async def zawarudo(self,ctx):
+        await self.yt(ctx,url="https://www.youtube.com/watch?v=8OhMBtyElhQ")
 
     @commands.command()
     async def relax(self,ctx):
@@ -235,7 +238,8 @@ class NotMentionedCommands(commands.Cog):
         "\t!stop остановить бота и выкинуть его из voice чата"+"\n"+
         "\t!volume + <громкость от 1 до 100>"
         "\t!golosovanie\n"+
-        "\t!relax")
+        "\t!relax\n"+
+        "\t!zawarudo")
         await channel.send("Другие извращения:" +"\n"+
         "\t!yey"+"\n"+
         "\t!bruh"+"\n"+
