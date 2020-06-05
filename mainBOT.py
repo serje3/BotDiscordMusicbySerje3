@@ -59,6 +59,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 global player_title
 player_title = ""
+global on_member_update_enabled
+on_member_update_enabled=true
 @bot.event
 async def on_ready():
     print('Logged in as')
@@ -247,12 +249,21 @@ class NotMentionedCommands(commands.Cog):
         "\t!Lord_Of_Pidarases"+"\n"+
         "\t!Nigguh\n"+
         "\t!gandon\n"+
-        "\t!urperdakisunderattack")
+        "\t!urperdakisunderattack\n")
+        await channel.send("Настройки бота:\n"+
+                          "\t!on_mUpdateset <значения: + - включить, - выключить> выключает все отслеживания")
 
     @commands.command()
     async def gandon(self,ctx):
         await ctx.send("пососеш)"+ctx.author.mention)
-
+    
+    @commands.command()
+    async def on_mUpdateset(self,ctx, ans):
+        if(ans == "+"):
+            on_member_update_enabled=true
+        elif(ans == "-"):
+            on_member_update_enabled=false
+            
     @commands.command()
     async def urperdakisunderattack(self,ctx):
         await ctx.send(bot.get_guild(675762800588750986).get_role(713763255646027897).mention)
@@ -283,10 +294,12 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_update(before, after):
+    if(on_member_update_enabled==false):
+        return
     #set nickname somebody static
-    #if (after.id==<userid>)and(after.nick!="Ivan20"):
-    #    member=after
-    #    await member.edit(nick="Ivan20")
+    if (after.id==553191333498454029)and(after.nick!="Ivan 20 cm"):
+        member=after
+        await member.edit(nick="Ivan 20 cm")
     if (after.status == discord.Status.offline):
         await bot.get_guild(after.guild.id).system_channel.send("Bruh "+str(after) + " не в сети")
     elif (before.status == discord.Status.offline) and (after.status == discord.Status.online):
