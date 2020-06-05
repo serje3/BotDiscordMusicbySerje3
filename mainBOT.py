@@ -60,7 +60,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 global player_title
 player_title = ""
 global on_member_update_enabled
-on_member_update_enabled=true
+on_member_update_enabled=True
 @bot.event
 async def on_ready():
     print('Logged in as')
@@ -260,9 +260,9 @@ class NotMentionedCommands(commands.Cog):
     @commands.command()
     async def on_mUpdateset(self,ctx, ans):
         if(ans == "+"):
-            on_member_update_enabled=true
+            on_member_update_enabled=True
         elif(ans == "-"):
-            on_member_update_enabled=false
+            on_member_update_enabled=False
             
     @commands.command()
     async def urperdakisunderattack(self,ctx):
@@ -294,7 +294,7 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_update(before, after):
-    if(on_member_update_enabled==false):
+    if(on_member_update_enabled==False):
         return
     #set nickname somebody static
     if (after.id==553191333498454029)and(after.nick!="Ivan 20 cm"):
