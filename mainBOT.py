@@ -335,9 +335,9 @@ async def on_member_update(before, after):
             member = after
             await member.edit(nick="Ivan 20 cm")
         if (after.status == discord.Status.offline):
-            await bot.get_guild(after.guild.id).system_channel.send("Bruh " + str(after) + " не в сети")
+            await bot.get_guild(710750040301371463).system_channel.send("Bruh " + str(after) + " не в сети")
         elif (before.status == discord.Status.offline) and (after.status == discord.Status.online):
-            await bot.get_guild(after.guild.id).system_channel.send("Bruh " + str(after) + " в сети")
+            await bot.get_guild(710750040301371463).system_channel.send("Bruh " + str(after) + " в сети")
         if (len(before.activities) == 1) and (len(after.activities) > 1):
             if after.activities[1].type is discord.ActivityType.playing:
 
@@ -358,3 +358,4 @@ bot.add_cog(Music(bot))
 bot.add_cog(NotMentionedCommands(bot))
 token = os.environ.get('TOKEN')
 bot.run(str(token))
+
