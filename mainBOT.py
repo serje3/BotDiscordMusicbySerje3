@@ -173,6 +173,13 @@ class Music(commands.Cog):
         ctx.voice_client.source.volume = volume / 100
 
         await ctx.send("Громкость: {}%".format(volume))
+        
+    @commands.command()
+    async def showList(self,ctx,nameList=""):
+        if nameList=="":
+            ctx.send(self.playlists.keys().join(", ")
+        else:
+            ctx.send(self.playlists[nameList].keys().join(", ")
     @commands.command()
     async def list(self,ctx,nameList="",index="", indexNum="",url=""):
         if(nameList=="add"):
@@ -198,7 +205,7 @@ class Music(commands.Cog):
         if Bot.roles[1].name != str(player_title):
             color = discord.Colour(0x3a989b)
             await Bot.roles[1].edit(name=str(player_title), colour=color, hoist=False)
-
+    
     @commands.command()
     async def golosovanie(self, ctx):
         await self.yt(ctx, url="https://www.youtube.com/watch?v=dhhTNEJbEQ4")
@@ -331,9 +338,9 @@ async def on_member_update(before, after):
         return
     elif(on_member_update_enabled==True):
     # set nickname somebody static
-        if (after.id == 553191333498454029) and (after.nick != "Ivan 20 cm"):
-            member = after
-            await member.edit(nick="Ivan 20 cm")
+    #    if (after.id == 553191333498454029) and (after.nick != "Ivan 20 cm"):
+    #        member = after
+    #        await member.edit(nick="Ivan 20 cm")
         if (after.status == discord.Status.offline):
             await bot.get_guild(710750040301371463).system_channel.send("Bruh " + str(after) + " не в сети")
         elif (before.status == discord.Status.offline) and (after.status == discord.Status.online):
