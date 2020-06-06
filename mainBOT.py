@@ -177,9 +177,9 @@ class Music(commands.Cog):
     @commands.command()
     async def showList(self,ctx,nameList=""):
         if nameList=="":
-            ctx.send(self.playlists.keys().join(", ")
+            ctx.send(", ".join(self.playlists.keys()))
         else:
-            ctx.send(self.playlists[nameList].keys().join(", ")
+            ctx.send(", ".join(self.playlists[nameList].keys()))
     @commands.command()
     async def list(self,ctx,nameList="",index="", indexNum="",url=""):
         if(nameList=="add"):
