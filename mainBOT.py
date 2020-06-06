@@ -66,7 +66,7 @@ async def on_ready():
     print(bot.user.name)
     # 675762801049862206
     # bot.get_guild(675762800588750986).get_role(713763255646027897).mention
-    # await bot.get_guild(675762800588750986).system_channel.send("ладно)")
+    await bot.get_guild(675762800588750986).system_channel.send("https://tenor.com/bhyep.gif")
     #   ded.mention + "пошел в пизду",tts=False)
 
     print('------')
