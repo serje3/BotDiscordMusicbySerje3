@@ -360,7 +360,11 @@ async def on_member_update(before, after):
                 await bot.get_guild(before.guild.id).system_channel.send(str(after)[:len(str(after)) - 5] + "(" + str(
                     after.activities[0].name) + ")" + " сейчас играет в " + str(after.activities[1].name), tts=False)
 
-
+@bot.event
+async def on_message(message):
+    if message.content == 'ты@':
+        await message.channel.send('я@', tts=True)
+                
 bot.add_cog(Music(bot))
 bot.add_cog(NotMentionedCommands(bot))
 token = os.environ.get('TOKEN')
