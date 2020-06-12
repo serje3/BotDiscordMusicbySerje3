@@ -361,6 +361,12 @@ async def on_member_update(before, after):
                     after.activities[0].name) + ")" + " сейчас играет в " + str(after.activities[1].name), tts=False)
 
 @bot.event
+async def on_guild_join(guild):
+    await guild.system_channel.send("https://tenor.com/bhyep.gif")
+                
+                
+  
+@bot.event
 async def on_message(message):
     if message.content == 'ты@':
         await message.channel.send('я@', tts=True)
