@@ -366,10 +366,10 @@ async def on_guild_join(guild):
                 
                 
   
-@bot.event
-async def on_message(message):
-    if message.content == 'ты@':
-        await message.channel.send('я@', tts=True)
+#@bot.event
+#async def on_message(message):
+#    if message.content == 'ты@':
+#        await message.channel.send('я@', tts=True)
                 
 bot.add_cog(Music(bot))
 bot.add_cog(NotMentionedCommands(bot))
