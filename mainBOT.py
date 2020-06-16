@@ -54,7 +54,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 
-global player_title
+
 player_title = ""
 on_member_update_enabled = True
 global playlists
@@ -85,10 +85,15 @@ class Config:
 class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.ConfigObject=Config()
+        self.ConfigObject = Config()
         self.ConfigObject.playload()
-        self.playlists=self.ConfigObject.playlists
+        self.playlists = self.ConfigObject.playlists
 
+    def afterSong(self, ctx):
+        Bot = bot.get_guild(ctx.message.guild.id).get_member(716041669384077343)
+        color = discord.Colour(0x3a989b)
+        coro = Bot.roles[1].edit(name="Музыка", colour=color, hoist=False)
+        asyncio.run_coroutine_threadsafe(coro, self.bot.loop)
 
     @commands.command()
     async def join(self, ctx, *, channel: discord.VoiceChannel):
@@ -105,7 +110,7 @@ class Music(commands.Cog):
 
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop)
-            ctx.voice_client.play(player, after=lambda e: print('Ошибка плеера: %s' % e) if e else None)
+            ctx.voice_client.play(player, after=self.afterSong(ctx))
 
         await ctx.send('Сейчас играет: {}'.format(player.title))
         player_title = str(player.title)
@@ -165,10 +170,10 @@ class Music(commands.Cog):
         if ctx.voice_client is None:
             return await ctx.send("Не присоединено к голосовому чату")
 
-        if volume > 100:
-            volume = 100
-        elif volume < 0:
-            volume = 0
+        # if volume > 100:
+        #     volume = 100
+        # elif volume < 0:
+        #     volume = 0
 
         ctx.voice_client.source.volume = volume / 100
 
@@ -318,6 +323,7 @@ class NotMentionedCommands(commands.Cog):
 
 @bot.command()
 async def on_mUpdateset(ctx, ans):
+    global on_member_update_enabled
     if (ans == "+"):
         on_member_update_enabled = True
     elif (ans == "-"):
@@ -333,18 +339,18 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_update(before, after):
-    print(on_member_update_enabled)
+    global on_member_update_enabled
     if (on_member_update_enabled == False):
         return
-    elif(on_member_update_enabled==True):
-    # set nickname somebody static
-    #    if (after.id == 553191333498454029) and (after.nick != "Ivan 20 cm"):
-    #        member = after
-    #        await member.edit(nick="Ivan 20 cm")
+    elif (on_member_update_enabled == True):
+
+        if (after.id == 553191333498454029) and (after.nick != "Ivan 20 cm"):
+            member = after
+            await member.edit(nick="Ivan 20 cm")
         if (after.status == discord.Status.offline):
-            await bot.get_guild(710750040301371463).system_channel.send("Bruh " + str(after) + " не в сети")
+            await bot.get_guild(after.guild.id).system_channel.send("Bruh " + str(after) + " не в сети")
         elif (before.status == discord.Status.offline) and (after.status == discord.Status.online):
-            await bot.get_guild(710750040301371463).system_channel.send("Bruh " + str(after) + " в сети")
+            await bot.get_guild(after.guild.id).system_channel.send("Bruh " + str(after) + " в сети")
         if (len(before.activities) == 1) and (len(after.activities) > 1):
             if after.activities[1].type is discord.ActivityType.playing:
 
@@ -374,5 +380,6 @@ async def on_guild_join(guild):
 bot.add_cog(Music(bot))
 bot.add_cog(NotMentionedCommands(bot))
 token = os.environ.get('TOKEN')
+
 bot.run(str(token))
 
