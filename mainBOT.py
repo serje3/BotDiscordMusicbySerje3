@@ -56,7 +56,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 
 player_title = ""
-on_member_update_enabled = True
+on_member_update_enabled = False
 global playlists
 
 
