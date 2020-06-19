@@ -247,7 +247,12 @@ class NotMentionedCommands(commands.Cog):
     async def Sobaka(self, ctx):
         await ctx.send("я @ ты @" * 250,
                        tts=True)
-
+    
+    @commands.command()
+    async def kpekep(self,ctx,text):
+        await ctx.send(text[::2])
+    
+    
     @commands.command()
     async def yey(self, ctx):
         await ctx.send("ye" * 250, tts=True)
