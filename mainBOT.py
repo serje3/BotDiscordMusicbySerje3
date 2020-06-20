@@ -214,7 +214,12 @@ class Music(commands.Cog):
     @commands.command()
     async def golosovanie(self, ctx):
         await self.yt(ctx, url="https://www.youtube.com/watch?v=dhhTNEJbEQ4")
-
+    
+    @commands.command()
+    async def kpop(self,ctx):
+        await self.yt(ctx,url="https://www.youtube.com/watch?v=tvhVVbFyt4E")
+        await ctx.send("https://media.tenor.com/images/063676b4372b2a7ec0833ddf0ffdd1e6/tenor.gif")
+    
     @commands.command()
     async def zawarudo(self, ctx):
         await self.yt(ctx, url="https://www.youtube.com/watch?v=8OhMBtyElhQ")
