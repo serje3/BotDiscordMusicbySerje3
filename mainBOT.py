@@ -356,7 +356,7 @@ async def on_member_update(before, after):
 
         if (after.id == 553191333498454029) and (after.nick != "Ivan 20 cm"):
             member = after
-            await member.edit(nick="Ivan 20 cm")
+            await member.edit(nick="Ivan 20 cum")
         if (after.status == discord.Status.offline):
             await bot.get_guild(after.guild.id).system_channel.send("Bruh " + str(after) + " не в сети")
         elif (before.status == discord.Status.offline) and (after.status == discord.Status.online):
