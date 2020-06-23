@@ -354,7 +354,7 @@ async def on_member_update(before, after):
         return
     elif (on_member_update_enabled == True):
 
-        if (after.id == 553191333498454029) and (after.nick != "Ivan 20 cm"):
+        if (after.id == 553191333498454029) and (after.nick != "Ivan 20 cum"):
             member = after
             await member.edit(nick="Ivan 20 cum")
         if (after.status == discord.Status.offline):
