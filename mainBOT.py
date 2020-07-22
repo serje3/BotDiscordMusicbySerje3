@@ -389,7 +389,7 @@ async def on_guild_join(guild):
                 
 bot.add_cog(Music(bot))
 bot.add_cog(NotMentionedCommands(bot))
-#token = os.environ.get('TOKEN')
+token = os.environ.get('TOKEN')
 
-bot.run('NzE2MDQxNjY5Mzg0MDc3MzQz.XxiKEw.dyzKOT0hcIn3lZ28OvmOl-C7RVI')
+bot.run(token)
 
