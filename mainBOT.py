@@ -289,6 +289,11 @@ class SongList(commands.Cog):
             self.database.drop(_id, ctx.guild.id)
             await ctx.send("Удалено")
 
+    @commands.command()
+    async def reload_db(self,ctx):
+        if ctx.author.id == '263430624080035841':
+            self.database.close_connection()
+
     @playlist.before_invoke
     async def ensure_voice(self, ctx):
         if ctx.voice_client is None:
@@ -299,6 +304,7 @@ class SongList(commands.Cog):
                 raise commands.CommandError("Пользователь не присоединён к голосовому чату.")
         elif ctx.voice_client.is_playing():
             ctx.voice_client.stop()
+
 
 
 class NotMentionedCommands(commands.Cog):
