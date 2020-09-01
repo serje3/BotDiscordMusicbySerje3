@@ -9,10 +9,10 @@ class ManageDB:
     def __init__(self):
         self.conn = self.create_connection()
         cursor = self.conn.cursor()
-        cursor.execute("""CREATE TABLE IF NOT EXISTS songs(
+        cursor.execute("""CREATE TABLE IF NOT EXISTS songs_list(
                            id INTEGER PRIMARY KEY NOT NULL ,
                            song text NOT NULL,
-                           guild INTEGER NOT NULL
+                           guild TEXT NOT NULL
         );""")
         self.conn.commit()
         cursor.close()
@@ -40,13 +40,13 @@ class ManageDB:
 
     def insert(self, arr):
         cursor = self.conn.cursor()
-        cursor.executemany("""INSERT INTO songs(song,guild) VALUES(%s,%s)""", arr)
+        cursor.executemany("""INSERT INTO songs_list(song,guild) VALUES(%s,%s)""", arr)
         self.conn.commit()
         cursor.close()
 
     def select(self, guild_id):
         cursor = self.conn.cursor()
-        cursor.execute("""SELECT * FROM songs WHERE guild=%(guild_id)s""", {'guild_id': guild_id})
+        cursor.execute("""SELECT * FROM songs_list WHERE guild=%(guild_id)s""", {'guild_id': str(guild_id)})
         result = cursor.fetchall()
         cursor.close()
         return result
@@ -54,7 +54,7 @@ class ManageDB:
     def drop(self, id_arr, guild):
         cursor = self.conn.cursor()
         for _id in id_arr:
-            cursor.execute("""DELETE FROM songs WHERE id= %(id)s and guild=%(guild_id)s""", {'id': _id, 'guild_id': guild})
+            cursor.execute("""DELETE FROM songs_list WHERE id= %(id)s and guild=%(guild_id)s""", {'id': _id, 'guild_id': str(guild)})
             self.conn.commit()
         cursor.close()
 
