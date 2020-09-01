@@ -1,9 +1,11 @@
 import asyncio
 import os
-import json
+
 import discord
 import youtube_dl
 import random
+
+from dataQueries import ManageDB
 from discord.ext import commands
 
 # Suppress noise about console usage from errors
@@ -54,40 +56,20 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 
-
-player_title = ""
 on_member_update_enabled = False
-global playlists
 
 
 @bot.event
 async def on_ready():
     print('Logged in as')
     print(bot.user.name)
-    # 675762801049862206
-    # bot.get_guild(675762800588750986).get_role(713763255646027897).mention
-    # await bot.get_guild(675762800588750986).system_channel.send("https://tenor.com/bhyep.gif")
-    #   ded.mention + "пошел в пизду",tts=False)
 
     print('------')
-class Config:
-    playlists = {}
-    def playload(self):
-        with open("playlists.json") as f:
-            self.playlists = json.load(f)
-    def playdump(self):
-        with open("playlists.json",'w') as f:
-            json.dump(self.playlists,f)
-    def getPlaylist(self):
-        return playlists
-    def setPlaylist(self,playlist):
-        self.playlists=playlist
+
+
 class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.ConfigObject = Config()
-        self.ConfigObject.playload()
-        self.playlists = self.ConfigObject.playlists
 
     def afterSong(self, ctx):
         Bot = bot.get_guild(ctx.message.guild.id).get_member(716041669384077343)
@@ -158,11 +140,6 @@ class Music(commands.Cog):
             await asyncio.sleep(8)
             await ctx.send("https://tenor.com/view/gachi-ricardo-milos-dance-gif-13294294")
 
-    # @commands.command()
-    # async def playlist(self, ctx, command):
-    #
-
-
     @commands.command()
     async def volume(self, ctx, volume: int):
         """Changes the player's volume"""
@@ -178,28 +155,7 @@ class Music(commands.Cog):
         ctx.voice_client.source.volume = volume / 100
 
         await ctx.send("Громкость: {}%".format(volume))
-        
-    @commands.command()
-    async def showList(self,ctx,nameList=""):
-        if nameList=="":
-            await ctx.send(", ".join(self.playlists.keys()))
-        else:
-            await ctx.send(", ".join(self.playlists[nameList].keys()))
-    @commands.command()
-    async def list(self,ctx,nameList="",index="", indexNum="",url=""):
-        if(nameList=="add"):
-            try:
-                self.playlists[index][indexNum]=url
-            except KeyError:
-                self.playlists[index]={}
-                self.playlists[index][indexNum]=url
-            finally:
-                self.ConfigObject.setPlaylist(self.playlists)
-                self.ConfigObject.playdump()
-        elif(nameList==""):
-            await ctx.send("вид программы !list (<имя плейлиста> или add) (если не add: индекс плейлиста, который создали, если add: индекс плейлиста который создается) (если add: url)  ")
-        else:
-            await self.yt(ctx,url=self.playlists[nameList][index])
+
     @commands.command()
     async def stop(self, ctx):
         """Stops and disconnects the bot from voice"""
@@ -210,16 +166,16 @@ class Music(commands.Cog):
         if Bot.roles[1].name != str(player_title):
             color = discord.Colour(0x3a989b)
             await Bot.roles[1].edit(name=str(player_title), colour=color, hoist=False)
-    
+
     @commands.command()
     async def golosovanie(self, ctx):
         await self.yt(ctx, url="https://www.youtube.com/watch?v=dhhTNEJbEQ4")
-    
+
     @commands.command()
-    async def kpop(self,ctx):
-        await self.yt(ctx,url="https://www.youtube.com/watch?v=tvhVVbFyt4E")
+    async def kpop(self, ctx):
+        await self.yt(ctx, url="https://www.youtube.com/watch?v=tvhVVbFyt4E")
         await ctx.send("https://media.tenor.com/images/063676b4372b2a7ec0833ddf0ffdd1e6/tenor.gif")
-    
+
     @commands.command()
     async def zawarudo(self, ctx):
         await self.yt(ctx, url="https://www.youtube.com/watch?v=8OhMBtyElhQ")
@@ -246,18 +202,116 @@ class Music(commands.Cog):
                 await Bot.roles[1].edit(name=str(player_title), colour=color, hoist=False)
 
 
+class SongList(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self.database = ManageDB()
+
+    @commands.command()
+    async def showList(self, ctx):
+        List = self.database.select(ctx.guild.id)
+        if List != []:
+            await ctx.send('id\tНазвание')
+            msg = []
+            for song in List:
+                msg.append(str(song[0]) + '   ' + song[1] + '\n')
+
+            lenList = [len(value) for value in ['hello', ' world']]
+            if sum(lenList) <= 2000:
+                await ctx.send("".join(msg))
+            else:
+
+                a = [value + sum(lenList[:i]) for value, i in [[lenList[i], i] for i in range(len(lenList))] if i != 0]
+                indexes = [0]
+                for i in range(len(a)):
+                    if a[i] - indexes[::-1][0] >= 2000:
+                        indexes.append(i)
+                for i in indexes:
+                    if i == 0:
+                        continue
+                    await ctx.send("".join(msg[:i]))
+                    del msg[:i]
+        else:
+            await ctx.send('Не найдено')
+
+    @commands.command()
+    async def playlist(self, ctx, _id=1):
+        Bot = bot.get_guild(ctx.message.guild.id).get_member(716041669384077343)
+        list = self.database.select(ctx.guild.id)
+        # await self.yt(ctx,url=list[id][1])
+        await ctx.send("Играет плейлист")
+        for id, song, guild in list:
+            print(song)
+            if id < _id:
+                continue
+
+            async with ctx.typing():
+                player = await YTDLSource.from_url(song, loop=self.bot.loop)
+                ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+
+            player_title = player.title
+            if Bot.roles[1].name != f"Плейлист ID {id}":
+                print(Bot.roles[1])
+                color = discord.Colour(0x36faff)
+                await Bot.roles[1].edit(name=f"Плейлист ID {id}", color=color, hoist=True)
+            await ctx.send(f"Плейлист ID {id} - {player_title}")
+            await asyncio.sleep(int(player.data['duration']))
+        await Bot.roles[1].edit(name="Музыка", colour=discord.Colour(0x3a989b), hoist=False)
+
+    @commands.command()
+    async def add(self, ctx, *songs):
+        guild = ctx.guild.id
+        songsList = []
+        print(songs)
+        text = ""
+        for song in songs:
+            if song[::-1][0] == ',':
+                text += song
+                songsList.append(text.replace(',', ''))
+                text = ""
+            else:
+                text += song + " "
+        if text != "":
+            songsList.append(text.replace(',', ''))
+        list = [(song, guild) for song in songsList]
+        self.database.insert(list)
+        await ctx.send(f"Сохранены: {', '.join(songsList)}"[:2000])
+
+    @commands.command()
+    async def drop(self, ctx, *_id):
+        if _id[0] == 'all':
+            list = self.database.select(ctx.guild.id)
+            index = list[::-1][0][0]
+            toDelete = [i for i in range(1, index + 1)]
+            self.database.drop(toDelete, ctx.guild.id)
+            await ctx.send("Удалено всё")
+        else:
+            self.database.drop(_id, ctx.guild.id)
+            await ctx.send("Удалено")
+
+    @playlist.before_invoke
+    async def ensure_voice(self, ctx):
+        if ctx.voice_client is None:
+            if ctx.author.voice:
+                await ctx.author.voice.channel.connect()
+            else:
+                await ctx.send("Не присоединено к голосовому чату.")
+                raise commands.CommandError("Пользователь не присоединён к голосовому чату.")
+        elif ctx.voice_client.is_playing():
+            ctx.voice_client.stop()
+
+
 class NotMentionedCommands(commands.Cog):
 
     @commands.command()
     async def Sobaka(self, ctx):
         await ctx.send("я @ ты @" * 250,
                        tts=True)
-    
+
     @commands.command()
-    async def kpekep(self,ctx,text):
+    async def kpekep(self, ctx, text):
         await ctx.send(text[::2])
-    
-    
+
     @commands.command()
     async def yey(self, ctx):
         await ctx.send("ye" * 250, tts=True)
@@ -286,33 +340,36 @@ class NotMentionedCommands(commands.Cog):
         await ctx.send("Niggaaaah", tts=True)
 
     @commands.command()
-    async def info(self, ctx, channel: discord.TextChannel):
-        await channel.send("Список команд:")
-        await channel.send("Музыка:" + "\n" +
-                           "\t!join + <имя голосового канала>" + "\n"
-                                                                 "\t!yt + <ссылка на видео Youtube>" + "\n" +
-                           "\t!stop остановить бота и выкинуть его из voice чата" + "\n" +
-                           "\t!volume + <громкость от 1 до 100>\n"
-                           "\t!golosovanie\n" +
-                           "\t!relax\n" +
-                           "\t!zawarudo\n"+
-                           "\t!list (<имя плейлиста> / add) (index / <имя плейлиста>)\n\t(... / index) (... / url")
-        await channel.send("Другие извращения:" + "\n" +
-                           "\t!yey" + "\n" +
-                           "\t!bruh" + "\n" +
-                           "\t!Sobaka" + "\n" +
-                           "\t!Lord_Of_Pidarases" + "\n" +
-                           "\t!Nigguh\n" +
-                           "\t!gandon\n" +
-                           "\t!urperdakisunderattack\n")
-        await channel.send("Настройки бота:\n" +
-                           "\t!on_mUpdateset <значения: + - включить, - выключить> выключает все отслеживания")
+    async def info(self, ctx):
+        await ctx.send("Список команд:")
+        await ctx.send("Музыка:" + "\n" +
+                       "\t!join + <имя голосового канала>" + "\n"
+                                                             "\t!yt + <ссылка на видео Youtube>" + "\n" +
+                       "\t!stop остановить бота и выкинуть его из voice чата" + "\n" +
+                       "\t!volume + <громкость от 1 до 100>\n"
+                       "\t!golosovanie\n" +
+                       "\t!relax\n" +
+                       "\t!zawarudo\n")
+        await ctx.send("Другие извращения:" + "\n" +
+                       "\t!yey" + "\n" +
+                       "\t!bruh" + "\n" +
+                       "\t!Sobaka" + "\n" +
+                       "\t!Lord_Of_Pidarases" + "\n" +
+                       "\t!Nigguh\n" +
+                       "\t!gandon\n" +
+                       "\t!urperdakisunderattack\n")
+        await ctx.send("Настройки бота:\n" +
+                       "\t!on_mUpdateset <значения: + - включить, - выключить> выключает все отслеживания")
+        await ctx.send("Плейлисты:\n" +
+                       "\t!add <название> - добавить песню или несколько песен разделяющиеся запятой и пробелом ', '\n" +
+                       "\t!playlist <id(по умолчанию самый первый)>\n" +
+                       "\t!showList - отобразить плейлист\n" +
+                       "\t!drop <'all' - чтобы удалить всё из плейлиста ; либо один или несколько id через пробел, которые указаны в !showList"
+                       )
 
     @commands.command()
     async def gandon(self, ctx):
         await ctx.send("пососеш)" + ctx.author.mention)
-
-
 
     @commands.command()
     async def urperdakisunderattack(self, ctx):
@@ -331,6 +388,7 @@ class NotMentionedCommands(commands.Cog):
         await ctx.send(bot.get_guild(675762800588750986).get_role(713763255646027897).mention)
         await ctx.send(bot.get_guild(675762800588750986).get_role(713763255646027897).mention)
 
+
 @bot.command()
 async def on_mUpdateset(ctx, ans):
     global on_member_update_enabled
@@ -338,6 +396,7 @@ async def on_mUpdateset(ctx, ans):
         on_member_update_enabled = True
     elif (ans == "-"):
         on_member_update_enabled = False
+
 
 @bot.event
 async def on_member_join(member):
@@ -376,20 +435,18 @@ async def on_member_update(before, after):
                 await bot.get_guild(before.guild.id).system_channel.send(str(after)[:len(str(after)) - 5] + "(" + str(
                     after.activities[0].name) + ")" + " сейчас играет в " + str(after.activities[1].name), tts=False)
 
+
 @bot.event
 async def on_guild_join(guild):
     await guild.system_channel.send("https://tenor.com/bhyep.gif")
-                
-                
-  
-#@bot.event
-#async def on_message(message):
-#    if message.content == 'ты@':
-#        await message.channel.send('я@', tts=True)
-                
+
+
 bot.add_cog(Music(bot))
+
 bot.add_cog(NotMentionedCommands(bot))
+
+bot.add_cog(SongList(bot))
+
 token = os.environ.get('TOKEN')
 
 bot.run(token)
-
