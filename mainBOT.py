@@ -291,14 +291,12 @@ class SongList(commands.Cog):
 
     @commands.command()
     async def reload_db(self,ctx):
-        if ctx.author.id == '263430624080035841':
-            self.database.close_connection()
-            ctx.send("Перезагрузка")
+        self.database.close_connection()
+        ctx.send("Перезагрузка")
 
     @commands.command()
     async def delete_all(self,ctx):
-        if ctx.author.id == '263430624080035841':
-            self.database.drop_table()
+        self.database.drop_table()
 
     @playlist.before_invoke
     async def ensure_voice(self, ctx):
