@@ -292,7 +292,7 @@ class SongList(commands.Cog):
     @commands.command()
     async def reload_db(self,ctx):
         self.database.close_connection()
-        ctx.send("Перезагрузка")
+        await ctx.send("Перезагрузка")
 
     @commands.command()
     async def delete_all(self,ctx):
