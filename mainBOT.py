@@ -205,12 +205,8 @@ class Music(commands.Cog):
 class SongList(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.database = None
-
-    @bot.event
-    async def on_ready(self):
         self.database = ManageDB()
-        
+
     @commands.command()
     async def showList(self, ctx):
         List = self.database.select(ctx.guild.id)
