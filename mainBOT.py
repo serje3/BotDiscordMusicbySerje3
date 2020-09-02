@@ -205,8 +205,12 @@ class Music(commands.Cog):
 class SongList(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.database = ManageDB()
+        self.database = None
 
+    @bot.event
+    async def on_ready(self):
+        self.database = ManageDB()
+        
     @commands.command()
     async def showList(self, ctx):
         List = self.database.select(ctx.guild.id)
@@ -291,9 +295,13 @@ class SongList(commands.Cog):
 
     @commands.command()
     async def reload_db(self,ctx):
-        if ctx.author.id == '263430624080035841':
+
             self.database.close_connection()
             ctx.send("Перезагрузка")
+
+    async def delete_all(self,ctx):
+        if ctx.author.id == '263430624080035841':
+            self.database.drop_table()
 
     @playlist.before_invoke
     async def ensure_voice(self, ctx):
