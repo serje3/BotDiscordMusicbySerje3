@@ -10,7 +10,7 @@ class ManageDB:
         self.conn = self.create_connection()
         cursor = self.conn.cursor()
         cursor.execute("""CREATE TABLE IF NOT EXISTS songs_list(
-                           id INTEGER PRIMARY KEY NOT NULL ,
+                           id SERIAL PRIMARY KEY NOT NULL ,
                            song text NOT NULL,
                            guild TEXT NOT NULL
         );""")
