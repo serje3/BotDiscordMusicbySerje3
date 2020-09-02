@@ -58,11 +58,6 @@ class ManageDB:
             self.conn.commit()
         cursor.close()
 
-    def drop_table(self):
-        cursor = self.conn.cursor()
-        cursor.execute("""DROP TABLE IF EXISTS songs""")
-        cursor.execute("""DROP TABLE IF EXISTS songs_list""")
-        self.conn.commit()
 
     def close_connection(self):
         self.conn.close()

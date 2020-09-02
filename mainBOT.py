@@ -85,6 +85,7 @@ class Music(commands.Cog):
             return await ctx.voice_client.move_to(channel)
 
         await channel.connect()
+        print('Подключено ' + str(ctx.voice_client))
 
     @commands.command()
     async def yt(self, ctx, *, url):
@@ -207,6 +208,8 @@ class SongList(commands.Cog):
         self.bot = bot
         self.database = ManageDB()
 
+
+
     @commands.command()
     async def showList(self, ctx):
         List = self.database.select(ctx.guild.id)
@@ -238,10 +241,11 @@ class SongList(commands.Cog):
     async def playlist(self, ctx, _id=1):
         Bot = bot.get_guild(ctx.message.guild.id).get_member(716041669384077343)
         list = self.database.select(ctx.guild.id)
+        if list is None:
+            return
         # await self.yt(ctx,url=list[id][1])
         await ctx.send("Играет плейлист")
         for id, song, guild in list:
-            print(song)
             if id < _id:
                 continue
 
@@ -256,6 +260,8 @@ class SongList(commands.Cog):
                 await Bot.roles[1].edit(name=f"Плейлист ID {id}", color=color, hoist=True)
             await ctx.send(f"Плейлист ID {id} - {player_title}")
             await asyncio.sleep(int(player.data['duration']))
+            if ctx.voice_client is None:
+                break
         await Bot.roles[1].edit(name="Музыка", colour=discord.Colour(0x3a989b), hoist=False)
 
     @commands.command()
@@ -289,14 +295,7 @@ class SongList(commands.Cog):
             self.database.drop(_id, ctx.guild.id)
             await ctx.send("Удалено")
 
-    @commands.command()
-    async def reload_db(self,ctx):
-        self.database.close_connection()
-        await ctx.send("Перезагрузка")
 
-    @commands.command()
-    async def delete_all(self,ctx):
-        self.database.drop_table()
 
     @playlist.before_invoke
     async def ensure_voice(self, ctx):
@@ -314,23 +313,6 @@ class SongList(commands.Cog):
 class NotMentionedCommands(commands.Cog):
 
     @commands.command()
-    async def Sobaka(self, ctx):
-        await ctx.send("я @ ты @" * 250,
-                       tts=True)
-
-    @commands.command()
-    async def kpekep(self, ctx, text):
-        await ctx.send(text[::2])
-
-    @commands.command()
-    async def yey(self, ctx):
-        await ctx.send("ye" * 250, tts=True)
-
-    @commands.command()
-    async def bruh(self, ctx):
-        await ctx.send("bruh", tts=True)
-
-    @commands.command()
     async def Lord_Of_Pidarases(self, ctx):
         guild = bot.get_guild(ctx.message.guild.id)
         all_users = []
@@ -346,10 +328,6 @@ class NotMentionedCommands(commands.Cog):
                            tts=True)
 
     @commands.command()
-    async def Nigguh(self, ctx):
-        await ctx.send("Niggaaaah", tts=True)
-
-    @commands.command()
     async def info(self, ctx):
         await ctx.send("Список команд:")
         await ctx.send("Музыка:" + "\n" +
@@ -361,13 +339,7 @@ class NotMentionedCommands(commands.Cog):
                        "\t!relax\n" +
                        "\t!zawarudo\n")
         await ctx.send("Другие извращения:" + "\n" +
-                       "\t!yey" + "\n" +
-                       "\t!bruh" + "\n" +
-                       "\t!Sobaka" + "\n" +
-                       "\t!Lord_Of_Pidarases" + "\n" +
-                       "\t!Nigguh\n" +
-                       "\t!gandon\n" +
-                       "\t!urperdakisunderattack\n")
+                       "\t!Lord_Of_Pidarases" + "\n")
         await ctx.send("Настройки бота:\n" +
                        "\t!on_mUpdateset <значения: + - включить, - выключить> выключает все отслеживания")
         await ctx.send("Плейлисты:\n" +
@@ -426,10 +398,10 @@ async def on_member_update(before, after):
         if (after.id == 553191333498454029) and (after.nick != "Ivan 20 cm"):
             member = after
             await member.edit(nick="Ivan 20 cm")
-        if (after.status == discord.Status.offline):
-            await bot.get_guild(after.guild.id).system_channel.send("Bruh " + str(after) + " не в сети")
-        elif (before.status == discord.Status.offline) and (after.status == discord.Status.online):
-            await bot.get_guild(after.guild.id).system_channel.send("Bruh " + str(after) + " в сети")
+        # if (after.status == discord.Status.offline):
+        #     await bot.get_guild(after.guild.id).system_channel.send("Bruh " + str(after) + " не в сети")
+        # elif (before.status == discord.Status.offline) and (after.status == discord.Status.online):
+        #     await bot.get_guild(after.guild.id).system_channel.send("Bruh " + str(after) + " в сети")
         if (len(before.activities) == 1) and (len(after.activities) > 1):
             if after.activities[1].type is discord.ActivityType.playing:
 
