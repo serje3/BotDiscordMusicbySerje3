@@ -29,12 +29,15 @@ public class BotApplication extends ListenerAdapter {
 
     private final LavalinkClient client;
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, NullTokenException {
         new BotApplication();
     }
 
-    public BotApplication() throws InterruptedException {
-        String token = "NzE2MDQxNjY5Mzg0MDc3MzQz.Gc7RqH.j_RznBBjyfqgbIZUuBsWkRseEq2JBpqbjg1_OY";
+    public BotApplication() throws InterruptedException, NullTokenException {
+        String token = System.getenv("BOT_TOKEN");
+        if (token == null) {
+            throw new NullTokenException();
+        }
         this.client = new LavalinkClient(Helpers.getUserIdFromToken(token));
 
         this.client.getLoadBalancer().addPenaltyProvider(new VoiceRegionPenaltyProvider());
@@ -222,7 +225,7 @@ public class BotApplication extends ListenerAdapter {
 
 
                     event.reply("Response from loadsearch endpoint."
-                            + "\ntracks: " + loadResult.getData().getTracks().size()
+                                    + "\ntracks: " + loadResult.getData().getTracks().size()
 //                            + "\nalbums: " + loadResult.getData().size()
 //                            + "\nartists: " + loadResult.getArtists().size()
 //                            + "\nplaylists: " + loadResult.getPlaylists().size()
@@ -247,5 +250,9 @@ public class BotApplication extends ListenerAdapter {
         }
 
         event.reply("Joining your channel!").queue();
+    }
+
+
+    static class NullTokenException extends Exception {
     }
 }

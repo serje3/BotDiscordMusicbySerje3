@@ -1,9 +1,18 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 group 'org.serje3'
 version '1.0-SNAPSHOT'
+
+ext {
+    javaMainClass = "org.serje3.BotApplication"
+}
+
+application {
+    mainClassName = javaMainClass
+}
 
 repositories {
     mavenCentral()
