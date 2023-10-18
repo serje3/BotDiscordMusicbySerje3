@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+}
+
+group 'org.serje3'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://maven.arbjerg.dev/releases'
+    }
+    maven {
+        url 'https://maven.arbjerg.dev/snapshots'
+    }
+}
+
+dependencies {
+    implementation "dev.arbjerg:lavalink-client:da79998defe6709bc9eb1cb5f625cdba5d9aa937-SNAPSHOT"
+    implementation "net.dv8tion:JDA:5.0.0-beta.15"
+
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'org.slf4j:slf4j-simple:2.0.9'
+
+}
+
+test {
+    useJUnitPlatform()
+}
