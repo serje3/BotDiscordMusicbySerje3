@@ -4,35 +4,32 @@ import dev.arbjerg.lavalink.client.*;
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener;
-import dev.arbjerg.lavalink.protocol.v4.LoadResult;
 import dev.arbjerg.lavalink.protocol.v4.Message;
-import dev.arbjerg.lavalink.protocol.v4.Track;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildVoiceState;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
-import org.serje3.BotApplication;
+import org.serje3.commands.music.*;
+import org.serje3.meta.abs.Command;
 
-import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 
 public class MusicAdapter extends ListenerAdapter {
 
     private final LavalinkClient client;
 
+    private final HashMap<String, Command> commands;
+
     public MusicAdapter() throws Exception {
         String token = System.getenv("BOT_TOKEN");
         if (token == null) {
-            System.out.println("No token provided");
             throw new Exception("No token provided");
         }
         this.client = new LavalinkClient(Helpers.getUserIdFromToken(token));
@@ -41,6 +38,9 @@ public class MusicAdapter extends ListenerAdapter {
 
         this.registerLavalinkNodes();
         this.registerLavalinkListeners();
+
+        this.commands = new HashMap<>();
+        this.registerCommands();
 
         JDABuilder.createDefault(token)
                 .setVoiceDispatchInterceptor(new JDAVoiceUpdateListener(this.client))
@@ -51,6 +51,13 @@ public class MusicAdapter extends ListenerAdapter {
                 .awaitReady();
     }
 
+    private void registerCommands() {
+        this.commands.put("play", new PlayCommand());
+        this.commands.put("gachi", new GachiCommand());
+        this.commands.put("pause", new PauseCommand());
+        this.commands.put("join", new JoinCommand());
+        this.commands.put("leave", new LeaveCommand());
+    }
 
     private void registerLavalinkNodes() {
         List.of(
@@ -101,156 +108,37 @@ public class MusicAdapter extends ListenerAdapter {
     @Override
     public void onReady(@NotNull net.dv8tion.jda.api.events.session.ReadyEvent event) {
         System.out.println(event.getJDA().getSelfUser().getAsTag() + " is ready!");
-
-        event.getJDA().updateCommands()
-                .addCommands(
-                        Commands.slash("custom-request", "Testing custom requests"),
-                        Commands.slash("custom-json-request", "Testing custom json requests"),
-                        Commands.slash("join", "Join the voice channel you are in."),
-                        Commands.slash("leave", "Leaves the vc"),
-                        Commands.slash("pause", "Pause or unpause the plauer"),
-                        Commands.slash("play", "Play a song")
-                                .addOption(
-                                        OptionType.STRING,
-                                        "identifier",
-                                        "The identifier of the song you want to play",
-                                        true
-                                )
-                )
-                .queue();
+        initializeSlashCommands(event.getJDA());
     }
 
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         switch (event.getFullCommandName()) {
-            case "join":
-                joinHelper(event);
-                break;
-            case "leave":
-                event.getJDA().getDirectAudioController().disconnect(event.getGuild());
-                event.reply("Leaving your channel!").queue();
-                break;
-            case "pause":
-                this.client.getLink(event.getGuild().getIdLong())
-                        .getPlayer()
-                        .flatMap((player) -> player.setPaused(!player.getPaused()).asMono())
-                        .subscribe((player) -> {
-                            event.reply("Player has been " + (player.getPaused() ? "paused" : "resumed") + "!").queue();
-                        });
-                break;
-            case "play": {
-                final Guild guild = event.getGuild();
-
-                // We are already connected, go ahead and play
-                if (guild.getSelfMember().getVoiceState().inAudioChannel()) {
-                    event.deferReply(false).queue();
-                } else {
-                    // Connect to VC first
-                    joinHelper(event);
-                }
-
-                final String identifier = event.getOption("identifier").getAsString();
-                final long guildId = guild.getIdLong();
-                final Link link = this.client.getLink(guildId);
-                link.loadItem(identifier).subscribe((item) -> {
-                    if (item instanceof LoadResult.TrackLoaded trackLoaded) {
-                        final Track track = trackLoaded.getData();
-
-                        link.createOrUpdatePlayer()
-                                .setEncodedTrack(track.getEncoded())
-                                .setVolume(35)
-                                .asMono()
-                                .subscribe((ignored) -> {
-                                    event.getHook().sendMessage("Now playing: " + track.getInfo().getTitle()).queue();
-                                });
-                    } else if (item instanceof LoadResult.PlaylistLoaded playlistLoaded) {
-                        final int trackCount = playlistLoaded.getData().getTracks().size();
-                        event.getHook()
-                                .sendMessage("This playlist has " + trackCount + " tracks!")
-                                .queue();
-                    } else if (item instanceof LoadResult.SearchResult searchResult) {
-                        final List<Track> tracks = searchResult.getData().getTracks();
-
-                        if (tracks.isEmpty()) {
-                            event.getHook().sendMessage("No tracks found!").queue();
-                            return;
-                        }
-
-                        final Track firstTrack = tracks.get(0);
-
-                        // This is a different way of updating the player! Choose your preference!
-                        // This method will also create a player if there is not one in the server yet
-                        link.updatePlayer((update) -> update.setEncodedTrack(firstTrack.getEncoded()).setVolume(35))
-                                .subscribe((ignored) -> {
-                                    event.getHook().sendMessage("Now playing: " + firstTrack.getInfo().getTitle()).queue();
-                                });
-
-                    } else if (item instanceof LoadResult.NoMatches) {
-                        event.getHook().sendMessage("No matches found for your input!").queue();
-                    } else if (item instanceof LoadResult.LoadFailed fail) {
-                        event.getHook().sendMessage("Failed to load track! " + fail.getData().getMessage()).queue();
-                    }
-                });
-
-                break;
-            }
-            case "custom-request": {
-                final Link link = this.client.getLink(event.getGuild().getIdLong());
-
-                link.getNode().customRequest(
-                        (builder) -> builder.get().path("/version").header("Accept", "text/plain")
-                ).subscribe((response) -> {
-                    try (ResponseBody body = response.body()) {
-                        final String bodyText = body.string();
-
-                        event.reply("Response from version endpoint (with custom request): " + bodyText).queue();
-                    } catch (IOException e) {
-                        event.reply("Something went wrong! " + e.getMessage()).queue();
-                    }
-                });
-                break;
-            }
-            case "custom-json-request": {
-                final Link link = this.client.getLink(event.getGuild().getIdLong());
-                link.getNode().customJsonRequest(LoadResult.SearchResult.Companion.serializer(),
-                        (builder) -> builder.path("/v4/loadsearch?query=ytsefarch%3Anever%20gonna%20give%20you%20up").get()
-                ).doOnSuccess((loadResult -> {
-                    if (loadResult == null) {
-                        event.reply("No load result!").queue();
-                        return;
-                    }
-
-
-                    event.reply("Response from loadsearch endpoint."
-                                    + "\ntracks: " + loadResult.getData().getTracks().size()
-//                            + "\nalbums: " + loadResult.getData().size()
-//                            + "\nartists: " + loadResult.getArtists().size()
-//                            + "\nplaylists: " + loadResult.getPlaylists().size()
-//                            + "\ntexts: " + loadResult.getTexts().size()
-                    ).queue();
-
-                })).subscribe();
-                break;
-            }
-            default:
-                event.reply("Unknown command???").queue();
-                break;
+            case "join" -> this.commands.get("join").execute(event, this.client);
+            case "leave" -> this.commands.get("leave").execute(event, this.client);
+            case "pause" -> this.commands.get("pause").execute(event, this.client);
+            case "play" -> this.commands.get("play").execute(event, this.client);
+            case "gachi" -> this.commands.get("gachi").execute(event, this.client);
+            default -> event.reply("Unknown command???").queue();
         }
     }
 
-    private void joinHelper(SlashCommandInteractionEvent event) {
-        final Member member = event.getMember();
-        final GuildVoiceState memberVoiceState = member.getVoiceState();
-
-        if (memberVoiceState.inAudioChannel()) {
-            event.getJDA().getDirectAudioController().connect(memberVoiceState.getChannel());
-        }
-
-        event.reply("Joining your channel!").queue();
-    }
-
-
-    public static class NullTokenException extends Exception {
+    private void initializeSlashCommands(JDA jda) {
+        jda.updateCommands()
+                .addCommands(
+                        Commands.slash("join", "Присоединиться к каналу."),
+                        Commands.slash("leave", "Выйти из голосового канала"),
+                        Commands.slash("pause", "Пауза трека"),
+                        Commands.slash("play", "Играть музыку")
+                                .addOption(
+                                        OptionType.STRING,
+                                        "identifier",
+                                        "Ссылка или id трека, который вы хотите включить",
+                                        true
+                                ),
+                        Commands.slash("gachi", "НЕ НАЖИМАТЬ")
+                )
+                .queue();
     }
 }
