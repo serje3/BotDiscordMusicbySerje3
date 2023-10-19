@@ -19,7 +19,7 @@ public class GachiCommand extends Command {
             VoiceHelper.joinHelper(event);
         }
 
-        event.reply(":billy:").submit();
+        event.reply(":billy:").queue();
         final String identifier = "https://www.youtube.com/watch?v=akHAQD3o1NA";
         final long guildId = guild.getIdLong();
         new PlayCommand().play(client, event, guildId, identifier);

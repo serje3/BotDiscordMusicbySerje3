@@ -10,6 +10,7 @@ import org.serje3.meta.abs.Command;
 import org.serje3.utils.VoiceHelper;
 
 import java.util.List;
+import java.util.Objects;
 
 public class PlayCommand extends Command {
     @Override
@@ -24,15 +25,26 @@ public class PlayCommand extends Command {
             VoiceHelper.joinHelper(event);
         }
 
-        final String identifier = event.getOption("identifier").getAsString();
+        final String playType = event.getSubcommandName();
+        String prefix = switch (Objects.requireNonNull(playType)) {
+            case "youtube" -> "ytsearch:";
+            case "soundcloud" -> "scsearch:";
+            default -> "";
+        };
+        System.out.println(event.getOptions());
+        final String identifier = event.getOption("текст").getAsString();
+        if (identifier.startsWith("https://")) {
+            prefix = "";
+        }
         final long guildId = guild.getIdLong();
-        this.play(client, event, guildId, identifier);
+        this.play(client, event, guildId, prefix + identifier);
     }
 
 
     public void play(LavalinkClient client, SlashCommandInteractionEvent event, Long guildId, String identifier) {
         final Link link = client.getLink(guildId);
         link.loadItem(identifier).subscribe((item) -> {
+            System.out.println(item);
             if (item instanceof LoadResult.TrackLoaded trackLoaded) {
                 final Track track = trackLoaded.getData();
 
@@ -41,18 +53,18 @@ public class PlayCommand extends Command {
                         .setVolume(35)
                         .asMono()
                         .subscribe((ignored) -> {
-                            event.getHook().sendMessage("Now playing: " + track.getInfo().getTitle()).queue();
+                            event.getHook().sendMessage("Сейчас играет: " + track.getInfo().getTitle()).queue();
                         });
             } else if (item instanceof LoadResult.PlaylistLoaded playlistLoaded) {
                 final int trackCount = playlistLoaded.getData().getTracks().size();
                 event.getHook()
-                        .sendMessage("This playlist has " + trackCount + " tracks!")
+                        .sendMessage("Этот плейлист имеет " + trackCount + " треков!")
                         .queue();
             } else if (item instanceof LoadResult.SearchResult searchResult) {
                 final List<Track> tracks = searchResult.getData().getTracks();
 
                 if (tracks.isEmpty()) {
-                    event.getHook().sendMessage("No tracks found!").queue();
+                    event.getHook().sendMessage("Ни одного трека не найдено!").queue();
                     return;
                 }
 
@@ -66,9 +78,9 @@ public class PlayCommand extends Command {
                         });
 
             } else if (item instanceof LoadResult.NoMatches) {
-                event.getHook().sendMessage("No matches found for your input!").queue();
+                event.getHook().sendMessage("Ничего не найдено по вашему запросу!").queue();
             } else if (item instanceof LoadResult.LoadFailed fail) {
-                event.getHook().sendMessage("Failed to load track! " + fail.getData().getMessage()).queue();
+                event.getHook().sendMessage("ЕБАТЬ Failed to load track! " + fail.getData().getMessage()).queue();
             }
         });
     }

@@ -4,6 +4,7 @@ import dev.arbjerg.lavalink.client.*;
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener;
+import com.github.topi314.lavasearch.AudioSearchManager;
 import dev.arbjerg.lavalink.protocol.v4.Message;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -11,6 +12,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +21,7 @@ import org.serje3.commands.music.*;
 import org.serje3.meta.abs.Command;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,12 +31,8 @@ public class MusicAdapter extends ListenerAdapter {
 
     private final HashMap<String, Command> commands;
 
-    public MusicAdapter() throws Exception {
-        String token = System.getenv("BOT_TOKEN");
-        if (token == null) {
-            throw new Exception("No token provided");
-        }
-        this.client = new LavalinkClient(Helpers.getUserIdFromToken(token));
+    public MusicAdapter(LavalinkClient client) throws Exception {
+        this.client = client;
 
         this.client.getLoadBalancer().addPenaltyProvider(new VoiceRegionPenaltyProvider());
 
@@ -41,14 +41,6 @@ public class MusicAdapter extends ListenerAdapter {
 
         this.commands = new HashMap<>();
         this.registerCommands();
-
-        JDABuilder.createDefault(token)
-                .setVoiceDispatchInterceptor(new JDAVoiceUpdateListener(this.client))
-                .enableIntents(GatewayIntent.GUILD_VOICE_STATES)
-                .enableCache(CacheFlag.VOICE_STATE)
-                .addEventListeners(this)
-                .build()
-                .awaitReady();
     }
 
     private void registerCommands() {
@@ -108,13 +100,15 @@ public class MusicAdapter extends ListenerAdapter {
     @Override
     public void onReady(@NotNull net.dv8tion.jda.api.events.session.ReadyEvent event) {
         System.out.println(event.getJDA().getSelfUser().getAsTag() + " is ready!");
+//        AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
+
         initializeSlashCommands(event.getJDA());
     }
 
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        switch (event.getFullCommandName()) {
+        switch (event.getFullCommandName().split(" ")[0]) {
             case "join" -> this.commands.get("join").execute(event, this.client);
             case "leave" -> this.commands.get("leave").execute(event, this.client);
             case "pause" -> this.commands.get("pause").execute(event, this.client);
@@ -131,11 +125,21 @@ public class MusicAdapter extends ListenerAdapter {
                         Commands.slash("leave", "Выйти из голосового канала"),
                         Commands.slash("pause", "Пауза трека"),
                         Commands.slash("play", "Играть музыку")
-                                .addOption(
-                                        OptionType.STRING,
-                                        "identifier",
-                                        "Ссылка или id трека, который вы хотите включить",
-                                        true
+                                .addSubcommands(
+                                        new SubcommandData("youtube", "Поиск из ютуба")
+                                                .addOption(
+                                                        OptionType.STRING,
+                                                        "текст",
+                                                        "Строка поиска youtube",
+                                                        true
+                                                ),
+                                        new SubcommandData("soundcloud", "Поиск из soundclound")
+                                                .addOption(
+                                                        OptionType.STRING,
+                                                        "текст",
+                                                        "Строка поиска soundcloud",
+                                                        true
+                                                )
                                 ),
                         Commands.slash("gachi", "НЕ НАЖИМАТЬ")
                 )
