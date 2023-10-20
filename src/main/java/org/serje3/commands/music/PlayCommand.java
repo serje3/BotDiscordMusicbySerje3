@@ -7,31 +7,25 @@ import dev.arbjerg.lavalink.protocol.v4.Track;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.serje3.meta.abs.Command;
-import org.serje3.utils.VoiceHelper;
+import org.serje3.meta.enums.PlaySourceType;
+import org.serje3.meta.annotations.JoinVoiceChannel;
 
 import java.util.List;
-import java.util.Objects;
 
 public class PlayCommand extends Command {
     @Override
+    @JoinVoiceChannel
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
         final Guild guild = event.getGuild();
 
-        // We are already connected, go ahead and play
-        if (guild.getSelfMember().getVoiceState().inAudioChannel()) {
-            event.deferReply(false).queue();
-        } else {
-            // Connect to VC first
-            VoiceHelper.joinHelper(event);
-        }
-
-        final String playType = event.getSubcommandName();
-        String prefix = switch (Objects.requireNonNull(playType)) {
-            case "youtube" -> "ytsearch:";
-            case "soundcloud" -> "scsearch:";
+        final PlaySourceType playType = PlaySourceType.valueOf(event.getSubcommandName());
+        String prefix = switch (playType) {
+            case YOUTUBE -> "ytsearch:";
+            case SOUNDCLOUD -> "scsearch:";
+            case YANDEX_MUSIC -> "ymsearch:";
             default -> "";
         };
-        System.out.println(event.getOptions());
+        System.out.println(prefix);
         final String identifier = event.getOption("текст").getAsString();
         if (identifier.startsWith("https://")) {
             prefix = "";
@@ -74,7 +68,7 @@ public class PlayCommand extends Command {
                 // This method will also create a player if there is not one in the server yet
                 link.updatePlayer((update) -> update.setEncodedTrack(firstTrack.getEncoded()).setVolume(35))
                         .subscribe((ignored) -> {
-                            event.getHook().sendMessage("Now playing: " + firstTrack.getInfo().getTitle()).queue();
+                            event.getHook().sendMessage("Сейчас играет: " + firstTrack.getInfo().getTitle()).queue();
                         });
 
             } else if (item instanceof LoadResult.NoMatches) {

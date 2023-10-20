@@ -1,5 +1,9 @@
 package org.serje3.adapters;
 
+import com.github.topi314.lavasrc.yandexmusic.YandexMusicSourceManager;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
 import dev.arbjerg.lavalink.client.*;
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
@@ -19,6 +23,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.jetbrains.annotations.NotNull;
 import org.serje3.commands.music.*;
 import org.serje3.meta.abs.Command;
+import org.serje3.meta.decorators.MusicCommandDecorator;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -44,11 +49,16 @@ public class MusicAdapter extends ListenerAdapter {
     }
 
     private void registerCommands() {
-        this.commands.put("play", new PlayCommand());
-        this.commands.put("gachi", new GachiCommand());
-        this.commands.put("pause", new PauseCommand());
-        this.commands.put("join", new JoinCommand());
-        this.commands.put("leave", new LeaveCommand());
+        this.commands.put("play", convertCommand(new PlayCommand()));
+        this.commands.put("gachi", convertCommand(new GachiCommand()));
+        this.commands.put("pause", convertCommand(new PauseCommand()));
+        this.commands.put("join", convertCommand(new JoinCommand()));
+        this.commands.put("leave", convertCommand(new LeaveCommand()));
+        this.commands.put("tts", convertCommand(new TTSCommand()));
+    }
+
+    private Command convertCommand(Command command) {
+        return new MusicCommandDecorator(command);
     }
 
     private void registerLavalinkNodes() {
@@ -100,9 +110,12 @@ public class MusicAdapter extends ListenerAdapter {
     @Override
     public void onReady(@NotNull net.dv8tion.jda.api.events.session.ReadyEvent event) {
         System.out.println(event.getJDA().getSelfUser().getAsTag() + " is ready!");
-//        AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
 
         initializeSlashCommands(event.getJDA());
+
+        AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
+        playerManager.registerSourceManager(new YandexMusicSourceManager("AQAAAAAQZs1CAAG8XjWJXJC1gUq1nLyhOwI9bUI"));
+        System.out.println(playerManager.getSourceManagers());
     }
 
 
@@ -114,7 +127,8 @@ public class MusicAdapter extends ListenerAdapter {
             case "pause" -> this.commands.get("pause").execute(event, this.client);
             case "play" -> this.commands.get("play").execute(event, this.client);
             case "gachi" -> this.commands.get("gachi").execute(event, this.client);
-            default -> event.reply("Unknown command???").queue();
+            case "tts" -> this.commands.get("tts").execute(event, this.client);
+            default -> event.reply("Такой cumанды нет???").queue();
         }
     }
 
@@ -139,9 +153,25 @@ public class MusicAdapter extends ListenerAdapter {
                                                         "текст",
                                                         "Строка поиска soundcloud",
                                                         true
+                                                ),
+                                        new SubcommandData("yandexmusic", "Поиск из Yandex Music")
+                                                .addOption(
+                                                        OptionType.STRING,
+                                                        "текст",
+                                                        "Строка поиска Yandex Music",
+                                                        true
                                                 )
                                 ),
-                        Commands.slash("gachi", "НЕ НАЖИМАТЬ")
+                        Commands.slash("gachi", "НЕ НАЖИМАТЬ"),
+                        Commands.slash("tts", "TTS бля")
+                                .addOption(OptionType.STRING,
+                                        "текст",
+                                        "текст в голос че не понятного",
+                                        true)
+                                .addOption(OptionType.STRING,
+                                        "голос",
+                                        "Выберите нужный голос из списка https://api.flowery.pw/v1/tts/voices",
+                                        false)
                 )
                 .queue();
     }

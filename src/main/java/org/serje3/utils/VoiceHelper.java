@@ -13,7 +13,5 @@ public class VoiceHelper {
         if (memberVoiceState.inAudioChannel()) {
             event.getJDA().getDirectAudioController().connect(memberVoiceState.getChannel());
         }
-
-        event.reply("Joining your channel!").queue();
     }
 }
