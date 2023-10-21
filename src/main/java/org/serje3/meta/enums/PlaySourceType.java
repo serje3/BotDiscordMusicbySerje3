@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum PlaySourceType {
     YOUTUBE("youtube"),
     SOUNDCLOUD("soundcloud"),
-    YANDEX_MUSIC("yandexmusic"),
+    YANDEXMUSIC("yandexmusic"),
     TEXT_TO_SPEECH("tts");
 
 

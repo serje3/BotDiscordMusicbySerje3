@@ -50,6 +50,7 @@ public class MusicAdapter extends ListenerAdapter {
 
     private void registerCommands() {
         this.commands.put("play", convertCommand(new PlayCommand()));
+        this.commands.put("queue", convertCommand(new QueueCommand()));
         this.commands.put("gachi", convertCommand(new GachiCommand()));
         this.commands.put("pause", convertCommand(new PauseCommand()));
         this.commands.put("join", convertCommand(new JoinCommand()));
@@ -81,6 +82,10 @@ public class MusicAdapter extends ListenerAdapter {
                 );
             });
         });
+    }
+
+    private void onTrackStarted() {
+
     }
 
     private void registerLavalinkListeners() {
@@ -126,6 +131,7 @@ public class MusicAdapter extends ListenerAdapter {
             case "leave" -> this.commands.get("leave").execute(event, this.client);
             case "pause" -> this.commands.get("pause").execute(event, this.client);
             case "play" -> this.commands.get("play").execute(event, this.client);
+            case "queue" -> this.commands.get("queue").execute(event, this.client);
             case "gachi" -> this.commands.get("gachi").execute(event, this.client);
             case "tts" -> this.commands.get("tts").execute(event, this.client);
             default -> event.reply("Такой cumанды нет???").queue();
@@ -138,7 +144,14 @@ public class MusicAdapter extends ListenerAdapter {
                         Commands.slash("join", "Присоединиться к каналу."),
                         Commands.slash("leave", "Выйти из голосового канала"),
                         Commands.slash("pause", "Пауза трека"),
-                        Commands.slash("play", "Играть музыку")
+                        Commands.slash("queue", "Добавить музыку в очередь")
+                                .addOption(
+                                        OptionType.STRING,
+                                        "текст",
+                                        "Строка поиска youtube",
+                                        true
+                                        ),
+                        Commands.slash("play", "Играет музыку и чистит всю очередь")
                                 .addSubcommands(
                                         new SubcommandData("youtube", "Поиск из ютуба")
                                                 .addOption(

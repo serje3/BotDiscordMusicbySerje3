@@ -6,20 +6,18 @@ import dev.arbjerg.lavalink.protocol.v4.LoadResult;
 import dev.arbjerg.lavalink.protocol.v4.Track;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import org.serje3.meta.abs.Command;
-import org.serje3.meta.enums.PlaySourceType;
 import org.serje3.meta.annotations.JoinVoiceChannel;
+import org.serje3.meta.enums.PlaySourceType;
 
 import java.util.List;
-import java.util.Objects;
 
-public class PlayCommand extends Command {
+public class QueueCommand extends PlayCommand {
     @Override
     @JoinVoiceChannel
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
         final Guild guild = event.getGuild();
 
-        final PlaySourceType playType = PlaySourceType.valueOf(Objects.requireNonNull(event.getSubcommandName()).toUpperCase());
+        final PlaySourceType playType = PlaySourceType.valueOf(event.getSubcommandName());
         String prefix = switch (playType) {
             case YOUTUBE -> "ytsearch:";
             case SOUNDCLOUD -> "scsearch:";
@@ -32,14 +30,10 @@ public class PlayCommand extends Command {
             prefix = "";
         }
         final long guildId = guild.getIdLong();
-        this.play(client, event, guildId, prefix + identifier);
+        this.play(client, event, guildId, prefix + identifier, 35);
     }
 
-    public void play(LavalinkClient client, SlashCommandInteractionEvent event,
-                     Long guildId, String identifier) {
-        this.play(client, event, guildId, identifier, 35);
-    }
-
+    @Override
     public void play(LavalinkClient client, SlashCommandInteractionEvent event,
                      Long guildId, String identifier, Integer volume) {
         final Link link = client.getLink(guildId);

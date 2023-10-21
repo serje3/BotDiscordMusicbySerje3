@@ -8,10 +8,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.annotations.JoinVoiceChannel;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 public class TTSCommand extends Command {
     @SneakyThrows
@@ -25,6 +21,6 @@ public class TTSCommand extends Command {
         OptionMapping voiceOption = event.getOption("голос");
         String voiceQuery = (voiceOption != null) ? "?voice=" + voiceOption.getAsString() : "";
         final String url = "ftts://" + identifier + voiceQuery;
-        new PlayCommand().play(client, event, guildId, url.replaceAll(" ", "%20"));
+        new PlayCommand().play(client, event, guildId, url.replaceAll(" ", "%20"), 100);
     }
 }
