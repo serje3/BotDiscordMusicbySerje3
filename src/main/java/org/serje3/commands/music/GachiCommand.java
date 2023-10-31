@@ -13,7 +13,7 @@ public class GachiCommand extends Command {
 
         // We are already connected, go ahead and play
         if (guild.getSelfMember().getVoiceState().inAudioChannel()) {
-            event.deferReply(false).queue();
+//            event.deferReply(false).queue();
         } else {
             // Connect to VC first
             VoiceHelper.joinHelper(event);

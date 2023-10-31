@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.enums.PlaySourceType;
 import org.serje3.meta.annotations.JoinVoiceChannel;
+import org.serje3.utils.TrackQueue;
 
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +43,8 @@ public class PlayCommand extends Command {
 
     public void play(LavalinkClient client, SlashCommandInteractionEvent event,
                      Long guildId, String identifier, Integer volume) {
+//        TrackQueue.clear(guildId);
+
         final Link link = client.getLink(guildId);
         link.loadItem(identifier).subscribe((item) -> {
             System.out.println(item);
@@ -51,6 +54,7 @@ public class PlayCommand extends Command {
                 link.createOrUpdatePlayer()
                         .setEncodedTrack(track.getEncoded())
                         .setVolume(volume)
+                        .setEndTime(track.getInfo().getLength())
                         .asMono()
                         .subscribe((ignored) -> {
                             event.getHook().sendMessage("Сейчас играет: " + track.getInfo().getTitle()).queue();
@@ -73,7 +77,13 @@ public class PlayCommand extends Command {
 
                 // This is a different way of updating the player! Choose your preference!
                 // This method will also create a player if there is not one in the server yet
-                link.updatePlayer((update) -> update.setEncodedTrack(firstTrack.getEncoded()).setVolume(volume))
+                link.updatePlayer((update) ->
+                                update
+                                        .setEncodedTrack(firstTrack.getEncoded())
+                                        .setVolume(volume)
+                                        .setEndTime(firstTrack.getInfo().getLength())
+                                        .setNoReplace(false)
+                        )
                         .subscribe((ignored) -> {
                             event.getHook().sendMessage("Сейчас играет: " + firstTrack.getInfo().getTitle()).queue();
                         });

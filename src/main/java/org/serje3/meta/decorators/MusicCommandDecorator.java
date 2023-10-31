@@ -46,7 +46,7 @@ public class MusicCommandDecorator extends Command {
         System.out.println("ANNOTATION JOIN");
         // We are already connected, go ahead and play
         if (guild.getSelfMember().getVoiceState().inAudioChannel()) {
-            event.deferReply(false).queue();
+//            event.deferReply(false).queue();
         } else {
             // Connect to VC first
             VoiceHelper.joinHelper(event);

@@ -1,4 +1,4 @@
-package org.serje3.commands.music;
+package org.serje3.commands.music.queue;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
@@ -6,8 +6,11 @@ import dev.arbjerg.lavalink.protocol.v4.LoadResult;
 import dev.arbjerg.lavalink.protocol.v4.Track;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import org.serje3.commands.music.PlayCommand;
 import org.serje3.meta.annotations.JoinVoiceChannel;
 import org.serje3.meta.enums.PlaySourceType;
+import org.serje3.utils.TrackQueue;
+import org.serje3.utils.exceptions.NoTracksInQueueException;
 
 import java.util.List;
 
@@ -17,14 +20,14 @@ public class QueueCommand extends PlayCommand {
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
         final Guild guild = event.getGuild();
 
-        final PlaySourceType playType = PlaySourceType.valueOf(event.getSubcommandName());
+        final PlaySourceType playType = PlaySourceType.valueOf(event.getSubcommandName().toUpperCase());
         String prefix = switch (playType) {
             case YOUTUBE -> "ytsearch:";
             case SOUNDCLOUD -> "scsearch:";
             case YANDEXMUSIC -> "ymsearch:";
             default -> "";
         };
-        System.out.println(prefix);
+
         final String identifier = event.getOption("текст").getAsString();
         if (identifier.startsWith("https://")) {
             prefix = "";
@@ -42,13 +45,9 @@ public class QueueCommand extends PlayCommand {
             if (item instanceof LoadResult.TrackLoaded trackLoaded) {
                 final Track track = trackLoaded.getData();
 
-                link.createOrUpdatePlayer()
-                        .setEncodedTrack(track.getEncoded())
-                        .setVolume(volume)
-                        .asMono()
-                        .subscribe((ignored) -> {
-                            event.getHook().sendMessage("Сейчас играет: " + track.getInfo().getTitle()).queue();
-                        });
+                System.out.println("Размер очереди - " + TrackQueue.size(guildId));
+                queue(client, link, guildId, track);
+                event.reply(track.getInfo().getTitle() + " - Добавлен в очередь").queue();
             } else if (item instanceof LoadResult.PlaylistLoaded playlistLoaded) {
                 final int trackCount = playlistLoaded.getData().getTracks().size();
                 event.getHook()
@@ -64,18 +63,32 @@ public class QueueCommand extends PlayCommand {
 
                 final Track firstTrack = tracks.get(0);
 
-
-                // This is a different way of updating the player! Choose your preference!
-                // This method will also create a player if there is not one in the server yet
-                link.updatePlayer((update) -> update.setEncodedTrack(firstTrack.getEncoded()).setVolume(volume))
-                        .subscribe((ignored) -> {
-                            event.getHook().sendMessage("Сейчас играет: " + firstTrack.getInfo().getTitle()).queue();
-                        });
-
+                queue(client, link, guildId, firstTrack);
+                event.reply(firstTrack.getInfo().getTitle() + " - Добавлен в очередь").queue();
             } else if (item instanceof LoadResult.NoMatches) {
                 event.getHook().sendMessage("Ничего не найдено по вашему запросу!").queue();
             } else if (item instanceof LoadResult.LoadFailed fail) {
                 event.getHook().sendMessage("ЕБАТЬ Failed to load track! " + fail.getData().getMessage()).queue();
+            }
+        });
+    }
+
+
+    private void queue(LavalinkClient client, Link link, Long guildId, Track track) {
+        TrackQueue.add(guildId, track);
+        link.getPlayer().subscribe((player) -> {
+            System.out.println(player.getState() + " " + player.getTrack());
+            boolean isStopped = !player.getState().getConnected() || player.getTrack() == null
+                    || player.getPosition() >= player.getTrack().getInfo().getLength();
+//            boolean isStream = player.getTrack() != null && player.getTrack().getInfo().isStream();
+            System.out.println("P: " + isStopped);
+            if (isStopped) {
+                try {
+                    System.out.println("START QUEUE");
+                    TrackQueue.skip(client, guildId);
+                } catch (NoTracksInQueueException e) {
+                    // Такое может произойти в очень редких случаях
+                }
             }
         });
     }
