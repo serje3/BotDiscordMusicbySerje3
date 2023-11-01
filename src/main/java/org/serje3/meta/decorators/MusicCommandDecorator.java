@@ -4,6 +4,7 @@ package org.serje3.meta.decorators;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.annotations.JoinVoiceChannel;
 import org.serje3.utils.VoiceHelper;
@@ -13,6 +14,16 @@ public class MusicCommandDecorator extends Command {
 
     public MusicCommandDecorator(Command command) {
         this.command = command;
+    }
+
+    @Override
+    public String getName() {
+        return this.command.getName();
+    }
+
+    @Override
+    public SlashCommandData getSlashCommand() {
+        return command.getSlashCommand();
     }
 
     @Override
@@ -45,12 +56,10 @@ public class MusicCommandDecorator extends Command {
         final Guild guild = event.getGuild();
         System.out.println("ANNOTATION JOIN");
         // We are already connected, go ahead and play
-        if (guild.getSelfMember().getVoiceState().inAudioChannel()) {
-//            event.deferReply(false).queue();
-        } else {
+        if (!guild.getSelfMember().getVoiceState().inAudioChannel()) {
             // Connect to VC first
             VoiceHelper.joinHelper(event);
         }
-
     }
+
 }

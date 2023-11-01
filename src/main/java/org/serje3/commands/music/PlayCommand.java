@@ -6,15 +6,50 @@ import dev.arbjerg.lavalink.protocol.v4.LoadResult;
 import dev.arbjerg.lavalink.protocol.v4.Track;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.enums.PlaySourceType;
 import org.serje3.meta.annotations.JoinVoiceChannel;
-import org.serje3.utils.TrackQueue;
 
 import java.util.List;
 import java.util.Objects;
 
 public class PlayCommand extends Command {
+    @Override
+    public String getName() {
+        return "play";
+    }
+
+    @Override
+    public SlashCommandData getSlashCommand() {
+        return getDefaultSlashCommand("Играет музыку и чистит всю очередь")
+                .addSubcommands(
+                        new SubcommandData("youtube", "Поиск из ютуба")
+                                .addOption(
+                                        OptionType.STRING,
+                                        "текст",
+                                        "Строка поиска youtube",
+                                        true
+                                ),
+                        new SubcommandData("soundcloud", "Поиск из soundclound")
+                                .addOption(
+                                        OptionType.STRING,
+                                        "текст",
+                                        "Строка поиска soundcloud",
+                                        true
+                                ),
+                        new SubcommandData("yandexmusic", "Поиск из Yandex Music")
+                                .addOption(
+                                        OptionType.STRING,
+                                        "текст",
+                                        "Строка поиска Yandex Music",
+                                        true
+                                )
+                );
+    }
+
     @Override
     @JoinVoiceChannel
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {

@@ -3,11 +3,22 @@ package org.serje3.commands.music.queue;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 
 public class QueueSkipCommand extends Command {
+    @Override
+    public String getName() {
+        return "skip";
+    }
+
+    @Override
+    public SlashCommandData getSlashCommand() {
+        return getDefaultSlashCommand("Пропустить трек");
+    }
+
     @Override
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
         try {

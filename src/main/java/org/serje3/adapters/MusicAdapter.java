@@ -10,23 +10,18 @@ import dev.arbjerg.lavalink.protocol.v4.Message;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import org.jetbrains.annotations.NotNull;
-import org.serje3.commands.music.*;
-import org.serje3.commands.music.queue.QueueClearCommand;
-import org.serje3.commands.music.queue.QueueCommand;
-import org.serje3.commands.music.queue.QueueSkipCommand;
-import org.serje3.commands.music.queue.QueueTracksCommand;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.decorators.MusicCommandDecorator;
+import org.serje3.utils.CommandList;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MusicAdapter extends ListenerAdapter {
 
@@ -46,17 +41,8 @@ public class MusicAdapter extends ListenerAdapter {
         this.registerCommands();
     }
 
-    private void registerCommands() {
-        this.commands.put("play", convertCommand(new PlayCommand()));
-        this.commands.put("gachi", convertCommand(new GachiCommand()));
-        this.commands.put("pause", convertCommand(new PauseCommand()));
-        this.commands.put("join", convertCommand(new JoinCommand()));
-        this.commands.put("leave", convertCommand(new LeaveCommand()));
-        this.commands.put("tts", convertCommand(new TTSCommand()));
-        this.commands.put("queue", convertCommand(new QueueCommand()));
-        this.commands.put("tracks", convertCommand(new QueueTracksCommand()));
-        this.commands.put("skip", convertCommand(new QueueSkipCommand()));
-        this.commands.put("clear", convertCommand(new QueueClearCommand()));
+    private void registerCommands(){
+        CommandList.forEach(command -> this.commands.put(command.getName(), convertCommand(command)));
     }
 
     private Command convertCommand(Command command) {
@@ -145,73 +131,9 @@ public class MusicAdapter extends ListenerAdapter {
 
     private void initializeSlashCommands(JDA jda) {
 
-
         jda.updateCommands()
                 .addCommands(
-                        Commands.slash("join", "Присоединиться к каналу."),
-                        Commands.slash("leave", "Выйти из голосового канала"),
-                        Commands.slash("pause", "Пауза трека"),
-                        Commands.slash("queue", "[BETA] Добавить музыку в очередь")
-                                .addSubcommands(
-                                        new SubcommandData("youtube", "Поиск из ютуба")
-                                                .addOption(
-                                                        OptionType.STRING,
-                                                        "текст",
-                                                        "Строка поиска youtube",
-                                                        true
-                                                ),
-                                        new SubcommandData("soundcloud", "Поиск из soundclound")
-                                                .addOption(
-                                                        OptionType.STRING,
-                                                        "текст",
-                                                        "Строка поиска soundcloud",
-                                                        true
-                                                ),
-                                        new SubcommandData("yandexmusic", "Поиск из Yandex Music")
-                                                .addOption(
-                                                        OptionType.STRING,
-                                                        "текст",
-                                                        "Строка поиска Yandex Music",
-                                                        true
-                                                )
-                                ),
-                        Commands.slash("play", "Играет музыку и чистит всю очередь")
-                                .addSubcommands(
-                                        new SubcommandData("youtube", "Поиск из ютуба")
-                                                .addOption(
-                                                        OptionType.STRING,
-                                                        "текст",
-                                                        "Строка поиска youtube",
-                                                        true
-                                                ),
-                                        new SubcommandData("soundcloud", "Поиск из soundclound")
-                                                .addOption(
-                                                        OptionType.STRING,
-                                                        "текст",
-                                                        "Строка поиска soundcloud",
-                                                        true
-                                                ),
-                                        new SubcommandData("yandexmusic", "Поиск из Yandex Music")
-                                                .addOption(
-                                                        OptionType.STRING,
-                                                        "текст",
-                                                        "Строка поиска Yandex Music",
-                                                        true
-                                                )
-                                ),
-                        Commands.slash("gachi", "НЕ НАЖИМАТЬ"),
-                        Commands.slash("tts", "TTS бля")
-                                .addOption(OptionType.STRING,
-                                        "текст",
-                                        "текст в голос че не понятного",
-                                        true)
-                                .addOption(OptionType.STRING,
-                                        "голос",
-                                        "Выберите нужный голос из списка https://api.flowery.pw/v1/tts/voices",
-                                        false),
-                        Commands.slash("tracks", "Показывает список треков в очереди"),
-                        Commands.slash("skip", "Пропустить трек"),
-                        Commands.slash("clear", "Очистить очередь")
+                        this.commands.values().stream().map(Command::getSlashCommand).collect(Collectors.toList())
                 )
                 .queue();
     }

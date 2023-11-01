@@ -4,6 +4,7 @@ import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.protocol.v4.Track;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
 import org.serje3.utils.TrackQueue;
 
@@ -12,6 +13,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class QueueTracksCommand extends Command {
+    @Override
+    public String getName() {
+        return "tracks";
+    }
+
+    @Override
+    public SlashCommandData getSlashCommand() {
+        return getDefaultSlashCommand("Показывает список треков в очереди");
+    }
+
     @Override
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
         Long guildId = event.getGuild().getIdLong();
