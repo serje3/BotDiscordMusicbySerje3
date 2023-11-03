@@ -24,7 +24,7 @@ public class PlayCommand extends Command {
 
     @Override
     public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("Играет музыку и чистит всю очередь")
+        return getDefaultSlashCommand("Играет музыку")
                 .addSubcommands(
                         new SubcommandData("youtube", "Поиск из ютуба")
                                 .addOption(
@@ -55,14 +55,13 @@ public class PlayCommand extends Command {
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
         final Guild guild = event.getGuild();
 
-        final PlaySourceType playType = PlaySourceType.valueOf(Objects.requireNonNull(event.getSubcommandName()).toUpperCase());
+        final PlaySourceType playType = PlaySourceType.valueOf(event.getSubcommandName().toUpperCase());
         String prefix = switch (playType) {
             case YOUTUBE -> "ytsearch:";
             case SOUNDCLOUD -> "scsearch:";
             case YANDEXMUSIC -> "ymsearch:";
             default -> "";
         };
-        System.out.println(prefix);
         final String identifier = event.getOption("текст").getAsString();
         if (identifier.startsWith("https://")) {
             prefix = "";
@@ -78,7 +77,6 @@ public class PlayCommand extends Command {
 
     public void play(LavalinkClient client, SlashCommandInteractionEvent event,
                      Long guildId, String identifier, Integer volume) {
-//        TrackQueue.clear(guildId);
 
         final Link link = client.getLink(guildId);
         link.loadItem(identifier).subscribe((item) -> {

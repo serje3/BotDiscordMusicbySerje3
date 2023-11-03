@@ -6,6 +6,7 @@ import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvi
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -30,6 +31,7 @@ public class BotApplication {
                 .setVoiceDispatchInterceptor(new JDAVoiceUpdateListener(client))
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES)
                 .enableCache(CacheFlag.VOICE_STATE)
+                .setActivity(Activity.customStatus("иди нахуй"))
                 .addEventListeners(musicAdapter)
                 .build();
         Bot.awaitReady();

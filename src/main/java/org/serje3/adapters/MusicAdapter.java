@@ -61,7 +61,6 @@ public class MusicAdapter extends ListenerAdapter {
             node.on(TrackStartEvent.class).subscribe((data) -> {
                 final LavalinkNode node1 = data.getNode();
                 final var event = data.getEvent();
-
                 System.out.printf(
                         "%s: track started: %s%n",
                         node1.getName(),

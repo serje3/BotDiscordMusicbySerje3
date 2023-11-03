@@ -4,10 +4,7 @@ import org.serje3.commands.music.*;
 import org.serje3.commands.music.filters.BassBoostCommand;
 import org.serje3.commands.music.filters.EBANUTIYBassBoostCommand;
 import org.serje3.commands.music.filters.NormalizeFilterCommand;
-import org.serje3.commands.music.queue.QueueClearCommand;
-import org.serje3.commands.music.queue.QueueCommand;
-import org.serje3.commands.music.queue.QueueSkipCommand;
-import org.serje3.commands.music.queue.QueueTracksCommand;
+import org.serje3.commands.music.queue.*;
 import org.serje3.meta.abs.Command;
 
 import java.lang.reflect.InvocationTargetException;
@@ -18,7 +15,7 @@ import java.util.function.Function;
 public class CommandList {
     private static final List<Class<?>> commands = new ArrayList<>() {
         {
-            add(PlayCommand.class);
+//            add(PlayCommand.class); deprecated
             add(GachiCommand.class);
             add(PauseCommand.class);
             add(JoinCommand.class);
@@ -28,6 +25,7 @@ public class CommandList {
             add(QueueTracksCommand.class);
             add(QueueSkipCommand.class);
             add(QueueClearCommand.class);
+            add(QueueNowCommand.class);
             add(NormalizeFilterCommand.class);
             add(BassBoostCommand.class);
             add(EBANUTIYBassBoostCommand.class);

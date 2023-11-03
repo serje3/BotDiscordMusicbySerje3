@@ -13,63 +13,17 @@ import org.serje3.commands.music.PlayCommand;
 import org.serje3.meta.annotations.JoinVoiceChannel;
 import org.serje3.meta.enums.PlaySourceType;
 import org.serje3.utils.TrackQueue;
+import org.serje3.utils.VoiceHelper;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class QueueCommand extends PlayCommand {
     @Override
-    public String getName() {
-        return "queue";
-    }
-
-    @Override
-    public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("[BETA] Добавить музыку в очередь")
-                .addSubcommands(
-                        new SubcommandData("youtube", "Поиск из ютуба")
-                                .addOption(
-                                        OptionType.STRING,
-                                        "текст",
-                                        "Строка поиска youtube",
-                                        true
-                                ),
-                        new SubcommandData("soundcloud", "Поиск из soundclound")
-                                .addOption(
-                                        OptionType.STRING,
-                                        "текст",
-                                        "Строка поиска soundcloud",
-                                        true
-                                ),
-                        new SubcommandData("yandexmusic", "Поиск из Yandex Music")
-                                .addOption(
-                                        OptionType.STRING,
-                                        "текст",
-                                        "Строка поиска Yandex Music",
-                                        true
-                                )
-                );
-    }
-
-    @Override
     @JoinVoiceChannel
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
-        final Guild guild = event.getGuild();
-
-        final PlaySourceType playType = PlaySourceType.valueOf(event.getSubcommandName().toUpperCase());
-        String prefix = switch (playType) {
-            case YOUTUBE -> "ytsearch:";
-            case SOUNDCLOUD -> "scsearch:";
-            case YANDEXMUSIC -> "ymsearch:";
-            default -> "";
-        };
-
-        final String identifier = event.getOption("текст").getAsString();
-        if (identifier.startsWith("https://")) {
-            prefix = "";
-        }
-        final long guildId = guild.getIdLong();
-        this.play(client, event, guildId, prefix + identifier, 35);
+        super.execute(event, client);
     }
 
     @Override
@@ -80,27 +34,43 @@ public class QueueCommand extends PlayCommand {
             System.out.println(item);
             if (item instanceof LoadResult.TrackLoaded trackLoaded) {
                 final Track track = trackLoaded.getData();
+                TrackQueue.add(guildId, track);
 
                 System.out.println("Размер очереди - " + TrackQueue.size(guildId));
-                queue(client, link, guildId, track);
-                event.reply(track.getInfo().getTitle() + " - Добавлен в очередь").queue();
+
+                queue(client, link, guildId);
+                event.replyEmbeds(VoiceHelper.getTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
+                        .queue();
             } else if (item instanceof LoadResult.PlaylistLoaded playlistLoaded) {
-                final int trackCount = playlistLoaded.getData().getTracks().size();
-                event.getHook()
-                        .sendMessage("Этот плейлист имеет " + trackCount + " треков! Но хуй его запущу сосите")
+                final List<Track> tracks = playlistLoaded.getData().getTracks();
+                if (tracks.isEmpty()) {
+                    event.reply("В этом плейлисте нет треков").queue();
+                    return;
+                } else if (tracks.size() >= 10000) {
+                    event.reply("Этот плейлист слишком большой").queue();
+                    return;
+                }
+                TrackQueue.addAll(guildId, tracks);
+                final int trackCount = tracks.size();
+
+                queue(client, link, guildId);
+                event.reply("Этот плейлист имеет " + trackCount + " треков! Запускаю - " + tracks.get(0).getInfo().getTitle())
                         .queue();
             } else if (item instanceof LoadResult.SearchResult searchResult) {
                 final List<Track> tracks = searchResult.getData().getTracks();
 
                 if (tracks.isEmpty()) {
-                    event.getHook().sendMessage("Ни одного трека не найдено!").queue();
+                    event.reply("Ни одного трека не найдено!").queue();
                     return;
                 }
 
                 final Track firstTrack = tracks.get(0);
+                TrackQueue.add(guildId, firstTrack);
 
-                queue(client, link, guildId, firstTrack);
-                event.reply(firstTrack.getInfo().getTitle() + " - Добавлен в очередь").queue();
+                queue(client, link, guildId);
+
+                event.replyEmbeds(VoiceHelper.getTrackEmbed(firstTrack, event.getMember(), "Добавлен в очередь"))
+                        .queue();
             } else if (item instanceof LoadResult.NoMatches) {
                 event.getHook().sendMessage("Ничего не найдено по вашему запросу!").queue();
             } else if (item instanceof LoadResult.LoadFailed fail) {
@@ -110,8 +80,7 @@ public class QueueCommand extends PlayCommand {
     }
 
 
-    private void queue(LavalinkClient client, Link link, Long guildId, Track track) {
-        TrackQueue.add(guildId, track);
+    private void queue(LavalinkClient client, Link link, Long guildId) {
         link.getPlayer().subscribe((player) -> {
             System.out.println(player.getState() + " " + player.getTrack());
             boolean isStopped = !player.getState().getConnected() || player.getTrack() == null
