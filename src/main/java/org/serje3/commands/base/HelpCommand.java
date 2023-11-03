@@ -36,7 +36,9 @@ public class HelpCommand extends Command {
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
         event.replyEmbeds(createHelpEmbed(event))
                 .addActionRow(
-                        Button.link("https://vk.com/club200458779", Emoji.fromFormatted("<:VK_EMOJI:1170054842077683842>"))
+                        Button.link("https://vk.com/club200458779", Emoji.fromFormatted("<:VK_EMOJI:1170054842077683842>")),
+                        Button.link("https://pay.cloudtips.ru/p/47dd3faa", "Оставить чаевые")
+                                .withEmoji(Emoji.fromFormatted("\uD83E\uDE99"))
                 )
                 .queue();
     }
