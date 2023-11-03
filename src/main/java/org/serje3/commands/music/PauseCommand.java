@@ -12,8 +12,8 @@ public class PauseCommand extends Command {
     }
 
     @Override
-    public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("Пауза трека");
+    public String getDescription() {
+        return "Пауза трека";
     }
 
     @Override
@@ -22,7 +22,7 @@ public class PauseCommand extends Command {
                 .getPlayer()
                 .flatMap((player) -> player.setPaused(!player.getPaused()).asMono())
                 .subscribe((player) -> {
-                    event.reply("Player has been " + (player.getPaused() ? "paused" : "resumed") + "!").queue();
+                    event.reply("Плеер " + (player.getPaused() ? "на паузе" : "возобновлён") + "!").queue();
                 });
     }
 }

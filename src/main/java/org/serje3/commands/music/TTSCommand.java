@@ -18,8 +18,13 @@ public class TTSCommand extends Command {
     }
 
     @Override
+    public String getDescription() {
+        return "TTS";
+    }
+
+    @Override
     public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("TTS")
+        return super.getSlashCommand()
                 .addOption(OptionType.STRING,
                         "текст",
                         "текст в голос че не понятного",

@@ -18,8 +18,8 @@ public class NormalizeFilterCommand extends Command {
     }
 
     @Override
-    public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("Вернуть звук как было");
+    public String getDescription() {
+        return "Вернуть звук как было";
     }
 
     @JoinVoiceChannel

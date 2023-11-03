@@ -13,8 +13,8 @@ public class QueueSkipCommand extends Command {
     }
 
     @Override
-    public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("Пропустить трек");
+    public String getDescription() {
+        return "Пропустить трек в очереди";
     }
 
     @Override

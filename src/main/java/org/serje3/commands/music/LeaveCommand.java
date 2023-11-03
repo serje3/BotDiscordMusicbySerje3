@@ -18,8 +18,8 @@ public class LeaveCommand extends Command {
     }
 
     @Override
-    public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("Выйти из голосового канала");
+    public String getDescription() {
+        return "Выйти из голосового канала";
     }
 
     @Override

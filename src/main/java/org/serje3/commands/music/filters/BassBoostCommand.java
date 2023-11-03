@@ -3,7 +3,6 @@ package org.serje3.commands.music.filters;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.protocol.v4.Band;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +14,8 @@ public class BassBoostCommand extends NormalizeFilterCommand {
     }
 
     @Override
-    public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("ВКЛЮЧИТЬ ЕБАНУТЫЙ УШЕДОЛБИЧЕСКИЙ БАСС");
+    public String getDescription() {
+        return "ВКЛЮЧИТЬ ЕБАНУТЫЙ УШЕДОЛБИЧЕСКИЙ БАСС";
     }
 
     protected String getReplyString(){

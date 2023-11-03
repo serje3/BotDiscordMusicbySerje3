@@ -8,7 +8,11 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 public abstract class Command {
     public abstract String getName();
 
-    public abstract SlashCommandData getSlashCommand();
+    public abstract String getDescription();
+
+    public SlashCommandData getSlashCommand() {
+        return getDefaultSlashCommand(getDescription());
+    }
 
     public SlashCommandData getDefaultSlashCommand(String description) {
         return Commands.slash(getName(), description);

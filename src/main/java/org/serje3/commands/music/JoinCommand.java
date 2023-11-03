@@ -17,8 +17,8 @@ public class JoinCommand extends Command {
     }
 
     @Override
-    public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("Присоединиться к каналу.");
+    public String getDescription() {
+        return "Присоединиться к каналу.";
     }
 
     @Override

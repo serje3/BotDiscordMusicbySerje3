@@ -3,13 +3,13 @@ package org.serje3.utils;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.protocol.v4.Track;
+import org.serje3.domain.TrackContext;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 
 import java.util.*;
 
 public class TrackQueue {
-    private static final HashMap<Long, Deque<Track>> tracksQueue = new HashMap<>();
-    private static final HashMap<Long, Boolean> busyPlayers = new HashMap<>();
+    private static final HashMap<Long, Deque<TrackContext>> tracksQueue = new HashMap<>();
 
     private static void init(Long guildId) {
         Set<Long> keySet = tracksQueue.keySet();
@@ -18,13 +18,13 @@ public class TrackQueue {
         }
     }
 
-    public static void add(Long guildId, Track track) {
+    public static void add(Long guildId, TrackContext track) {
         init(guildId);
 
         tracksQueue.get(guildId).addLast(track);
     }
 
-    public static void addAll(Long guildId, Collection<Track> tracks) {
+    public static void addAll(Long guildId, Collection<TrackContext> tracks) {
         init(guildId);
 
         tracksQueue.get(guildId).addAll(tracks);
@@ -33,17 +33,18 @@ public class TrackQueue {
     public static void skip(LavalinkClient client, Long guildId) throws NoTracksInQueueException {
         init(guildId);
 
-        Track track = TrackQueue.pop(guildId);
-        System.out.println("BLYAT   "  + TrackQueue.tracksQueue.get(guildId));
-        Link link = client.getLink(guildId);
-        if (track == null) {
+        TrackContext trackContext = TrackQueue.pop(guildId);
+        if (trackContext == null) {
             throw new NoTracksInQueueException();
         }
+        Track track = trackContext.getTrack();
+        System.out.println("BLYAT   "  + TrackQueue.tracksQueue.get(guildId));
+        Link link = client.getLink(guildId);
         System.out.println("Next track is " + track.getInfo().getTitle() + " in guild " + guildId);
         VoiceHelper.play(link, track, 35);
     }
 
-    public static Track pop(Long guildId) {
+    public static TrackContext pop(Long guildId) {
         init(guildId);
         return tracksQueue.get(guildId).poll();
     }
@@ -58,9 +59,9 @@ public class TrackQueue {
         tracksQueue.get(guildId).clear();
     }
 
-    public static List<Track> listQueue(Long guildId) {
+    public static List<TrackContext> listQueue(Long guildId) {
         init(guildId);
-        Deque<Track> tracks = tracksQueue.get(guildId);
+        Deque<TrackContext> tracks = tracksQueue.get(guildId);
         if (tracks == null) {
             return new ArrayList<>();
         }

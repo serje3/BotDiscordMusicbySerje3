@@ -14,7 +14,6 @@ import org.serje3.meta.enums.PlaySourceType;
 import org.serje3.meta.annotations.JoinVoiceChannel;
 
 import java.util.List;
-import java.util.Objects;
 
 public class PlayCommand extends Command {
     @Override
@@ -23,8 +22,13 @@ public class PlayCommand extends Command {
     }
 
     @Override
+    public String getDescription() {
+        return "Включает музыку, доступно для выбора несколько источников воспроизведения";
+    }
+
+    @Override
     public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("Играет музыку")
+        return super.getSlashCommand()
                 .addSubcommands(
                         new SubcommandData("youtube", "Поиск из ютуба")
                                 .addOption(

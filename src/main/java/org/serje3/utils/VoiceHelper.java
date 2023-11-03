@@ -30,16 +30,11 @@ public class VoiceHelper {
                 .asMono()
                 .subscribe((ignored) -> {
                     System.out.println("player - " + ignored);
-//                    long guildId = link.getGuildId();
-//                    TextChannel channel = BotApplication.Bot.getTextChannelById(guildId);
-////                    if (channel != null) {
-////                        channel.sendMessage("Сейчас играет: " + track.getInfo().getTitle()).queue();
-////                    }
                 });
     }
 
 
-    public static MessageEmbed getTrackEmbed(Track track, Member member, String description) {
+    public static MessageEmbed wrapTrackEmbed(Track track, Member member, String description) {
         if (track == null) return null;
         String title = track.getInfo().getTitle();
         String author = track.getInfo().getAuthor();

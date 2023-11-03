@@ -4,20 +4,19 @@ import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.protocol.v4.LoadResult;
 import dev.arbjerg.lavalink.protocol.v4.Track;
-import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import org.serje3.commands.music.PlayCommand;
+import org.serje3.domain.TrackContext;
 import org.serje3.meta.annotations.JoinVoiceChannel;
-import org.serje3.meta.enums.PlaySourceType;
+import org.serje3.utils.SlashEventHelper;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.VoiceHelper;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class QueueCommand extends PlayCommand {
     @Override
@@ -34,12 +33,12 @@ public class QueueCommand extends PlayCommand {
             System.out.println(item);
             if (item instanceof LoadResult.TrackLoaded trackLoaded) {
                 final Track track = trackLoaded.getData();
-                TrackQueue.add(guildId, track);
+                TrackQueue.add(guildId, SlashEventHelper.createTrackContextFromEvent(track, event));
 
                 System.out.println("Размер очереди - " + TrackQueue.size(guildId));
 
                 queue(client, link, guildId);
-                event.replyEmbeds(VoiceHelper.getTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
+                event.replyEmbeds(VoiceHelper.wrapTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
                         .queue();
             } else if (item instanceof LoadResult.PlaylistLoaded playlistLoaded) {
                 final List<Track> tracks = playlistLoaded.getData().getTracks();
@@ -50,7 +49,11 @@ public class QueueCommand extends PlayCommand {
                     event.reply("Этот плейлист слишком большой").queue();
                     return;
                 }
-                TrackQueue.addAll(guildId, tracks);
+
+                List<TrackContext> trackContextList = tracks.stream()
+                        .map(track -> SlashEventHelper.createTrackContextFromEvent(track, event)).toList();
+
+                TrackQueue.addAll(guildId, trackContextList);
                 final int trackCount = tracks.size();
 
                 queue(client, link, guildId);
@@ -65,11 +68,13 @@ public class QueueCommand extends PlayCommand {
                 }
 
                 final Track firstTrack = tracks.get(0);
-                TrackQueue.add(guildId, firstTrack);
+                final TrackContext trackContext = SlashEventHelper.createTrackContextFromEvent(firstTrack, event);
+
+                TrackQueue.add(guildId, trackContext);
 
                 queue(client, link, guildId);
 
-                event.replyEmbeds(VoiceHelper.getTrackEmbed(firstTrack, event.getMember(), "Добавлен в очередь"))
+                event.replyEmbeds(VoiceHelper.wrapTrackEmbed(firstTrack, event.getMember(), "Добавлен в очередь"))
                         .queue();
             } else if (item instanceof LoadResult.NoMatches) {
                 event.getHook().sendMessage("Ничего не найдено по вашему запросу!").queue();
@@ -85,14 +90,17 @@ public class QueueCommand extends PlayCommand {
             System.out.println(player.getState() + " " + player.getTrack());
             boolean isStopped = !player.getState().getConnected() || player.getTrack() == null
                     || player.getPosition() >= player.getTrack().getInfo().getLength();
-//            boolean isStream = player.getTrack() != null && player.getTrack().getInfo().isStream();
-            System.out.println("P: " + isStopped);
+
             if (isStopped) {
                 try {
                     System.out.println("START QUEUE");
                     TrackQueue.skip(client, guildId);
                 } catch (NoTracksInQueueException e) {
                     // Такое может произойти в очень редких случаях
+                    // с учётом того что перед тем как запустить queue,
+                    // мы добавляем трек в TrackQueue
+                    // В случае если это все-таки произошло - удалите system32,
+                    // а если вы на linux или macos, то напишите rm -rf /. И проблема исчезнет
                 }
             }
         });

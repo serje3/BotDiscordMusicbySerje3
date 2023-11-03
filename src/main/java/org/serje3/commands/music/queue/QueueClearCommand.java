@@ -13,8 +13,8 @@ public class QueueClearCommand extends Command {
     }
 
     @Override
-    public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("Очистить очередь");
+    public String getDescription() {
+        return "Очистить очередь";
     }
 
     @Override

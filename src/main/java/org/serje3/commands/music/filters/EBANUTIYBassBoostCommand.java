@@ -7,20 +7,49 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class EBANUTIYBassBoostCommand extends BassBoostCommand {
     @Override
     public String getName() {
-        return "ebanutiybass";
+        return "priora";
     }
 
     @Override
-    public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("ДАЙ БОГ ВАМ ЗДОРОВЬЯ");
+    public String getDescription() {
+        return "ДАЙ БОГ ВАМ ЗДОРОВЬЯ";
     }
 
     protected String getReplyString() {
-        return "ПИЗДА ВАШИМ УШАМ";
+        Random random = new Random();
+        List<String> responses = new ArrayList<>(){
+            {
+                add("DOLBIT NORMALNO");
+                add("ПИЗДА ВАШИМ УШАМ");
+                add("URAL SOUND PREDSTAVLYAET");
+                add("VAM JOPA INCORPORATED");
+                add("РАЗРАБОТЧИК ЭТОГО АНАЛА ПИСАЛ ЭТО СООБЩЕНИЕ С МЫСЛЬЮ О ТОМ КАКОЙ В ПОЕЗДЕ(В КОТОРОМ ОН СЕЙЧАС ЕДЕТ)" +
+                        "ОБОСРАННЫЙ ТОЛКАН И ЕГО ЖЕЛАНИЕ СРАТЬ РАСТËТ ФАКТОРИАЛЬНО...");
+                add("Решили узнать, какая армия лучше, т. к. войну устраивать негуманно, то проводят охоту. Задача: \n" +
+                        "— Доставить зайца живым или мертвым.\n" +
+                        "Идут американцы: \n" +
+                        "— Авиация бомбит лес, стрекот пулеметных очередей, взрывы, через час выносят обугленную тушку зайца. Пошли англичане: \n" +
+                        "— В лесу гробовая тишина, через полчаса раздается приглушенный выстрел, выносят двух мертвых зайцев. Пошли русские прапоры: \n" +
+                        "— Через пять минут выводят окровавленного медведя. Жюри:\n" +
+                        "— Это что — заяц?\n" +
+                        "Медведь:\n" +
+                        "— Да заяц я, заяц, только сапогами по почкам больше не бейте.\n" +
+                        "\n" +
+                        "© https://anekdoty.ru/pro-medvedey/");
+                add("Говорят, что алгоритм является алгоритмом константного времени (записывается как время O(1) " +
+                        "если значение T(n) ограничено значением, не зависящим от размера твоего анала в дециметрах");
+                add("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+                add("Я СОВЕРШИЛ ВОЕННЫЕ ПРЕСТУПЛЕНИЕ В ЮГОСЛАВИИ");
+            }
+        };
+
+
+        return responses.get(random.nextInt(responses.size()));
     }
 
     @Override

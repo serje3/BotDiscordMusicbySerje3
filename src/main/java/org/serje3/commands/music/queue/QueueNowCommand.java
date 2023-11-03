@@ -3,14 +3,11 @@ package org.serje3.commands.music.queue;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.protocol.v4.Track;
-import net.dv8tion.jda.api.entities.EmbedType;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
 import org.serje3.utils.VoiceHelper;
 
-import java.time.OffsetDateTime;
 
 public class QueueNowCommand extends Command {
     @Override
@@ -19,8 +16,8 @@ public class QueueNowCommand extends Command {
     }
 
     @Override
-    public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("Узнать что сейчас играет");
+    public String getDescription() {
+        return "Узнать что сейчас играет";
     }
 
     @Override
@@ -33,7 +30,7 @@ public class QueueNowCommand extends Command {
                 event.reply("Никаких треков сейчас не играет").queue();
                 return;
             };
-            event.replyEmbeds(VoiceHelper.getTrackEmbed(track, event.getMember(), "")).queue();
+            event.replyEmbeds(VoiceHelper.wrapTrackEmbed(track, event.getMember(), "")).queue();
         });
     }
 }

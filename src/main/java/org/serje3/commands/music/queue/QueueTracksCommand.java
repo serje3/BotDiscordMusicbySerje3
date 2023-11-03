@@ -5,6 +5,7 @@ import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.protocol.v4.Track;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import org.serje3.domain.TrackContext;
 import org.serje3.meta.abs.Command;
 import org.serje3.utils.TrackQueue;
 
@@ -19,14 +20,15 @@ public class QueueTracksCommand extends Command {
     }
 
     @Override
-    public SlashCommandData getSlashCommand() {
-        return getDefaultSlashCommand("Показывает список треков в очереди");
+    public String getDescription() {
+        return "Показывает список треков в очереди";
     }
 
     @Override
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
         Long guildId = event.getGuild().getIdLong();
-        List<Track> tracks = TrackQueue.listQueue(guildId);
+        List<TrackContext> trackContextList = TrackQueue.listQueue(guildId);
+        List<Track> tracks = trackContextList.stream().map(TrackContext::getTrack).collect(Collectors.toList());
         System.out.println(tracks);
         Link link = client.getLink(event.getGuild().getIdLong());
         link.getPlayer().subscribe(lavalinkPlayer -> {

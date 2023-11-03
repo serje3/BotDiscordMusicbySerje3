@@ -22,6 +22,11 @@ public class MusicCommandDecorator extends Command {
     }
 
     @Override
+    public String getDescription() {
+        return this.command.getDescription();
+    }
+
+    @Override
     public SlashCommandData getSlashCommand() {
         return command.getSlashCommand();
     }
