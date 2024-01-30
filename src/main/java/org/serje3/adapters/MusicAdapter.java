@@ -61,7 +61,7 @@ public class MusicAdapter extends ListenerAdapter implements ContainSlashCommand
         ).forEach((node) -> {
             node.on(TrackStartEvent.class).subscribe((data) -> {
                 final LavalinkNode node1 = data.getNode();
-                final var event = data.getEvent();
+                final var event = data;
                 System.out.printf(
                         "%s: track started: %s%n",
                         node1.getName(),
@@ -69,8 +69,8 @@ public class MusicAdapter extends ListenerAdapter implements ContainSlashCommand
                 );
             });
             node.on(TrackEndEvent.class).subscribe((data) -> {
-                System.out.println("TRACK ENDED " + data.getEvent().getType());
-                Long guildId = Long.parseLong(data.getEvent().getGuildId());
+                System.out.println("TRACK ENDED " + data.getEndReason());
+                Long guildId = data.getGuildId();
                 try {
                     TrackQueue.skip(client, guildId);
                 } catch (NoTracksInQueueException e) {
@@ -82,9 +82,9 @@ public class MusicAdapter extends ListenerAdapter implements ContainSlashCommand
     }
 
     private void registerLavalinkListeners() {
-        this.client.on(dev.arbjerg.lavalink.client.ReadyEvent.class).subscribe((data) -> {
-            final LavalinkNode node = data.getNode();
-            final Message.ReadyEvent event = data.getEvent();
+        this.client.on(dev.arbjerg.lavalink.client.ReadyEvent.class).subscribe((event) -> {
+            final LavalinkNode node = event.getNode();
+
             System.out.printf(
                     "Node '%s' is ready, session id is '%s'!%n",
                     node.getName(),
@@ -92,9 +92,9 @@ public class MusicAdapter extends ListenerAdapter implements ContainSlashCommand
             );
         });
 
-        this.client.on(StatsEvent.class).subscribe((data) -> {
-            final LavalinkNode node = data.getNode();
-            final Message.StatsEvent event = data.getEvent();
+        this.client.on(StatsEvent.class).subscribe((event) -> {
+            final LavalinkNode node = event.getNode();
+
 
             System.out.printf(
                     "Node '%s' has stats, current players: %d/%d%n",

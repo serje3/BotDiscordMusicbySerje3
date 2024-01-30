@@ -2,8 +2,7 @@ package org.serje3.commands.music;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.protocol.v4.LoadResult;
-import dev.arbjerg.lavalink.protocol.v4.Track;
+import dev.arbjerg.lavalink.client.protocol.*;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -85,8 +84,8 @@ public class PlayCommand extends Command {
         final Link link = client.getLink(guildId);
         link.loadItem(identifier).subscribe((item) -> {
             System.out.println(item);
-            if (item instanceof LoadResult.TrackLoaded trackLoaded) {
-                final Track track = trackLoaded.getData();
+            if (item instanceof TrackLoaded trackLoaded) {
+                final Track track = trackLoaded.getTrack();
 
                 link.createOrUpdatePlayer()
                         .setEncodedTrack(track.getEncoded())
@@ -96,13 +95,13 @@ public class PlayCommand extends Command {
                         .subscribe((ignored) -> {
                             event.getHook().sendMessage("Сейчас играет: " + track.getInfo().getTitle()).queue();
                         });
-            } else if (item instanceof LoadResult.PlaylistLoaded playlistLoaded) {
-                final int trackCount = playlistLoaded.getData().getTracks().size();
+            } else if (item instanceof PlaylistLoaded playlistLoaded) {
+                final int trackCount = playlistLoaded.getTracks().size();
                 event.getHook()
                         .sendMessage("Этот плейлист имеет " + trackCount + " треков! Но хуй его запущу сосите")
                         .queue();
-            } else if (item instanceof LoadResult.SearchResult searchResult) {
-                final List<Track> tracks = searchResult.getData().getTracks();
+            } else if (item instanceof SearchResult searchResult) {
+                final List<Track> tracks = searchResult.getTracks();
 
                 if (tracks.isEmpty()) {
                     event.getHook().sendMessage("Ни одного трека не найдено!").queue();
@@ -125,10 +124,10 @@ public class PlayCommand extends Command {
                             event.getHook().sendMessage("Сейчас играет: " + firstTrack.getInfo().getTitle()).queue();
                         });
 
-            } else if (item instanceof LoadResult.NoMatches) {
+            } else if (item instanceof NoMatches) {
                 event.getHook().sendMessage("Ничего не найдено по вашему запросу!").queue();
-            } else if (item instanceof LoadResult.LoadFailed fail) {
-                event.getHook().sendMessage("ЕБАТЬ Failed to load track! " + fail.getData().getMessage()).queue();
+            } else if (item instanceof LoadFailed fail) {
+                event.getHook().sendMessage("ЕБАТЬ Failed to load track! " + fail.getException().getMessage()).queue();
             }
         });
     }
