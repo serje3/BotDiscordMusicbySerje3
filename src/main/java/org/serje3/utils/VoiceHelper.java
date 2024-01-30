@@ -2,7 +2,7 @@ package org.serje3.utils;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.protocol.v4.Track;
+import dev.arbjerg.lavalink.client.protocol.Track;
 import net.dv8tion.jda.api.entities.EmbedType;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;

@@ -2,7 +2,7 @@ package org.serje3.utils;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.protocol.v4.Track;
+import dev.arbjerg.lavalink.client.protocol.Track;
 import org.serje3.domain.TrackContext;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 

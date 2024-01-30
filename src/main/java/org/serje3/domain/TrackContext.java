@@ -1,6 +1,6 @@
 package org.serje3.domain;
 
-import dev.arbjerg.lavalink.protocol.v4.Track;
+import dev.arbjerg.lavalink.client.protocol.Track;
 import lombok.*;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;

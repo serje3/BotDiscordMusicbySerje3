@@ -1,6 +1,6 @@
 package org.serje3.utils;
 
-import dev.arbjerg.lavalink.protocol.v4.Track;
+import dev.arbjerg.lavalink.client.protocol.Track;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.serje3.domain.TrackContext;
 

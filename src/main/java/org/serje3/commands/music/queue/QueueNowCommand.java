@@ -2,7 +2,7 @@ package org.serje3.commands.music.queue;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.protocol.v4.Track;
+import dev.arbjerg.lavalink.client.protocol.Track;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;

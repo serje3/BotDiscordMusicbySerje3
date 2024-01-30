@@ -2,10 +2,8 @@ package org.serje3.commands.music.queue;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.protocol.v4.LoadResult;
-import dev.arbjerg.lavalink.protocol.v4.Track;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import dev.arbjerg.lavalink.client.protocol.*;
+
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.serje3.commands.music.PlayCommand;
 import org.serje3.domain.TrackContext;
@@ -31,8 +29,8 @@ public class QueueCommand extends PlayCommand {
         final Link link = client.getLink(guildId);
         link.loadItem(identifier).subscribe((item) -> {
             System.out.println(item);
-            if (item instanceof LoadResult.TrackLoaded trackLoaded) {
-                final Track track = trackLoaded.getData();
+            if (item instanceof TrackLoaded trackLoaded) {
+                final Track track = trackLoaded.getTrack();
                 TrackQueue.add(guildId, SlashEventHelper.createTrackContextFromEvent(track, event));
 
                 System.out.println("Размер очереди - " + TrackQueue.size(guildId));
@@ -40,8 +38,8 @@ public class QueueCommand extends PlayCommand {
                 queue(client, link, guildId);
                 event.replyEmbeds(VoiceHelper.wrapTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
                         .queue();
-            } else if (item instanceof LoadResult.PlaylistLoaded playlistLoaded) {
-                final List<Track> tracks = playlistLoaded.getData().getTracks();
+            } else if (item instanceof PlaylistLoaded playlistLoaded) {
+                final List<Track> tracks = playlistLoaded.getTracks();
                 if (tracks.isEmpty()) {
                     event.reply("В этом плейлисте нет треков").queue();
                     return;
@@ -59,8 +57,8 @@ public class QueueCommand extends PlayCommand {
                 queue(client, link, guildId);
                 event.reply("Этот плейлист имеет " + trackCount + " треков! Запускаю - " + tracks.get(0).getInfo().getTitle())
                         .queue();
-            } else if (item instanceof LoadResult.SearchResult searchResult) {
-                final List<Track> tracks = searchResult.getData().getTracks();
+            } else if (item instanceof SearchResult searchResult) {
+                final List<Track> tracks = searchResult.getTracks();
 
                 if (tracks.isEmpty()) {
                     event.reply("Ни одного трека не найдено!").queue();
@@ -76,10 +74,10 @@ public class QueueCommand extends PlayCommand {
 
                 event.replyEmbeds(VoiceHelper.wrapTrackEmbed(firstTrack, event.getMember(), "Добавлен в очередь"))
                         .queue();
-            } else if (item instanceof LoadResult.NoMatches) {
+            } else if (item instanceof NoMatches) {
                 event.getHook().sendMessage("Ничего не найдено по вашему запросу!").queue();
-            } else if (item instanceof LoadResult.LoadFailed fail) {
-                event.getHook().sendMessage("ЕБАТЬ Failed to load track! " + fail.getData().getMessage()).queue();
+            } else if (item instanceof LoadFailed fail) {
+                event.getHook().sendMessage("ЕБАТЬ Failed to load track! " + fail.getException().getMessage()).queue();
             }
         });
     }
