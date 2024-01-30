@@ -42,7 +42,7 @@ public class NormalizeFilterCommand extends Command {
                 defaultFilters.getPluginFilters());
         System.out.println(filters.getVolume() + " " + filters.getEqualizer());
         client.getLink(event.getGuild().getIdLong()).createOrUpdatePlayer()
-                .setFilters(filters).asMono()
+                .setFilters(filters)
                 .subscribe(p -> {
                     System.out.println(p);
                     event.reply(getReplyString()).queue();

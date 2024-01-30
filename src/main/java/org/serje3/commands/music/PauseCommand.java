@@ -20,7 +20,7 @@ public class PauseCommand extends Command {
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
         client.getLink(event.getGuild().getIdLong())
                 .getPlayer()
-                .flatMap((player) -> player.setPaused(!player.getPaused()).asMono())
+                .flatMap((player) -> player.setPaused(!player.getPaused()))
                 .subscribe((player) -> {
                     event.reply("Плеер " + (player.getPaused() ? "на паузе" : "возобновлён") + "!").queue();
                 });

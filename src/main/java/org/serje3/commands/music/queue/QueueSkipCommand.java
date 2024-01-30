@@ -25,7 +25,7 @@ public class QueueSkipCommand extends Command {
                 return;
             }
             link.createOrUpdatePlayer().setPosition(player.getTrack().getInfo().getLength())
-                    .asMono().subscribe(d -> {
+                    .subscribe(d -> {
                         System.out.println("succ& " + d);
                     });
         });

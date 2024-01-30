@@ -2,7 +2,12 @@ package org.serje3.commands.music;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.protocol.*;
+import dev.arbjerg.lavalink.client.protocol.PlaylistLoaded;
+import dev.arbjerg.lavalink.client.protocol.SearchResult;
+import dev.arbjerg.lavalink.client.protocol.Track;
+import dev.arbjerg.lavalink.client.protocol.TrackLoaded;
+import dev.arbjerg.lavalink.client.protocol.NoMatches;
+import dev.arbjerg.lavalink.client.protocol.LoadFailed;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -91,7 +96,6 @@ public class PlayCommand extends Command {
                         .setEncodedTrack(track.getEncoded())
                         .setVolume(volume)
                         .setEndTime(track.getInfo().getLength())
-                        .asMono()
                         .subscribe((ignored) -> {
                             event.getHook().sendMessage("Сейчас играет: " + track.getInfo().getTitle()).queue();
                         });

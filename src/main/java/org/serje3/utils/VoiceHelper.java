@@ -27,7 +27,6 @@ public class VoiceHelper {
         link.createOrUpdatePlayer()
                 .setEncodedTrack(track.getEncoded())
                 .setVolume(volume).setNoReplace(false)
-                .asMono()
                 .subscribe((ignored) -> {
                     System.out.println("player - " + ignored);
                 });
