@@ -32,7 +32,7 @@ repositories {
 }
 
 dependencies {
-    implementation "dev.arbjerg:lavalink-client:da79998defe6709bc9eb1cb5f625cdba5d9aa937-SNAPSHOT"
+    implementation "dev.arbjerg:lavalink-client:2.2.0"
     implementation "dev.arbjerg:lavaplayer:2.0.2"
     implementation "net.dv8tion:JDA:5.0.0-beta.15"
     implementation "com.github.topi314.lavasearch:lavasearch:1.0.0-beta.2"
