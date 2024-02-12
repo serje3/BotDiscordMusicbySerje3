@@ -13,9 +13,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Remove known_hosts
-      run: rm -f $HOME/.ssh/known_hosts
-
     - name: Set up SSH
       uses: webfactory/ssh-agent@v0.5.3
       with:
@@ -24,4 +21,3 @@ jobs:
     - name: Deploy
       run: |
         scp -r / ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_WORKING_DIRECTORY }}
-        ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} "cd ${{ secrets.VPS_WORKING_DIRECTORY }} && ./deploy-prod.sh"
