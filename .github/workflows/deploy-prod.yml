@@ -20,4 +20,4 @@ jobs:
 
     - name: Deploy
       run: |
-        scp -r / ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_WORKING_DIRECTORY }}
+        scp -r / ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_WORKING_DIRECTORY }}
