@@ -18,7 +18,7 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Deploy to VPS
+    - name: Deploy
       run: |
         scp -r / ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_WORKING_DIRECTORY }}
         ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} "cd ${{ secrets.VPS_WORKING_DIRECTORY }} && ./deploy-prod.sh"
