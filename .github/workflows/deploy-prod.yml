@@ -20,4 +20,4 @@ jobs:
 
     - name: Deploy
       run: |
-        scp -r / ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_WORKING_DIRECTORY }}
+        scp -r ${{ github.workspace }} root@147.45.77.142:/opt/captain-cocker
