@@ -24,6 +24,10 @@ public class QueueSkipCommand extends Command {
             if (player.getTrack() == null || !player.getState().getConnected()){
                 return;
             }
+            System.out.println("SKIPPING " + player.getTrack().getInfo().getTitle());
+            System.out.println("isStream " + player.getTrack().getInfo().isStream());
+            System.out.println("isSeekable " + player.getTrack().getInfo().isSeekable());
+
             link.createOrUpdatePlayer().setPosition(player.getTrack().getInfo().getLength())
                     .subscribe(d -> {
                         System.out.println("succ& " + d);
