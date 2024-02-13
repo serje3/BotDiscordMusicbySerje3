@@ -21,18 +21,27 @@ public class QueueSkipCommand extends Command {
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
         Link link = client.getLink(event.getGuild().getIdLong());
         link.getPlayer().subscribe(player -> {
-            if (player.getTrack() == null || !player.getState().getConnected()){
+            if (player.getTrack() == null || !player.getState().getConnected()) {
+                event.reply("Никаких треков сейчас не играет").queue();
                 return;
             }
             System.out.println("SKIPPING " + player.getTrack().getInfo().getTitle());
             System.out.println("isStream " + player.getTrack().getInfo().isStream());
             System.out.println("isSeekable " + player.getTrack().getInfo().isSeekable());
 
+
+            if (player.getTrack().getInfo().isStream()) {
+                link.createOrUpdatePlayer()
+                        .setEndTime(0L)
+                        .subscribe();
+                return;
+            }
+
             link.createOrUpdatePlayer().setPosition(player.getTrack().getInfo().getLength())
                     .subscribe(d -> {
                         System.out.println("succ& " + d);
                     });
+            event.reply("Трек пропущен").queue();
         });
-        event.reply("Трек пропущен").queue();
     }
 }
