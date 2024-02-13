@@ -31,17 +31,16 @@ public class QueueSkipCommand extends Command {
             System.out.println("isSeekable " + player.getTrack().getInfo().isSeekable());
 
 
-            if (player.getTrack().getInfo().isStream()) {
-                link.destroyPlayer().subscribe();
-                event.reply("Стрим выключен").queue();
-                return;
-            }
-
             link.createOrUpdatePlayer().setPosition(player.getTrack().getInfo().getLength())
                     .subscribe(d -> {
                         System.out.println("succ& " + d);
                     });
-            event.reply("Трек пропущен").queue();
+
+            if (player.getTrack().getInfo().isStream()) {
+                event.reply("Стрим выключен").queue();
+            } else {
+                event.reply("Трек пропущен").queue();
+            }
         });
     }
 }

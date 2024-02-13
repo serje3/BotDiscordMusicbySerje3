@@ -26,7 +26,9 @@ public class VoiceHelper {
     public static void play(Link link, Track track, Integer volume) {
         link.createOrUpdatePlayer()
                 .setEncodedTrack(track.getEncoded())
-                .setVolume(volume).setNoReplace(false)
+                .setVolume(volume)
+                .setNoReplace(false)
+                .setEndTime(track.getInfo().getLength())
                 .subscribe((ignored) -> {
                     System.out.println("player - " + ignored);
                 });
