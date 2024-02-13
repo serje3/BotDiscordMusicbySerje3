@@ -85,6 +85,7 @@ public class QueueCommand extends PlayCommand {
 
     private void queue(LavalinkClient client, Link link, Long guildId) {
         link.getPlayer().subscribe((player) -> {
+
             System.out.println(player.getState() + " " + player.getTrack());
             boolean isStopped = !player.getState().getConnected() || player.getTrack() == null
                     || player.getPosition() >= player.getTrack().getInfo().getLength();
