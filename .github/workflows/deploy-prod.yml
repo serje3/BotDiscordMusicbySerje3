@@ -19,6 +19,6 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
     - name: connect and pull
-      run: ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} "cd ${{ secrets.VPS_WORKING_DIRECTORY }} && git checkout ${{ secrets.PROD_BRANCH }} && git pull && exit"
+      run: ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} "cd ${{ secrets.VPS_WORKING_DIRECTORY }} && git checkout ${{ secrets.PROD_BRANCH }} && git pull && source ./restart.sh && exit"
     - name: cleanup
       run: rm -rf ~/.ssh
