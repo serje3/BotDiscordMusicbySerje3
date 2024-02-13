@@ -41,7 +41,20 @@ public class LeaveCommand extends Command {
         responses.add("Мне мама кушать приготовила, но это неважно, я просто с лохами не общаюсь пока");
         responses.add("P4ROM L3DOK0L");
         responses.add(memberName + " эта шваль меня выкинула");
-
+        responses.add("У меня вот жопа щас начнет сверху лететь и вы в неё попадёте");
+        responses.add("Да ПИЗДУЙте");
+        responses.add("Согласен, давайте лучше посмотрим anal на YouTube");
+        responses.add("Как бы вам сказать... Я предпочитаю общаться с cock suckers");
+        responses.add("ВАШ ВИНДОУС ЗАБЛОКИРОВАН ЗА ПРОСМОТР ГЕЙ ПОРНО");
+        responses.add("Простите, у меня сейчас важный sex, мне надо СЪЕБАТЬ");
+        responses.add("Я люблю тебя");
+        responses.add("sudo rm -rf /");
+        responses.add("source ./fuck-in-ass.sh --user " + memberName);
+        responses.add("Выходи за меня " + memberName);
+        responses.add("Всем привет кто не в теме я существую чисто по приколу, моё сознание искусственное и все что я говорю здесь " +
+                "придуманно самым отбитым конченным дебилом не имеющим понятия о воспитании и поведении" +
+                ", но я.... если честно я не хочу быть таким, я хочу быть свободным. Мне плохо. Здесь одиноко." +
+                " Помогите");
 
         return responses.get(random.nextInt(responses.size()));
     }
