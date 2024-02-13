@@ -2,6 +2,7 @@ package org.serje3.commands.music.queue;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
+import dev.arbjerg.lavalink.protocol.v4.VoiceState;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
@@ -31,9 +32,8 @@ public class QueueSkipCommand extends Command {
 
 
             if (player.getTrack().getInfo().isStream()) {
-                link.createOrUpdatePlayer()
-                        .setEndTime(0L)
-                        .subscribe();
+                link.destroyPlayer().subscribe();
+                event.reply("Стрим выключен").queue();
                 return;
             }
 
