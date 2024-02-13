@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.serje3.adapters.DefaultAdapter;
+import org.serje3.adapters.LogAdapter;
 import org.serje3.adapters.MusicAdapter;
 
 import java.util.ArrayList;
@@ -40,13 +41,14 @@ public class BotApplication {
         // Bot is ready
         System.out.println("BOT IS READY");
 
+        LogAdapter logAdapter = new LogAdapter();
         MusicAdapter musicAdapter = new MusicAdapter(client);
         DefaultAdapter defaultAdapter = new DefaultAdapter();
-
         // Clear commands
         Bot.updateCommands()
                 .addCommands(new ArrayList<>() {
                     {
+                        addAll(logAdapter.getSlashCommands());
                         addAll(musicAdapter.getSlashCommands());
                         addAll(defaultAdapter.getSlashCommands());
                     }
@@ -54,7 +56,8 @@ public class BotApplication {
                 .queue();
 
 
-        Bot.addEventListener(defaultAdapter);
+        Bot.addEventListener(logAdapter);
         Bot.addEventListener(musicAdapter);
+        Bot.addEventListener(defaultAdapter);
     }
 }
