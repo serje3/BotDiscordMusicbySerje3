@@ -19,6 +19,7 @@ public class MusicCommandList extends CommandList {
             {
 //              add(PlayCommand.class); deprecated, use QueueCommand instead
                 add(GachiCommand.class);
+                add(LofiCommand.class);
                 add(PauseCommand.class);
                 add(JoinCommand.class);
                 add(LeaveCommand.class);
