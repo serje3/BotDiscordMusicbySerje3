@@ -37,7 +37,7 @@ public class PlayCommand extends Command {
                         new SubcommandData("youtube", "Поиск из ютуба")
                                 .addOption(
                                         OptionType.STRING,
-                                        "текст",
+                                        "текст".toLowerCase(),
                                         "Строка поиска youtube",
                                         true
                                 ),

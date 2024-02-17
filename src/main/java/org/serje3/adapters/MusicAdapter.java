@@ -8,6 +8,7 @@ import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
 import dev.arbjerg.lavalink.protocol.v4.Message;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.decorators.MusicCommandDecorator;
 import org.serje3.meta.interfaces.ContainSlashCommands;
+import org.serje3.rest.handlers.EventRestHandler;
 import org.serje3.utils.commands.MusicCommandList;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
@@ -30,8 +32,11 @@ public class MusicAdapter extends ListenerAdapter implements ContainSlashCommand
 
     private final HashMap<String, Command> commands;
 
+    private final EventRestHandler eventRestHandler;
+
     public MusicAdapter(LavalinkClient client) {
         this.client = client;
+        this.eventRestHandler = new EventRestHandler();
 
         this.client.getLoadBalancer().addPenaltyProvider(new VoiceRegionPenaltyProvider());
 
@@ -117,14 +122,16 @@ public class MusicAdapter extends ListenerAdapter implements ContainSlashCommand
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         System.out.println("Command Name: " + event.getName());
+
         String commandName = event.getName();
         Command command = this.commands.get(commandName);
         if (command != null) {
             command.execute(event, this.client);
         } else {
             // скорее всего ответ должен придти в другом listener
-//            event.reply("Такой cumанды нет???").queue();
+            return;
         }
+        eventRestHandler.handleSlashEvent(event);
     }
 
     @Override

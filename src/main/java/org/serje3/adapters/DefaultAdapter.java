@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.interfaces.ContainSlashCommands;
+import org.serje3.rest.handlers.EventRestHandler;
 import org.serje3.utils.commands.DefaultCommandList;
 
 import java.util.ArrayList;
@@ -18,7 +19,10 @@ import java.util.stream.Collectors;
 public class DefaultAdapter extends ListenerAdapter implements ContainSlashCommands {
     private final HashMap<String, Command> commands = new HashMap<>();
 
+    private final EventRestHandler eventRestHandler;
+
     public DefaultAdapter() {
+        eventRestHandler = new EventRestHandler();
         new DefaultCommandList().forEach(command -> {
             System.out.println(command);
             this.commands.put(command.getName(), command);
@@ -35,12 +39,15 @@ public class DefaultAdapter extends ListenerAdapter implements ContainSlashComma
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         System.out.println("Command Name: " + event.getName());
         String commandName = event.getName();
+
         Command command = this.commands.get(commandName);
         if (command != null) {
             command.execute(event, null);
         } else {
             // скорее всего ответ должен придти в другом listener
+            return;
         }
+        eventRestHandler.handleSlashEvent(event);
     }
 
     @Override

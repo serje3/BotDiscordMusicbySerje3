@@ -15,7 +15,7 @@ public abstract class Command {
     }
 
     public SlashCommandData getDefaultSlashCommand(String description) {
-        return Commands.slash(getName(), description);
+        return Commands.slash(getName(), description.length() > 99 ? description.substring(0, 99): description);
     }
 
     public abstract void execute(SlashCommandInteractionEvent event, LavalinkClient client);
