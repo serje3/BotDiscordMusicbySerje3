@@ -126,12 +126,12 @@ public class MusicAdapter extends ListenerAdapter implements ContainSlashCommand
         String commandName = event.getName();
         Command command = this.commands.get(commandName);
         if (command != null) {
+            eventRestHandler.handleSlashEvent(event);
             command.execute(event, this.client);
         } else {
             // скорее всего ответ должен придти в другом listener
             return;
         }
-        eventRestHandler.handleSlashEvent(event);
     }
 
     @Override

@@ -9,8 +9,10 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import org.serje3.adapters.LogAdapter;
 import org.serje3.meta.abs.Command;
 import org.serje3.utils.commands.DefaultCommandList;
+import org.serje3.utils.commands.LogCommandList;
 import org.serje3.utils.commands.MusicCommandList;
 
 import java.util.ArrayList;
@@ -75,12 +77,17 @@ public class HelpCommand extends Command {
     private List<MessageEmbed.Field> createCommandFields() {
         MusicCommandList musicCommandList = new MusicCommandList();
         DefaultCommandList defaultCommandList = new DefaultCommandList();
+        LogCommandList logCommandList = new LogCommandList();
         List<MessageEmbed.Field> fields = new ArrayList<>();
         fields.add(new MessageEmbed.Field("Музыка", "", false, false));
         musicCommandList.forEach(command ->
                 fields.add(new MessageEmbed.Field("/" + command.getName(), command.getDescription(), true, true)));
         fields.add(new MessageEmbed.Field("", "", false, false));
-        fields.add(new MessageEmbed.Field("Базовые", "", false, false));
+        fields.add(new MessageEmbed.Field("Информация и статистика", "", false, false));
+        logCommandList.forEach(command ->
+                fields.add(new MessageEmbed.Field("/" + command.getName(), command.getDescription(), true)));
+        fields.add(new MessageEmbed.Field("", "", false, false));
+        fields.add(new MessageEmbed.Field("Помощь различного рода", "", false, false));
         defaultCommandList.forEach(command ->
                 fields.add(new MessageEmbed.Field("/" + command.getName(), command.getDescription(), true)));
         return fields;

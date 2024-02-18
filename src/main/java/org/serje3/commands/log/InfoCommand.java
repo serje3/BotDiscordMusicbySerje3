@@ -31,7 +31,7 @@ public class InfoCommand  extends Command {
 
     @Override
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
-        memberRestHandler.performGetMemberInfo(event, (memberInfo) -> {
+        memberRestHandler.performAsyncGetMemberInfo(event, (memberInfo) -> {
             System.out.println(memberInfo);
             String name = event.getMember().getEffectiveName();
             event.replyEmbeds(
@@ -56,7 +56,6 @@ public class InfoCommand  extends Command {
                             }
                     )
             ).queue();
-            return null;
         });
     }
 }

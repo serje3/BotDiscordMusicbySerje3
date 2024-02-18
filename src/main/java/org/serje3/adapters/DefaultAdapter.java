@@ -42,12 +42,12 @@ public class DefaultAdapter extends ListenerAdapter implements ContainSlashComma
 
         Command command = this.commands.get(commandName);
         if (command != null) {
+            eventRestHandler.handleSlashEvent(event);
             command.execute(event, null);
         } else {
             // скорее всего ответ должен придти в другом listener
             return;
         }
-        eventRestHandler.handleSlashEvent(event);
     }
 
     @Override

@@ -5,8 +5,10 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.serje3.commands.music.queue.QueueCommand;
 import org.serje3.meta.abs.Command;
+import org.serje3.meta.annotations.JoinVoiceChannel;
 import org.serje3.utils.VoiceHelper;
 
+@Deprecated
 public class LofiCommand extends Command {
     @Override
     public String getName() {
@@ -19,15 +21,10 @@ public class LofiCommand extends Command {
     }
 
     @Override
+    @JoinVoiceChannel
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
-        final Guild guild = event.getGuild();
-
-        if (!guild.getSelfMember().getVoiceState().inAudioChannel()) {
-            VoiceHelper.joinHelper(event);
-        }
-
         final String identifier = "https://www.youtube.com/watch?v=rUxyKA_-grg";
-        final long guildId = guild.getIdLong();
+        final long guildId = event.getGuild().getIdLong();
         new QueueCommand().play(client, event, guildId, identifier);
     }
 }

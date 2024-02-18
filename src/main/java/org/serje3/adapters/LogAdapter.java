@@ -39,12 +39,12 @@ public class LogAdapter extends ListenerAdapter implements ContainSlashCommands 
         String commandName = event.getName();
         Command command = this.commands.get(commandName);
         if (command != null) {
+            eventRestHandler.handleSlashEvent(event);
             command.execute(event, null);
         } else {
             // скорее всего ответ должен придти в другом listener
 //            event.reply("Такой cumанды нет???").queue();
             return;
         }
-        eventRestHandler.handleSlashEvent(event);
     }
 }
