@@ -25,6 +25,6 @@ public class EventRestHandler extends BaseRestClient {
                 guild
         );
 
-        this.post("/events/slash-received", request, HttpResponse.BodyHandlers.ofString());
+        this.post("/events/slash-received", request, Object.class);
     }
 }

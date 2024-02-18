@@ -1,5 +1,6 @@
 package org.serje3.utils.commands;
 
+import org.serje3.commands.log.InfoCommand;
 import org.serje3.commands.log.TestCommand;
 import org.serje3.commands.music.*;
 import org.serje3.commands.music.filters.BassBoostCommand;
@@ -15,6 +16,7 @@ public class LogCommandList extends CommandList {
         this.setCommands(new ArrayList<>() {
             {
                 add(TestCommand.class);
+                add(InfoCommand.class);
             }
         });
     }
