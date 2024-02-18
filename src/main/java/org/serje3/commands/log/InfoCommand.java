@@ -41,7 +41,7 @@ public class InfoCommand  extends Command {
                             "Статистика",
                             EmbedType.AUTO_MODERATION,
                             OffsetDateTime.now(),
-                            255,
+                            event.getMember().getColorRaw(),
                             null,
                             null,
                             new MessageEmbed.AuthorInfo(name, null, event.getMember().getEffectiveAvatarUrl(), null),
@@ -50,7 +50,6 @@ public class InfoCommand  extends Command {
                             null,
                             new ArrayList<>(){
                                 {
-                                    add(new MessageEmbed.Field("Количество вызванных команд", memberInfo.getCountExecutedCommands().toString(),false));
                                     add(new MessageEmbed.Field("Место в рейтинге самых активных пользователей", memberInfo.getRating().getRank().toString(), false));
                                     add(new MessageEmbed.Field("Общее количество вызванных команд", memberInfo.getRating().getCount().toString(), false));
                                 }
