@@ -7,6 +7,7 @@ public enum PlaySourceType {
     YOUTUBE("youtube"),
     SOUNDCLOUD("soundcloud"),
     YANDEXMUSIC("yandexmusic"),
+    SPOTIFY("spotify"),
     TEXT_TO_SPEECH("tts");
 
 

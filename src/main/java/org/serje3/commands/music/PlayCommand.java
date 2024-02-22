@@ -34,25 +34,32 @@ public class PlayCommand extends Command {
     public SlashCommandData getSlashCommand() {
         return super.getSlashCommand()
                 .addSubcommands(
-                        new SubcommandData("youtube", "Поиск из ютуба")
+                        new SubcommandData(PlaySourceType.YOUTUBE.name().toLowerCase(), "Поиск из ютуба")
                                 .addOption(
                                         OptionType.STRING,
                                         "текст".toLowerCase(),
                                         "Строка поиска youtube",
                                         true
                                 ),
-                        new SubcommandData("soundcloud", "Поиск из soundclound")
+                        new SubcommandData(PlaySourceType.SOUNDCLOUD.name().toLowerCase(), "Поиск из soundclound")
                                 .addOption(
                                         OptionType.STRING,
                                         "текст",
                                         "Строка поиска soundcloud",
                                         true
                                 ),
-                        new SubcommandData("yandexmusic", "Поиск из Yandex Music")
+                        new SubcommandData(PlaySourceType.YANDEXMUSIC.name().toLowerCase(), "Поиск из Yandex Music")
                                 .addOption(
                                         OptionType.STRING,
                                         "текст",
                                         "Строка поиска Yandex Music",
+                                        true
+                                ),
+                        new SubcommandData(PlaySourceType.SPOTIFY.name().toLowerCase(), "Поиск из spotify")
+                                .addOption(
+                                        OptionType.STRING,
+                                        "текст",
+                                        "Строка поиска Spotify",
                                         true
                                 )
                 );
@@ -68,6 +75,7 @@ public class PlayCommand extends Command {
             case YOUTUBE -> "ytsearch:";
             case SOUNDCLOUD -> "scsearch:";
             case YANDEXMUSIC -> "ymsearch:";
+            case SPOTIFY -> "spsearch:";
             default -> "";
         };
         final String identifier = event.getOption("текст").getAsString();
