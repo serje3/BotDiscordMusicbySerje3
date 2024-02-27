@@ -29,7 +29,8 @@ public class RadioCommand extends Command {
                         new SubcommandData(RadioType.GACHI.name().toLowerCase(), "Spanking"),
                         new SubcommandData(RadioType.LOFI.name().toLowerCase(), "Чилл"),
                         new SubcommandData(RadioType.PHONK.name().toLowerCase(), "для педиков"),
-                        new SubcommandData(RadioType.SYNTHWAVE.name().toLowerCase(), "хз че написать")
+                        new SubcommandData(RadioType.SYNTHWAVE.name().toLowerCase(), "хз че написать"),
+                        new SubcommandData(RadioType.DARKAMBIENT.name().toLowerCase(), "подумать над своим поведением")
                 );
     }
 
@@ -57,6 +58,9 @@ public class RadioCommand extends Command {
             case SYNTHWAVE -> {
                 return "https://www.youtube.com/watch?v=4xDzrJKXOOY";
             }
+            case DARKAMBIENT -> {
+                return "https://www.youtube.com/watch?v=SKhpl1OMqEY";
+            }
         }
         return null;
     }
@@ -65,6 +69,7 @@ public class RadioCommand extends Command {
         GACHI,
         LOFI,
         PHONK,
-        SYNTHWAVE
+        SYNTHWAVE,
+        DARKAMBIENT
     }
 }
