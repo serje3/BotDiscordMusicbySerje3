@@ -1,57 +1,45 @@
 package org.serje3.adapters;
 
-import com.github.topi314.lavasrc.yandexmusic.YandexMusicSourceManager;
-import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import dev.arbjerg.lavalink.client.*;
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
 import dev.arbjerg.lavalink.protocol.v4.Message;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import org.serje3.meta.abs.AdapterContext;
+import org.serje3.meta.abs.BaseListenerAdapter;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.decorators.MusicCommandDecorator;
-import org.serje3.meta.interfaces.ContainSlashCommands;
-import org.serje3.rest.handlers.EventRestHandler;
-import org.serje3.utils.commands.MusicCommandList;
+import org.serje3.utils.commands.MusicAdapterContext;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class MusicAdapter extends ListenerAdapter implements ContainSlashCommands {
+import static org.serje3.BotApplication.Bot;
 
-    private final LavalinkClient client;
-
-    private final HashMap<String, Command> commands;
-
-    private final EventRestHandler eventRestHandler;
+public class MusicAdapter extends BaseListenerAdapter {
 
     public MusicAdapter(LavalinkClient client) {
+        super();
         this.client = client;
-        this.eventRestHandler = new EventRestHandler();
-
         this.client.getLoadBalancer().addPenaltyProvider(new VoiceRegionPenaltyProvider());
-
         this.registerLavalinkNodes();
         this.registerLavalinkListeners();
 
-        this.commands = new HashMap<>();
-        this.registerCommands();
+        this.setClient(client);
     }
 
-    private void registerCommands() {
-        new MusicCommandList().forEach(command -> this.commands.put(command.getName(), convertCommand(command)));
+    @Override
+    protected AdapterContext getAdapterContext() {
+        return new MusicAdapterContext();
     }
 
-    private Command convertCommand(Command command) {
+
+    @Override
+    protected Command convertCommand(Command command) {
         return new MusicCommandDecorator(command);
     }
 
@@ -76,6 +64,10 @@ public class MusicAdapter extends ListenerAdapter implements ContainSlashCommand
             node.on(TrackEndEvent.class).subscribe((data) -> {
                 System.out.println("TRACK ENDED " + data.getEndReason());
                 Long guildId = data.getGuildId();
+                if (data.getEndReason() == Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason.LOAD_FAILED){
+                    User userById = Bot.getUserById(263430624080035841L);
+                    userById.openPrivateChannel().queue((channel) -> channel.sendMessage("Трек " + data.getTrack().getInfo().getTitle() + " закончился с ошибкой").queue());
+                }
                 try {
                     TrackQueue.skip(client, guildId);
                 } catch (NoTracksInQueueException e) {
@@ -108,34 +100,5 @@ public class MusicAdapter extends ListenerAdapter implements ContainSlashCommand
                     event.getPlayers()
             );
         });
-    }
-
-    @Override
-    public void onReady(@NotNull net.dv8tion.jda.api.events.session.ReadyEvent event) {
-        System.out.println("[MusicAdapter] " + event.getJDA().getSelfUser().getEffectiveName() + " is ready!");
-
-        AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
-        playerManager.registerSourceManager(new YandexMusicSourceManager("AQAAAAAQZs1CAAG8XjWJXJC1gUq1nLyhOwI9bUI"));
-    }
-
-
-    @Override
-    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        System.out.println("Command Name: " + event.getName());
-
-        String commandName = event.getName();
-        Command command = this.commands.get(commandName);
-        if (command != null) {
-            eventRestHandler.handleSlashEvent(event);
-            command.execute(event, this.client);
-        } else {
-            // скорее всего ответ должен придти в другом listener
-            return;
-        }
-    }
-
-    @Override
-    public List<SlashCommandData> getSlashCommands() {
-        return this.commands.values().stream().map(Command::getSlashCommand).collect(Collectors.toList());
     }
 }

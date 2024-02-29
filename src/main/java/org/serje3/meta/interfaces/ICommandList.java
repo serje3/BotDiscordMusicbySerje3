@@ -10,5 +10,5 @@ import java.util.function.Function;
 public interface ICommandList {
     List<Class<?>> getCommands();
     void setCommands(List<Class<?>> commands);
-    void forEach(Function<Command, ?> func);
+    void forEachCommand(Function<Command, ?> func);
 }
