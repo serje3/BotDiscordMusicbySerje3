@@ -3,6 +3,7 @@ package org.serje3.services;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.LavalinkPlayer;
 import dev.arbjerg.lavalink.client.Link;
+import dev.arbjerg.lavalink.client.PlayerUpdateBuilder;
 import dev.arbjerg.lavalink.client.protocol.Track;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Member;
@@ -26,18 +27,20 @@ import reactor.core.publisher.Mono;
 public class MusicService {
 
     public void pauseMusic(SlashCommandInteractionEvent event, LavalinkClient client){
-        client.getLink(event.getGuild().getIdLong())
-                .getPlayer()
-                .flatMap((player) -> player.setPaused(!player.getPaused()))
+        pauseMusic(event.getGuild().getIdLong(), client)
                 .subscribe((player) -> {
                     event.reply("Плеер " + (player.getPaused() ? "на паузе" : "возобновлён") + "!").queue();
                 });
     }
 
-    public Mono<LavalinkPlayer> pauseMusic(ButtonInteractionEvent event, LavalinkClient client){
-        return client.getLink(event.getGuild().getIdLong())
+    public Mono<LavalinkPlayer> pauseMusic(Long guildId, LavalinkClient client){
+        return client.getLink(guildId)
                 .getPlayer()
-                .flatMap((player) -> player.setPaused(!player.getPaused()));
+                .flatMap((player) -> {
+                    PlayerUpdateBuilder playerUpdateBuilder = player.setPaused(!player.getPaused());
+                    TrackQueue.pause(guildId, player.getPaused());
+                    return playerUpdateBuilder;
+                });
     }
 
 
@@ -119,10 +122,10 @@ public class MusicService {
     public void whatsPlayingNowWithoutInteraction(TextChannel textChannel, TrackContext track) {
             try {
                 if (track == null) throw new NoTrackIsPlayingNow();
-                textChannel.sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track.getTrack(), track.getMember(), "Далее: "))
+                textChannel.sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track.getTrack(), track.getMember(), ""))
                         .addActionRow(
-                                new RepeatButton().asJDAButton(),
-                                new PauseButton().asJDAButton(),
+                                track.isRepeat() ? new RepeatButton.On().asJDAButton() : new RepeatButton().asJDAButton(),
+                                track.isPaused() ? new PausePlayButton().asJDAButton() : new PauseButton().asJDAButton(),
                                 new SkipButton().asJDAButton(),
                                 Button.link(track.getTrack().getInfo().getUri(), "Ссылка на трек")
                         ).queue();

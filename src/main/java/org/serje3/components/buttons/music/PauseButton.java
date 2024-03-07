@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.serje3.meta.abs.Button;
 import org.serje3.services.MusicService;
+import org.serje3.utils.TrackQueue;
 
 public class PauseButton extends Button {
     private final MusicService musicService = new MusicService();
@@ -30,7 +31,7 @@ public class PauseButton extends Button {
 
     @Override
     public void handle(ButtonInteractionEvent event, LavalinkClient client) {
-        musicService.pauseMusic(event, client).subscribe(player -> {
+        musicService.pauseMusic(event.getGuild().getIdLong(), client).subscribe(player -> {
             event.editButton(new PausePlayButton().asJDAButton()).queue();
         });
     }

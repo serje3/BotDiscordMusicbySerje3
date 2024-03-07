@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
 import org.serje3.services.MusicService;
+import org.serje3.utils.TrackQueue;
 
 public class PauseCommand extends Command {
     private final MusicService musicService = new MusicService();

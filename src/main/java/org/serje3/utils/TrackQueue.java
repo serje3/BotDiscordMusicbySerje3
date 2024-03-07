@@ -38,7 +38,7 @@ public class TrackQueue {
         init(guildId);
         TrackContext trackNow = peekNow(guildId);
         TrackContext trackContext;
-        if (emitByEvent && trackNow != null && trackNow.getRepeat()){
+        if (emitByEvent && trackNow != null && trackNow.isRepeat()){
             trackContext = trackNow;
         } else {
             trackContext = TrackQueue.pop(guildId);
@@ -64,11 +64,18 @@ public class TrackQueue {
         });
     }
 
+    public static void pause(Long guildId, boolean paused){
+        tracksNow.computeIfPresent(guildId, (id, trackContext) -> {
+            trackContext.setPaused(paused);
+            return trackContext;
+        });
+    }
+
     public static Boolean toggleRepeat(Long guildId) {
         TrackContext trackContext = tracksNow.get(guildId);
         if (trackContext == null) return false;
-        TrackContext updatedTrackContext = repeat(guildId, !trackContext.getRepeat());
-        return updatedTrackContext.getRepeat();
+        TrackContext updatedTrackContext = repeat(guildId, !trackContext.isRepeat());
+        return updatedTrackContext.isRepeat();
     }
 
     public static TrackContext peekNow(Long guildId){

@@ -11,6 +11,7 @@ public class SlashEventHelper {
                 .member(event.getMember())
                 .textChannel(event.getChannel().asTextChannel())
                 .repeat(false)
+                .paused(false)
                 .build();
     }
 }
