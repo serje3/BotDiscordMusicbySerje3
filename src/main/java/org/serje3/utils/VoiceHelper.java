@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import org.serje3.utils.exceptions.NoTracksInQueueException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,6 +29,7 @@ public class VoiceHelper {
                 .setEncodedTrack(track.getEncoded())
                 .setVolume(volume)
                 .setNoReplace(false)
+                .setPaused(false)
                 .setEndTime(track.getInfo().getLength())
                 .subscribe((ignored) -> {
                     System.out.println("player - " + ignored);
@@ -67,5 +69,27 @@ public class VoiceHelper {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void queue(LavalinkClient client, Link link, Long guildId) {
+        link.getPlayer().subscribe((player) -> {
+
+            System.out.println(player.getState() + " " + player.getTrack());
+            boolean isStopped = !player.getState().getConnected() || player.getTrack() == null
+                    || player.getPosition() >= player.getTrack().getInfo().getLength();
+
+            if (isStopped) {
+                try {
+                    System.out.println("START QUEUE");
+                    TrackQueue.skip(client, guildId, false);
+                } catch (NoTracksInQueueException e) {
+                    // Такое может произойти в очень редких случаях
+                    // с учётом того что перед тем как запустить queue,
+                    // мы добавляем трек в TrackQueue
+                    // В случае если это все-таки произошло - удалите system32,
+                    // а если вы на linux или macos, то напишите rm -rf /. И проблема исчезнет
+                }
+            }
+        });
     }
 }

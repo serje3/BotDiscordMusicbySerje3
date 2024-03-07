@@ -2,6 +2,8 @@ package org.serje3.utils.commands;
 
 import org.serje3.components.autocomplete.music.SearchAutocomplete;
 import org.serje3.components.buttons.music.PauseButton;
+import org.serje3.components.buttons.music.PausePlayButton;
+import org.serje3.components.buttons.music.RepeatButton;
 import org.serje3.components.buttons.music.SkipButton;
 import org.serje3.components.commands.music.*;
 import org.serje3.components.commands.music.filters.BassBoostCommand;
@@ -34,7 +36,10 @@ public class MusicAdapterContext extends AdapterContext {
         this.setButtons(new ArrayList<>(){
             {
                 add(PauseButton.class);
+                add(PausePlayButton.class);
                 add(SkipButton.class);
+                add(RepeatButton.class);
+                add(RepeatButton.On.class);
             }
         });
         this.setAutoCompletes(new ArrayList<>(){

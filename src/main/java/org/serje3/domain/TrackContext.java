@@ -14,4 +14,5 @@ public class TrackContext {
     private Track track;
     private Member member;
     private TextChannel textChannel;
+    private volatile Boolean repeat;
 }

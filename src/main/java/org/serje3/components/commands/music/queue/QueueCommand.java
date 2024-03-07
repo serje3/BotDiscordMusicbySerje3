@@ -26,6 +26,7 @@ public class QueueCommand extends PlayCommand {
     @Override
     public void play(LavalinkClient client, SlashCommandInteractionEvent event,
                      Long guildId, String identifier, Integer volume) {
+        event.deferReply().queue();
         System.out.println("IDENTIFIER:" + identifier);
         final Link link = client.getLink(guildId);
         link.loadItem(identifier).subscribe((item) -> {
@@ -36,16 +37,16 @@ public class QueueCommand extends PlayCommand {
 
                 System.out.println("Размер очереди - " + TrackQueue.size(guildId));
 
-                queue(client, link, guildId);
-                event.replyEmbeds(VoiceHelper.wrapTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
+                VoiceHelper.queue(client, link, guildId);
+                event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
                         .queue();
             } else if (item instanceof PlaylistLoaded playlistLoaded) {
                 final List<Track> tracks = playlistLoaded.getTracks();
                 if (tracks.isEmpty()) {
-                    event.reply("В этом плейлисте нет треков").queue();
+                    event.getHook().sendMessage("В этом плейлисте нет треков").queue();
                     return;
                 } else if (tracks.size() >= 10000) {
-                    event.reply("Этот плейлист слишком большой").queue();
+                    event.getHook().sendMessage("Этот плейлист слишком большой").queue();
                     return;
                 }
 
@@ -55,14 +56,14 @@ public class QueueCommand extends PlayCommand {
                 TrackQueue.addAll(guildId, trackContextList);
                 final int trackCount = tracks.size();
 
-                queue(client, link, guildId);
-                event.reply("Этот плейлист имеет " + trackCount + " треков! Запускаю - " + tracks.get(0).getInfo().getTitle())
+                VoiceHelper.queue(client, link, guildId);
+                event.getHook().sendMessage("Этот плейлист имеет " + trackCount + " треков! Запускаю - " + tracks.get(0).getInfo().getTitle())
                         .queue();
             } else if (item instanceof SearchResult searchResult) {
                 final List<Track> tracks = searchResult.getTracks();
 
                 if (tracks.isEmpty()) {
-                    event.reply("Ни одного трека не найдено!").queue();
+                    event.getHook().sendMessage("Ни одного трека не найдено!").queue();
                     return;
                 }
 
@@ -71,37 +72,14 @@ public class QueueCommand extends PlayCommand {
 
                 TrackQueue.add(guildId, trackContext);
 
-                queue(client, link, guildId);
+                VoiceHelper.queue(client, link, guildId);
 
-                event.replyEmbeds(VoiceHelper.wrapTrackEmbed(firstTrack, event.getMember(), "Добавлен в очередь"))
+                event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(firstTrack, event.getMember(), "Добавлен в очередь"))
                         .queue();
             } else if (item instanceof NoMatches) {
-                event.reply("Ничего не найдено по вашему запросу!").queue();
+                event.getHook().sendMessage("Ничего не найдено по вашему запросу!").queue();
             } else if (item instanceof LoadFailed fail) {
-                event.reply("ЕБАТЬ НЕ ПОЛУЧИЛОСЬ ЗАГРУЗИТЬ АУДИО! Ашибка: " + fail.getException().getMessage()).queue();
-            }
-        });
-    }
-
-
-    private void queue(LavalinkClient client, Link link, Long guildId) {
-        link.getPlayer().subscribe((player) -> {
-
-            System.out.println(player.getState() + " " + player.getTrack());
-            boolean isStopped = !player.getState().getConnected() || player.getTrack() == null
-                    || player.getPosition() >= player.getTrack().getInfo().getLength();
-
-            if (isStopped) {
-                try {
-                    System.out.println("START QUEUE");
-                    TrackQueue.skip(client, guildId);
-                } catch (NoTracksInQueueException e) {
-                    // Такое может произойти в очень редких случаях
-                    // с учётом того что перед тем как запустить queue,
-                    // мы добавляем трек в TrackQueue
-                    // В случае если это все-таки произошло - удалите system32,
-                    // а если вы на linux или macos, то напишите rm -rf /. И проблема исчезнет
-                }
+                event.getHook().sendMessage("ЕБАТЬ НЕ ПОЛУЧИЛОСЬ ЗАГРУЗИТЬ АУДИО! Ашибка: " + fail.getException().getMessage()).queue();
             }
         });
     }

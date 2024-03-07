@@ -6,11 +6,11 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.serje3.meta.abs.Button;
 import org.serje3.services.MusicService;
 
-public class PauseButton extends Button {
+public class PausePlayButton extends Button {
     private final MusicService musicService = new MusicService();
     @Override
     public final String getComponentId() {
-        return "pause";
+        return "pause-play";
     }
 
     @Override
@@ -20,7 +20,7 @@ public class PauseButton extends Button {
 
     @Override
     public Emoji getLabelEmoji() {
-        return Emoji.fromFormatted("⏸\uFE0F");
+        return Emoji.fromFormatted("▶\uFE0F");
     }
 
     @Override
@@ -31,7 +31,7 @@ public class PauseButton extends Button {
     @Override
     public void handle(ButtonInteractionEvent event, LavalinkClient client) {
         musicService.pauseMusic(event, client).subscribe(player -> {
-            event.editButton(new PausePlayButton().asJDAButton()).queue();
+            event.editButton(new PauseButton().asJDAButton()).queue();
         });
     }
 }

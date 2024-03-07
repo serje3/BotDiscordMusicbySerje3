@@ -4,12 +4,15 @@ import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.protocol.Track;
 import org.serje3.domain.TrackContext;
+import org.serje3.utils.exceptions.NoTrackIsPlayingNow;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TrackQueue {
-    private static final HashMap<Long, Deque<TrackContext>> tracksQueue = new HashMap<>();
+    private static final ConcurrentHashMap<Long, Deque<TrackContext>> tracksQueue = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Long, TrackContext> tracksNow = new ConcurrentHashMap<>();
 
     private static void init(Long guildId) {
         Set<Long> keySet = tracksQueue.keySet();
@@ -30,18 +33,52 @@ public class TrackQueue {
         tracksQueue.get(guildId).addAll(tracks);
     }
 
-    public static void skip(LavalinkClient client, Long guildId) throws NoTracksInQueueException {
+    public static TrackContext skip(LavalinkClient client, Long guildId, boolean emitByEvent) throws NoTracksInQueueException {
+        // return: next track
         init(guildId);
-
-        TrackContext trackContext = TrackQueue.pop(guildId);
+        TrackContext trackNow = peekNow(guildId);
+        TrackContext trackContext;
+        if (emitByEvent && trackNow != null && trackNow.getRepeat()){
+            trackContext = trackNow;
+        } else {
+            trackContext = TrackQueue.pop(guildId);
+        }
+        System.out.println(trackNow + " " + trackContext);
         if (trackContext == null) {
+            tracksNow.computeIfPresent(guildId, (key, val) -> null);
             throw new NoTracksInQueueException();
         }
         Track track = trackContext.getTrack();
-        System.out.println("BLYAT   "  + TrackQueue.tracksQueue.get(guildId));
+        System.out.println("BLYAT   " + TrackQueue.tracksQueue.get(guildId));
         Link link = client.getLink(guildId);
         System.out.println("Next track is " + track.getInfo().getTitle() + " in guild " + guildId);
         VoiceHelper.play(link, track, 35);
+        tracksNow.put(guildId, trackContext);
+        return trackContext;
+    }
+
+    public static TrackContext repeat(Long guildId, Boolean repeat){
+        return tracksNow.computeIfPresent(guildId, (id, trackContext) -> {
+            trackContext.setRepeat(repeat);
+            return trackContext;
+        });
+    }
+
+    public static Boolean toggleRepeat(Long guildId) {
+        TrackContext trackContext = tracksNow.get(guildId);
+        if (trackContext == null) return false;
+        TrackContext updatedTrackContext = repeat(guildId, !trackContext.getRepeat());
+        return updatedTrackContext.getRepeat();
+    }
+
+    public static TrackContext peekNow(Long guildId){
+        init(guildId);
+        return tracksNow.get(guildId);
+    }
+
+    public static TrackContext getFirst(Long guildId) {
+        init(guildId);
+        return tracksQueue.get(guildId).peekFirst();
     }
 
     public static TrackContext pop(Long guildId) {

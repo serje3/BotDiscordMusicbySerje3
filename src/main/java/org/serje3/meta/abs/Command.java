@@ -4,6 +4,7 @@ import dev.arbjerg.lavalink.client.LavalinkClient;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import org.serje3.utils.exceptions.NoTrackIsPlayingNow;
 
 public abstract class Command {
     public abstract String getName();

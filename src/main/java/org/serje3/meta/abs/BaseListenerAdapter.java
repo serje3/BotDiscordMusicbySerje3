@@ -39,11 +39,11 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        System.out.println(getLogPrefix() + "Command Name: " + event.getName());
 
         String commandName = event.getName();
         Command command = this.commands.get(commandName);
         if (command != null) {
+            System.out.println(getLogPrefix() + "Command Name: " + event.getName());
             eventRestHandler.handleSlashEvent(event);
             command.execute(event, client);
         }
@@ -51,9 +51,9 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
 
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
-        System.out.println(getLogPrefix() + "Button interaction: " + event.getComponentId());
         Button button = this.buttons.get(event.getComponentId());
         if (button != null) {
+            System.out.println(getLogPrefix() + "Button interaction: " + event.getComponentId());
             button.handle(event, client);
         }
     }

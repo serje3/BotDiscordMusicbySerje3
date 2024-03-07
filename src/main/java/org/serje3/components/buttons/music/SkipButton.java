@@ -1,6 +1,7 @@
 package org.serje3.components.buttons.music;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.serje3.meta.abs.Button;
 import org.serje3.services.MusicService;
@@ -15,12 +16,17 @@ public class SkipButton extends Button {
 
     @Override
     public String getLabel() {
-        return "Пропустить";
+        return null;
+    }
+
+    @Override
+    public Emoji getLabelEmoji() {
+        return Emoji.fromFormatted("⏭\uFE0F");
     }
 
     @Override
     public ButtonType getButtonType() {
-        return ButtonType.PRIMARY;
+        return ButtonType.SECONDARY;
     }
 
     @Override

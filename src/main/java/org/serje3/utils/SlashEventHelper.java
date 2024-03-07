@@ -10,6 +10,7 @@ public class SlashEventHelper {
                 .track(track)
                 .member(event.getMember())
                 .textChannel(event.getChannel().asTextChannel())
+                .repeat(false)
                 .build();
     }
 }

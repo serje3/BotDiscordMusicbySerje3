@@ -1,17 +1,26 @@
 package org.serje3.services;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
+import dev.arbjerg.lavalink.client.LavalinkPlayer;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.protocol.Track;
 import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.serje3.components.buttons.music.PauseButton;
+import org.serje3.components.buttons.music.PausePlayButton;
+import org.serje3.components.buttons.music.RepeatButton;
 import org.serje3.components.buttons.music.SkipButton;
+import org.serje3.domain.TrackContext;
 import org.serje3.meta.enums.PlaySourceType;
+import org.serje3.utils.TrackQueue;
 import org.serje3.utils.VoiceHelper;
+import org.serje3.utils.exceptions.NoTrackIsPlayingNow;
+import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 public class MusicService {
@@ -25,79 +34,47 @@ public class MusicService {
                 });
     }
 
-    public void pauseMusic(ButtonInteractionEvent event, LavalinkClient client){
-        client.getLink(event.getGuild().getIdLong())
+    public Mono<LavalinkPlayer> pauseMusic(ButtonInteractionEvent event, LavalinkClient client){
+        return client.getLink(event.getGuild().getIdLong())
                 .getPlayer()
-                .flatMap((player) -> player.setPaused(!player.getPaused()))
-                .subscribe((player) -> {
-                    event.reply("Плеер " + (player.getPaused() ? "на паузе" : "возобновлён") + "!").queue();
-                });
+                .flatMap((player) -> player.setPaused(!player.getPaused()));
     }
 
 
-    public void whatsPlayingNow(SlashCommandInteractionEvent event, LavalinkClient client) {
-        client.getLink(event.getGuild().getIdLong()).getPlayer().subscribe(player -> {
+    public MessageEmbed whatsPlayingNow(Member member, LavalinkPlayer player) throws NoTrackIsPlayingNow {
             Track track = player.getTrack();
             if (track == null ||  player.getPosition() >= track.getInfo().getLength()) {
-                event.reply("Никаких треков сейчас не играет").queue();
-                return;
+                throw new NoTrackIsPlayingNow();
             };
-            event.replyEmbeds(VoiceHelper.wrapTrackEmbed(track, event.getMember(), ""))
-                    .addActionRow(
-                            new PauseButton().asJDAButton(),
-                            new SkipButton().asJDAButton(),
-                            Button.link(track.getInfo().getUri(), "Ссылка на трек")
-                    ).queue();
-        });
+            return VoiceHelper.wrapTrackEmbed(track, member, "");
     }
 
     public void skipTrack(SlashCommandInteractionEvent event, LavalinkClient client) {
+        long guildId = event.getGuild().getIdLong();
         Link link = client.getLink(event.getGuild().getIdLong());
+        TrackQueue.repeat(guildId, false);
         link.getPlayer().subscribe(player -> {
-            if (player.getTrack() == null || !player.getState().getConnected()) {
-                event.reply("Никаких треков сейчас не играет").queue();
-                return;
-            }
-            System.out.println("SKIPPING " + player.getTrack().getInfo().getTitle());
-            System.out.println("isStream " + player.getTrack().getInfo().isStream());
-            System.out.println("isSeekable " + player.getTrack().getInfo().isSeekable());
-
-
-            link.createOrUpdatePlayer().setPosition(player.getTrack().getInfo().getLength())
-                    .subscribe(d -> {
-                        System.out.println("succ& " + d);
-                    });
-
-            if (player.getTrack().getInfo().isStream()) {
-                event.reply("Стрим выключен").queue();
-            } else {
-                event.reply("Трек пропущен").queue();
+            try {
+                event.reply(skipTrack(event.getMember(), link, player)).queue();
+            } catch (NoTrackIsPlayingNow e) {
+                event.reply(e.getMessage()).queue();
             }
         });
     }
 
     public void skipTrack(ButtonInteractionEvent event, LavalinkClient client) {
-        Link link = client.getLink(event.getGuild().getIdLong());
+        event.deferReply().queue();
+        long guildId = event.getGuild().getIdLong();
+        Link link = client.getLink(guildId);
+        TrackQueue.repeat(guildId, false);
         link.getPlayer().subscribe(player -> {
-            if (player.getTrack() == null || !player.getState().getConnected()) {
-                event.reply("Никаких треков сейчас не играет").queue();
-                return;
+            try {
+                event.getHook().sendMessage(skipTrack(event.getMember(), link, player)).queue();
+            } catch (NoTrackIsPlayingNow e) {
+                event.getHook().sendMessage(e.getMessage()).queue();
             }
-            System.out.println("SKIPPING " + player.getTrack().getInfo().getTitle());
-            System.out.println("isStream " + player.getTrack().getInfo().isStream());
-            System.out.println("isSeekable " + player.getTrack().getInfo().isSeekable());
-
-
-            link.createOrUpdatePlayer().setPosition(player.getTrack().getInfo().getLength())
-                    .subscribe(d -> {
-                        System.out.println("succ& " + d);
-                    });
-
-            if (player.getTrack().getInfo().isStream()) {
-                event.reply("Стрим выключен").queue();
-            } else {
-                event.reply("Трек пропущен").queue();
-            }
+        }, (e) -> {
+            event.getHook().sendMessage("Что-то пошло не по плану (а возможно и по плану)").queue();
         });
     }
 
@@ -115,5 +92,42 @@ public class MusicService {
             prefix = "";
         }
         return prefix;
+    }
+
+
+    private String skipTrack(Member member, Link link, LavalinkPlayer player) throws NoTrackIsPlayingNow {
+            if (player.getTrack() == null || !player.getState().getConnected()) {
+                throw new NoTrackIsPlayingNow();
+            }
+
+            System.out.println("SKIPPING " + player.getTrack().getInfo().getTitle());
+            System.out.println("isStream " + player.getTrack().getInfo().isStream());
+            System.out.println("isSeekable " + player.getTrack().getInfo().isSeekable());
+
+            link.createOrUpdatePlayer().setPosition(player.getTrack().getInfo().getLength())
+                    .subscribe(d -> {
+                        System.out.println("succ& " + d);
+                    });
+            String mention = (member != null ? member.getAsMention() : "Анон");
+            if (player.getTrack().getInfo().isStream()) {
+                return "Стрим выключен, " + mention;
+            } else {
+                return "Трек пропущен, " + mention;
+            }
+    }
+
+    public void whatsPlayingNowWithoutInteraction(TextChannel textChannel, TrackContext track) {
+            try {
+                if (track == null) throw new NoTrackIsPlayingNow();
+                textChannel.sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track.getTrack(), track.getMember(), "Далее: "))
+                        .addActionRow(
+                                new RepeatButton().asJDAButton(),
+                                new PauseButton().asJDAButton(),
+                                new SkipButton().asJDAButton(),
+                                Button.link(track.getTrack().getInfo().getUri(), "Ссылка на трек")
+                        ).queue();
+            } catch (NoTrackIsPlayingNow e) {
+                // ниче не делаем
+            }
     }
 }

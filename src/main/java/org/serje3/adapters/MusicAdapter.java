@@ -4,23 +4,30 @@ import dev.arbjerg.lavalink.client.*;
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
 import dev.arbjerg.lavalink.protocol.v4.Message;
+import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import org.serje3.domain.TrackContext;
 import org.serje3.meta.abs.AdapterContext;
 import org.serje3.meta.abs.BaseListenerAdapter;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.decorators.MusicCommandDecorator;
+import org.serje3.services.MusicService;
+import org.serje3.utils.VoiceHelper;
 import org.serje3.utils.commands.MusicAdapterContext;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.serje3.BotApplication.Bot;
 
 public class MusicAdapter extends BaseListenerAdapter {
+    private final MusicService musicService;
 
     public MusicAdapter(LavalinkClient client) {
         super();
@@ -30,6 +37,7 @@ public class MusicAdapter extends BaseListenerAdapter {
         this.registerLavalinkListeners();
 
         this.setClient(client);
+        this.musicService = new MusicService();
     }
 
     @Override
@@ -69,7 +77,8 @@ public class MusicAdapter extends BaseListenerAdapter {
                     userById.openPrivateChannel().queue((channel) -> channel.sendMessage("Трек " + data.getTrack().getInfo().getTitle() + " закончился с ошибкой").queue());
                 }
                 try {
-                    TrackQueue.skip(client, guildId);
+                    TrackContext newTrack = TrackQueue.skip(client, guildId, true);
+                    onNextTrack(newTrack);
                 } catch (NoTracksInQueueException e) {
                     //pass
 
@@ -100,5 +109,28 @@ public class MusicAdapter extends BaseListenerAdapter {
                     event.getPlayers()
             );
         });
+    }
+
+    private void onNextTrack(TrackContext newTrack) {
+        TextChannel textChannel = newTrack.getTextChannel();
+        System.out.println("TEXTT " + textChannel);
+        if (textChannel == null) return;
+        MessageHistory history = textChannel.getHistoryAround(textChannel.getLatestMessageId(), 10).submit().join();
+        List<net.dv8tion.jda.api.entities.Message> retrievedHistory = history.getRetrievedHistory();
+        List<net.dv8tion.jda.api.entities.Message> messageToDelete = new ArrayList<>();
+        for (net.dv8tion.jda.api.entities.Message message: retrievedHistory){
+            net.dv8tion.jda.api.entities.Message.Interaction interaction = message.getInteraction();
+            if (checkInteractionValidForDelete(interaction)){
+                messageToDelete.add(message);
+            }
+        }
+        if (!messageToDelete.isEmpty()) textChannel.deleteMessages(messageToDelete).queue();
+        musicService.whatsPlayingNowWithoutInteraction(textChannel, newTrack);
+    }
+
+    private boolean checkInteractionValidForDelete(net.dv8tion.jda.api.entities.Message.Interaction interaction) {
+        if (interaction == null) return false;
+        String name = interaction.getName();
+        return name.equals("now") || name.startsWith("play") || name.startsWith("radio");
     }
 }

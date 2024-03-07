@@ -1,5 +1,6 @@
 package org.serje3.components.autocomplete.music;
 
+import com.google.gson.Gson;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.protocol.LoadFailed;
 import dev.arbjerg.lavalink.client.protocol.SearchResult;
@@ -58,16 +59,13 @@ public class SearchAutocomplete extends AutoComplete {
                                             if (title.length() > 100) title = title.substring(0, 100);
                                             return new Command.Choice(title, url != null ? url : title);
                                         }).toList();
+                                System.out.println(options);
                                 event.replyChoices(options).queue();
                             } else if (item instanceof LoadFailed loadFailed) {
                                 event.replyChoices(Collections.emptyList()).queue();
                             }
                         }
                 );
-//        List<Command.Choice> options = Stream.of(words)
-//                .filter(word -> word.startsWith(event.getFocusedOption().getValue())) // only display words that start with the user's current input
-//                .map(word -> new Command.Choice(word, word)) // map the words to choices
-//                .collect(Collectors.toList());
-//        event.replyChoices(options).queue();
+
     }
 }
