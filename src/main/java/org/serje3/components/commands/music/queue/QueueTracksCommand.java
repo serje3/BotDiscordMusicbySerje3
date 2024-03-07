@@ -28,20 +28,16 @@ public class QueueTracksCommand extends Command {
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
         Long guildId = event.getGuild().getIdLong();
         List<TrackContext> trackContextList = TrackQueue.listQueue(guildId);
+        TrackContext now = TrackQueue.peekNow(guildId);
         List<Track> tracks = trackContextList.stream().map(TrackContext::getTrack).collect(Collectors.toList());
         System.out.println(tracks);
-        Link link = client.getLink(event.getGuild().getIdLong());
-        link.getPlayer().subscribe(lavalinkPlayer -> {
-            System.out.println("CURRENT TRACK " + lavalinkPlayer.getTrack());
-            System.out.println("CURRENT PLAYER " + lavalinkPlayer.getPosition());
-        });
+
         AtomicReference<Integer> count = new AtomicReference<>(0);
         String tracksList = tracks.stream().map((t) -> {
             count.updateAndGet(v -> v + 1);
             return count + " " + t.getInfo().getTitle();
         }).collect(Collectors.joining("\n"));
-        event.reply(
-                "Сейчас в очереди: \n" + ((tracksList.length() != 0) ? tracksList : "Пусто")
-                ).queue();
+        String content = "Играет сейчас: " + (now != null ? now.getTrack().getInfo() : "Ничего") + "\nСейчас в очереди: \n" + ((!tracksList.isEmpty()) ? tracksList : "Пусто");
+        event.reply(content).queue();
     }
 }
