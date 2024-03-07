@@ -31,7 +31,7 @@ public class PausePlayButton extends Button {
     @Override
     public void handle(ButtonInteractionEvent event, LavalinkClient client) {
         musicService.pauseMusic(event.getGuild().getIdLong(), client).subscribe(player -> {
-            event.editButton(new PauseButton().asJDAButton()).queue();
+            event.editButton(player.getPaused() ? new PausePlayButton().asJDAButton() : new PauseButton().asJDAButton()).queue();
         });
     }
 }
