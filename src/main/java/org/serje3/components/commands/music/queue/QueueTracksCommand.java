@@ -37,7 +37,7 @@ public class QueueTracksCommand extends Command {
             count.updateAndGet(v -> v + 1);
             return count + " " + t.getInfo().getTitle();
         }).collect(Collectors.joining("\n"));
-        String content = "Играет сейчас: " + (now != null ? now.getTrack().getInfo() : "Ничего") + "\nСейчас в очереди: \n" + ((!tracksList.isEmpty()) ? tracksList : "Пусто");
+        String content = "Играет сейчас: " + (now != null ? now.getTrack().getInfo().getTitle() : "Ничего") + "\nСейчас в очереди: \n" + ((!tracksList.isEmpty()) ? tracksList : "Пусто");
         event.reply(content).queue();
     }
 }
