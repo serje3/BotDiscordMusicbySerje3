@@ -10,6 +10,7 @@ plugins:
       - "ytsearch:%QUERY%" # Will be used if track has no ISRC or no track could be found for the ISRC
       - "ymsearch:%QUERY%"
       - "spsearch:%QUERY%"
+      - "ytmsearch:%QUERY%"
       #  you can add multiple other fallback sources here
     sources:
       spotify: true # Enable Spotify source
@@ -133,4 +134,3 @@ logging:
     rollingpolicy:
       max-file-size: 1GB
       max-history: 30
-debug: true
