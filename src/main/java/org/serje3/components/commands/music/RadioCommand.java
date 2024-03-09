@@ -37,6 +37,7 @@ public class RadioCommand extends Command {
     @Override
     @JoinVoiceChannel
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+        event.deferReply().queue();
         RadioType radioType = RadioType.valueOf(event.getSubcommandName().toUpperCase());
 
         final String identifier = chooseIdentifier(radioType);
