@@ -1,21 +1,21 @@
 package org.serje3.meta.enums;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 public enum PlaySourceType {
-    YOUTUBE("youtube"),
-    SOUNDCLOUD("soundcloud"),
-    YANDEXMUSIC("yandexmusic"),
-    SPOTIFY("spotify"),
-    TEXT_TO_SPEECH("tts");
+    YOUTUBE("youtube", "ytsearch:"),
+    YOUTUBEMUSIC("youtubemusic", "ytmsearch:"),
+    SOUNDCLOUD("soundcloud", "scsearch:"),
+    YANDEXMUSIC("yandexmusic", "ymsearch:"),
+    SPOTIFY("spotify", "spsearch:"),
+    TEXT_TO_SPEECH("tts", null);
 
 
     private final String title;
-
-    PlaySourceType(String title) {
-        this.title = title;
-    }
+    private final String searchMask;
 
     @Override
     public String toString() {

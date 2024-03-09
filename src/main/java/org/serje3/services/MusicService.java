@@ -83,13 +83,7 @@ public class MusicService {
 
     public String getSearchPrefix(String subCommandName, String identifier){
         final PlaySourceType playType = PlaySourceType.valueOf(subCommandName.toUpperCase());
-        String prefix = switch (playType) {
-            case YOUTUBE -> "ytsearch:";
-            case SOUNDCLOUD -> "scsearch:";
-            case YANDEXMUSIC -> "ymsearch:";
-            case SPOTIFY -> "spsearch:";
-            default -> "";
-        };
+        String prefix = playType.getSearchMask();
 
         if (identifier.startsWith("https://")) {
             prefix = "";

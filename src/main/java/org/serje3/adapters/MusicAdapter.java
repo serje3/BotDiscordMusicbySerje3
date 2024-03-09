@@ -6,15 +6,15 @@ import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvi
 import dev.arbjerg.lavalink.protocol.v4.Message;
 import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.serje3.domain.TrackContext;
 import org.serje3.meta.abs.AdapterContext;
 import org.serje3.meta.abs.BaseListenerAdapter;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.decorators.MusicCommandDecorator;
+import org.serje3.rest.domain.NodeRef;
+import org.serje3.rest.handlers.NodeRestHandler;
 import org.serje3.services.MusicService;
-import org.serje3.utils.VoiceHelper;
 import org.serje3.utils.commands.MusicAdapterContext;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
@@ -22,15 +22,16 @@ import org.serje3.utils.exceptions.NoTracksInQueueException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import static org.serje3.BotApplication.Bot;
 
 public class MusicAdapter extends BaseListenerAdapter {
     private final MusicService musicService;
+    private final NodeRestHandler nodeRestHandler;
 
     public MusicAdapter(LavalinkClient client) {
         super();
+        this.nodeRestHandler = new NodeRestHandler();
         this.client = client;
         this.client.getLoadBalancer().addPenaltyProvider(new VoiceRegionPenaltyProvider());
         this.registerLavalinkNodes();
@@ -52,14 +53,21 @@ public class MusicAdapter extends BaseListenerAdapter {
     }
 
     private void registerLavalinkNodes() {
-        List.of(
-                client.addNode(
-                        "Testnode",
-                        URI.create("ws://localhost:2333"),
-                        "testing",
-                        RegionGroup.EUROPE
-                )
-        ).forEach((node) -> {
+        List<NodeRef> nodes;
+        try{
+            nodes = this.nodeRestHandler.getNodes();
+            System.out.println(nodes);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+            throw new RuntimeException("Error with nodes receive: " + e.getMessage());
+        }
+
+        nodes.stream().map(node -> client.addNode(
+                node.getUrl(),
+                URI.create(node.getUrl()),
+                node.getPassword(),
+                RegionGroup.EUROPE
+        )).toList().forEach((node) -> {
             node.on(TrackStartEvent.class).subscribe((data) -> {
                 final LavalinkNode node1 = data.getNode();
                 final var event = data;

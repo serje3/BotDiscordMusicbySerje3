@@ -10,6 +10,8 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import org.serje3.domain.TrackContext;
 import org.serje3.meta.abs.AutoComplete;
 import org.serje3.meta.enums.PlaySourceType;
+import org.serje3.rest.domain.Tracks;
+import org.serje3.rest.handlers.YoutubeRestHandler;
 import org.serje3.services.MusicService;
 import org.serje3.utils.SlashEventHelper;
 import org.serje3.utils.TrackQueue;
@@ -17,11 +19,13 @@ import org.serje3.utils.VoiceHelper;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SearchAutocomplete extends AutoComplete {
     private final MusicService musicService = new MusicService();
+    private final YoutubeRestHandler youtubeRestHandler = new YoutubeRestHandler();
 
     @Override
     public String getName() {
@@ -36,11 +40,22 @@ public class SearchAutocomplete extends AutoComplete {
         String identifier = event.getFocusedOption().getValue();
         String subCommand = event.getSubcommandName();
         PlaySourceType playSourceType = PlaySourceType.valueOf(subCommand.toUpperCase());
-        String searchPrefix = musicService.getSearchPrefix(subCommand, identifier);
-        if (client == null || identifier.isEmpty() || identifier.startsWith("https://")) {
+        if (client == null || identifier.isEmpty() || identifier.startsWith("https://") || playSourceType.equals(PlaySourceType.TEXT_TO_SPEECH)) {
             event.replyChoices(Collections.emptyList()).queue();
             return;
         }
+        if (playSourceType.equals(PlaySourceType.YOUTUBE)){
+            try {
+                System.out.println("CACHED YOUTUBE SEARCH");
+                cachedYoutubeAutocomplete(identifier, event);
+                return;
+            } catch (Exception e){
+                // then pass & try default search youtube method
+                System.out.println(e.getMessage());
+            }
+        }
+        System.out.println("WTF???????");
+        String searchPrefix = musicService.getSearchPrefix(subCommand, identifier);
         client.getLink(event.getGuild().getIdLong())
                 .loadItem(searchPrefix + identifier)
                 .subscribe(item -> {
@@ -48,7 +63,7 @@ public class SearchAutocomplete extends AutoComplete {
                                 final List<Track> tracks = searchResult.getTracks();
 
                                 if (tracks.isEmpty()) {
-                                    event.replyChoices(Collections.emptyList()).queue();
+                                    emptyChoices(event);
                                     return;
                                 }
 
@@ -67,5 +82,40 @@ public class SearchAutocomplete extends AutoComplete {
                         }
                 );
 
+    }
+
+    private void cachedYoutubeAutocomplete(String identifier, CommandAutoCompleteInteractionEvent event) {
+        System.out.println("WTF NEXT IS YOUTUBE RESPONSE");
+        Tracks tracks;
+        try{
+            tracks = youtubeRestHandler.searchCached(identifier);
+        } catch (ExecutionException | InterruptedException e){
+            System.out.println(e.getMessage());
+            emptyChoices(event);
+            return;
+        }
+        System.out.println("NEXT IS YOUTUBE RESPONSE");
+        System.out.println(tracks + " " + tracks.getItems());
+        if (tracks.getItems().isEmpty()) {
+            emptyChoices(event);
+            return;
+        }
+
+        List<Command.Choice> options = tracks.getItems().stream()
+                .map(track -> {
+                    String url = track.getYoutubeURL();
+                    String title = track.title();
+                    return new Command.Choice(title, url != null ? url : title);
+                }).toList().subList(0, 25);
+        System.out.println(options);
+        event.replyChoices(options).queue((s) -> {
+            System.out.println("success");
+        }, (e) -> {
+            System.out.println("Error");
+        });
+    }
+
+    private void emptyChoices(CommandAutoCompleteInteractionEvent event){
+        event.replyChoices(Collections.emptyList()).queue();
     }
 }

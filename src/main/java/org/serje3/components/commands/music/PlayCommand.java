@@ -21,7 +21,7 @@ import org.serje3.services.MusicService;
 import java.util.List;
 
 public class PlayCommand extends Command {
-    private final MusicService musicService = new MusicService();
+    protected final MusicService musicService = new MusicService();
 
     @Override
     public String getName() {
@@ -66,6 +66,14 @@ public class PlayCommand extends Command {
                                         OptionType.STRING,
                                         "текст",
                                         "Строка поиска Spotify",
+                                        true,
+                                        true
+                                ),
+                        new SubcommandData(PlaySourceType.YOUTUBEMUSIC.name().toLowerCase(), "Поиск из Youtube Music")
+                                .addOption(
+                                        OptionType.STRING,
+                                        "текст",
+                                        "Строка поиска Youtube Music",
                                         true,
                                         true
                                 )
