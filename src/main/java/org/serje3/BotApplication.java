@@ -54,8 +54,6 @@ public class BotApplication {
                     }
                 })
                 .queue();
-
-
         Bot.addEventListener(logAdapter);
         Bot.addEventListener(musicAdapter);
         Bot.addEventListener(defaultAdapter);

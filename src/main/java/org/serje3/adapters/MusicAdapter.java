@@ -18,6 +18,8 @@ import org.serje3.services.MusicService;
 import org.serje3.utils.commands.MusicAdapterContext;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -28,6 +30,8 @@ import static org.serje3.BotApplication.Bot;
 public class MusicAdapter extends BaseListenerAdapter {
     private final MusicService musicService;
     private final NodeRestHandler nodeRestHandler;
+    private final Logger logger = LoggerFactory.getLogger(MusicAdapter.class);
+
 
     public MusicAdapter(LavalinkClient client) {
         super();
@@ -53,13 +57,17 @@ public class MusicAdapter extends BaseListenerAdapter {
     }
 
     private void registerLavalinkNodes() {
-        List<NodeRef> nodes;
+        List<NodeRef> nodes = null;
         try{
             nodes = this.nodeRestHandler.getNodes();
             System.out.println(nodes);
         }catch (Exception e){
             System.out.println(e.getMessage());
-            throw new RuntimeException("Error with nodes receive: " + e.getMessage());
+//            throw new RuntimeException("Error with nodes receive: " + e.getMessage());
+        }
+
+        if (nodes == null || nodes.isEmpty()){
+            nodes = List.of(new NodeRef(0, "ws://localhost:2333", "testing", "EUROPE"));
         }
 
         nodes.stream().map(node -> client.addNode(
@@ -89,7 +97,7 @@ public class MusicAdapter extends BaseListenerAdapter {
                     onNextTrack(newTrack);
                 } catch (NoTracksInQueueException e) {
                     //pass
-
+                    logger.warn("No Tracks in Queue in guild {}", guildId);
                 }
             });
         });
@@ -121,7 +129,6 @@ public class MusicAdapter extends BaseListenerAdapter {
 
     private void onNextTrack(TrackContext newTrack) {
         TextChannel textChannel = newTrack.getTextChannel();
-        System.out.println("TEXTT " + textChannel);
         if (textChannel == null) return;
         MessageHistory history = textChannel.getHistoryAround(textChannel.getLatestMessageId(), 10).submit().join();
         List<net.dv8tion.jda.api.entities.Message> retrievedHistory = history.getRetrievedHistory();

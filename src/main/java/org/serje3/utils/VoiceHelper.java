@@ -3,10 +3,7 @@ package org.serje3.utils;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.protocol.Track;
-import net.dv8tion.jda.api.entities.EmbedType;
-import net.dv8tion.jda.api.entities.GuildVoiceState;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 
@@ -17,8 +14,9 @@ public class VoiceHelper {
 
     public static void joinHelper(SlashCommandInteractionEvent event) {
         final Member member = event.getMember();
+        final Guild guild = event.getGuild();
         final GuildVoiceState memberVoiceState = member.getVoiceState();
-
+        guild.getAudioManager().setSelfMuted(true);
         if (memberVoiceState.inAudioChannel()) {
             event.getJDA().getDirectAudioController().connect(memberVoiceState.getChannel());
         }
@@ -31,7 +29,6 @@ public class VoiceHelper {
                 .setNoReplace(false)
                 .setEndTime(track.getInfo().getLength())
                 .subscribe((ignored) -> {
-                    System.out.println("player - " + ignored);
                 });
     }
 

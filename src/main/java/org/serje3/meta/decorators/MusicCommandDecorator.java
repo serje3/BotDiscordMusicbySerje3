@@ -7,10 +7,14 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.annotations.JoinVoiceChannel;
+import org.serje3.services.MusicService;
 import org.serje3.utils.VoiceHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MusicCommandDecorator extends Command {
     private final Command command;
+    private final Logger logger = LoggerFactory.getLogger(MusicCommandDecorator.class);
 
     public MusicCommandDecorator(Command command) {
         this.command = command;
@@ -44,9 +48,9 @@ public class MusicCommandDecorator extends Command {
             JoinVoiceChannel joinAnnotation = commandClass.getDeclaredMethod(
                             "execute", SlashCommandInteractionEvent.class, LavalinkClient.class)
                     .getAnnotation(JoinVoiceChannel.class);
-            System.out.println(joinAnnotation);
             if (joinAnnotation != null) {
                 this.annotationJoin(event, client);
+                logger.info("Bot joined in voice channel in {} guild", event.getGuild().getId());
             }
         } catch (NoSuchMethodException e) {
             System.out.println("No execute method");
@@ -59,7 +63,6 @@ public class MusicCommandDecorator extends Command {
 
     private void annotationJoin(SlashCommandInteractionEvent event, LavalinkClient client) {
         final Guild guild = event.getGuild();
-        System.out.println("ANNOTATION JOIN");
         // We are already connected, go ahead and play
         if (!guild.getSelfMember().getVoiceState().inAudioChannel()) {
             // Connect to VC first

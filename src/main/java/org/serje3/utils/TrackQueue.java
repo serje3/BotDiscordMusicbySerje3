@@ -43,7 +43,7 @@ public class TrackQueue {
         } else {
             trackContext = TrackQueue.pop(guildId);
         }
-        System.out.println(trackNow + " " + trackContext);
+
         if (trackContext == null) {
             tracksNow.computeIfPresent(guildId, (key, val) -> null);
             throw new NoTracksInQueueException();
