@@ -13,10 +13,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import org.serje3.components.buttons.music.PauseButton;
-import org.serje3.components.buttons.music.PausePlayButton;
-import org.serje3.components.buttons.music.RepeatButton;
-import org.serje3.components.buttons.music.SkipButton;
+import org.serje3.components.buttons.music.*;
 import org.serje3.domain.TrackContext;
 import org.serje3.meta.enums.PlaySourceType;
 import org.serje3.utils.SlashEventHelper;
@@ -131,6 +128,7 @@ public class MusicService {
             if (track == null) throw new NoTrackIsPlayingNow();
             textChannel.sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track.getTrack(), track.getMember(), ""))
                     .addActionRow(
+                            new AddToQueueButton().asJDAButton(),
                             track.isRepeat() ? new RepeatButton.On().asJDAButton() : new RepeatButton().asJDAButton(),
                             track.isPaused() ? new PausePlayButton().asJDAButton() : new PauseButton().asJDAButton(),
                             new SkipButton().asJDAButton(),

@@ -51,6 +51,9 @@ public class QueueTracksCommand extends Command {
         });
 
         String tracksList = trackListBuilder.toString();
+        if (tracksList.length() > 850){
+            tracksList = tracksList.substring(0, 850) + "\n...[не могу вывести всё]...";
+        }
         if (!tracksList.isEmpty()) {
             embedBuilder.addField("Сейчас в очереди:", tracksList, false);
         } else {
