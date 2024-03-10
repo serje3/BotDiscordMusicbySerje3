@@ -76,7 +76,7 @@ public class VoiceHelper {
     public static void queue(LavalinkClient client, Link link, Long guildId) {
         link.getPlayer().subscribe((player) -> {
 
-            logger.info("Queue. Player state - {} {}", player.getState(), player.getTrack().getInfo().getTitle());
+            logger.info("Queue. Player state - {}", player.getState());
             boolean isStopped = !player.getState().getConnected() || player.getTrack() == null
                     || player.getPosition() >= player.getTrack().getInfo().getLength();
 
