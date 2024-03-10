@@ -16,7 +16,8 @@ public class VoiceHelper {
         final Member member = event.getMember();
         final Guild guild = event.getGuild();
         final GuildVoiceState memberVoiceState = member.getVoiceState();
-        guild.getAudioManager().setSelfMuted(true);
+
+        guild.getAudioManager().setSelfDeafened(true);
         if (memberVoiceState.inAudioChannel()) {
             event.getJDA().getDirectAudioController().connect(memberVoiceState.getChannel());
         }
