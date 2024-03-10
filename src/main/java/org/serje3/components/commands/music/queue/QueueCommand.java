@@ -33,6 +33,9 @@ public class QueueCommand extends PlayCommand {
         final Guild guild = event.getGuild();
         String subcommandName = event.getSubcommandName();
         String identifier = event.getOption("текст").getAsString();
+        if (identifier.length() > 100 && !identifier.startsWith("https://")){
+            identifier = identifier.substring(0, 100);
+        }
         final long guildId = guild.getIdLong();
         PlaySourceType type = PlaySourceType.valueOf(subcommandName.toUpperCase());
         String prefix = musicService.getSearchPrefix(subcommandName, identifier);
@@ -66,7 +69,6 @@ public class QueueCommand extends PlayCommand {
                      Long guildId, String identifier, Integer volume) {
         System.out.println("IDENTIFIER:" + identifier);
 
-        final Link link = client.getLink(guildId);
 
         VoiceHelper.getLink(client, guildId).loadItem(identifier)
                 .subscribe((item) -> {

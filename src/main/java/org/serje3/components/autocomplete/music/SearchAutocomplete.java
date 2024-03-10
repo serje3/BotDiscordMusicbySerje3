@@ -16,6 +16,8 @@ import org.serje3.services.MusicService;
 import org.serje3.utils.SlashEventHelper;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.VoiceHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.stream.Stream;
 public class SearchAutocomplete extends AutoComplete {
     private final MusicService musicService = new MusicService();
     private final YoutubeRestHandler youtubeRestHandler = new YoutubeRestHandler();
+    private final Logger logger = LoggerFactory.getLogger(SearchAutocomplete.class);
 
     @Override
     public String getName() {
@@ -34,10 +37,13 @@ public class SearchAutocomplete extends AutoComplete {
 
     @Override
     public void handle(CommandAutoCompleteInteractionEvent event, LavalinkClient client) {
-        System.out.println(event);
-        System.out.println(event.getSubcommandName());
-        System.out.println(event.getFocusedOption().getValue());
+        logger.info(event.toString());
+        logger.info(event.getSubcommandName());
+        logger.info(event.getFocusedOption().getValue());
         String identifier = event.getFocusedOption().getValue();
+        if (identifier.length() > 100){
+            identifier = identifier.substring(0, 100);
+        }
         String subCommand = event.getSubcommandName();
         PlaySourceType playSourceType = PlaySourceType.valueOf(subCommand.toUpperCase());
         if (client == null || identifier.isEmpty() || identifier.startsWith("https://") || playSourceType.equals(PlaySourceType.TEXT_TO_SPEECH)) {
@@ -46,15 +52,15 @@ public class SearchAutocomplete extends AutoComplete {
         }
         if (playSourceType.equals(PlaySourceType.YOUTUBE)){
             try {
-                System.out.println("CACHED YOUTUBE SEARCH");
+                logger.info("CACHED YOUTUBE SEARCH");
                 cachedYoutubeAutocomplete(identifier, event);
                 return;
             } catch (Exception e){
                 // then pass & try default search youtube method
-                System.out.println(e.getMessage());
+                logger.info(e.getMessage());
             }
         }
-        System.out.println("WTF???????");
+        logger.info("WTF???????");
         String searchPrefix = musicService.getSearchPrefix(subCommand, identifier);
         client.getLink(event.getGuild().getIdLong())
                 .loadItem(searchPrefix + identifier)
@@ -74,7 +80,7 @@ public class SearchAutocomplete extends AutoComplete {
                                             if (title.length() > 100) title = title.substring(0, 100);
                                             return new Command.Choice(title, url != null ? url : title);
                                         }).toList();
-                                System.out.println(options);
+                                logger.info(options.toString());
                                 event.replyChoices(options).queue();
                             } else if (item instanceof LoadFailed loadFailed) {
                                 event.replyChoices(Collections.emptyList()).queue();
@@ -85,18 +91,18 @@ public class SearchAutocomplete extends AutoComplete {
     }
 
     private void cachedYoutubeAutocomplete(String identifier, CommandAutoCompleteInteractionEvent event) {
-        System.out.println("WTF NEXT IS YOUTUBE RESPONSE");
+        logger.info("WTF NEXT IS YOUTUBE RESPONSE");
         Tracks tracks;
         try{
             tracks = youtubeRestHandler.searchCached(identifier);
         } catch (ExecutionException | InterruptedException e){
-            System.out.println(e.getMessage());
+            logger.info(e.getMessage());
             emptyChoices(event);
             return;
         }
-        System.out.println("NEXT IS YOUTUBE RESPONSE");
-        System.out.println(tracks + " " + tracks.getItems());
-        if (tracks.getItems().isEmpty()) {
+        logger.info("NEXT IS YOUTUBE RESPONSE");
+        logger.info("{} {}", tracks, tracks.getItems());
+        if (tracks.getItems() == null || tracks.getItems().isEmpty()) {
             emptyChoices(event);
             return;
         }
@@ -107,11 +113,11 @@ public class SearchAutocomplete extends AutoComplete {
                     String title = track.title();
                     return new Command.Choice(title, url != null ? url : title);
                 }).toList().subList(0, 25);
-        System.out.println(options);
+        logger.info(options.toString());
         event.replyChoices(options).queue((s) -> {
-            System.out.println("success");
+            logger.info("success");
         }, (e) -> {
-            System.out.println("Error");
+            logger.info("Error");
         });
     }
 
