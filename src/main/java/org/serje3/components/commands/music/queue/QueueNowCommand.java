@@ -4,10 +4,7 @@ import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import org.serje3.components.buttons.music.PauseButton;
-import org.serje3.components.buttons.music.PausePlayButton;
-import org.serje3.components.buttons.music.RepeatButton;
-import org.serje3.components.buttons.music.SkipButton;
+import org.serje3.components.buttons.music.*;
 import org.serje3.meta.abs.Command;
 import org.serje3.services.MusicService;
 import org.serje3.utils.exceptions.NoTrackIsPlayingNow;
@@ -35,6 +32,7 @@ public class QueueNowCommand extends Command {
                 Button playPauseBtn = player.getPaused() ? new PausePlayButton().asJDAButton() : new PauseButton().asJDAButton();
                 event.replyEmbeds(musicService.whatsPlayingNow(event.getMember(), player))
                         .addActionRow(
+                                new AddToQueueButton().asJDAButton(),
                                 new RepeatButton().asJDAButton(),
                                 playPauseBtn,
                                 new SkipButton().asJDAButton(),
