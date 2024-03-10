@@ -45,7 +45,7 @@ public class TrackQueue {
         }
 
         if (trackContext == null) {
-            tracksNow.computeIfPresent(guildId, (key, val) -> null);
+            clearNow(guildId);
             throw new NoTracksInQueueException();
         }
         Track track = trackContext.getTrack();
@@ -81,6 +81,10 @@ public class TrackQueue {
     public static TrackContext peekNow(Long guildId){
         init(guildId);
         return tracksNow.get(guildId);
+    }
+
+    public static void clearNow(Long guildId) {
+        tracksNow.computeIfPresent(guildId, (key, val) -> null);
     }
 
     public static TrackContext getFirst(Long guildId) {

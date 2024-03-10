@@ -2,15 +2,20 @@ package org.serje3.utils;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
+import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion;
 import dev.arbjerg.lavalink.client.protocol.Track;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
 public class VoiceHelper {
+    private static final Logger logger = LoggerFactory.getLogger(VoiceHelper.class);
+
 
     public static void joinHelper(SlashCommandInteractionEvent event) {
         final Member member = event.getMember();
@@ -71,13 +76,13 @@ public class VoiceHelper {
     public static void queue(LavalinkClient client, Link link, Long guildId) {
         link.getPlayer().subscribe((player) -> {
 
-            System.out.println(player.getState() + " " + player.getTrack());
+            logger.info("Queue. Player state - {} {}", player.getState(), player.getTrack().getInfo().getTitle());
             boolean isStopped = !player.getState().getConnected() || player.getTrack() == null
                     || player.getPosition() >= player.getTrack().getInfo().getLength();
 
             if (isStopped) {
                 try {
-                    System.out.println("START QUEUE");
+                    logger.info("START QUEUE");
                     TrackQueue.skip(client, guildId, false);
                 } catch (NoTracksInQueueException e) {
                     // Такое может произойти в очень редких случаях
@@ -88,5 +93,11 @@ public class VoiceHelper {
                 }
             }
         });
+    }
+
+
+    public static Link getLink(LavalinkClient client, Long guildId){
+        return client
+                .getLink(guildId);
     }
 }

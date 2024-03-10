@@ -7,6 +7,7 @@ import dev.arbjerg.lavalink.client.protocol.*;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import org.serje3.components.buttons.music.AddToQueueButton;
 import org.serje3.components.commands.music.PlayCommand;
 import org.serje3.domain.TrackContext;
 import org.serje3.meta.annotations.JoinVoiceChannel;
@@ -35,23 +36,23 @@ public class QueueCommand extends PlayCommand {
         final long guildId = guild.getIdLong();
         PlaySourceType type = PlaySourceType.valueOf(subcommandName.toUpperCase());
         String prefix = musicService.getSearchPrefix(subcommandName, identifier);
-        if (type == PlaySourceType.YOUTUBE && !identifier.startsWith("https://")){
+        if (type == PlaySourceType.YOUTUBE && !identifier.startsWith("https://")) {
             String url = trySearchCachedUrl(prefix, identifier);
             this.play(client, event, guildId, url);
             return;
         }
-        this.play(client, event, guildId,prefix + identifier);
+        this.play(client, event, guildId, prefix + identifier);
     }
 
     private String trySearchCachedUrl(String prefix, String identifier) {
         Tracks tracks;
-        try{
+        try {
             tracks = youtubeRestHandler.searchCached(identifier);
-        } catch (InterruptedException | ExecutionException e){
+        } catch (InterruptedException | ExecutionException e) {
             System.out.println(e);
             return prefix + identifier;
         }
-        if (tracks.getItems() == null || tracks.getItems().isEmpty()){
+        if (tracks.getItems() == null || tracks.getItems().isEmpty()) {
             return prefix + identifier;
         }
 
@@ -66,61 +67,52 @@ public class QueueCommand extends PlayCommand {
         System.out.println("IDENTIFIER:" + identifier);
 
         final Link link = client.getLink(guildId);
-        client
-                .getLoadBalancer()
-                .selectNode(VoiceRegion.RUSSIA)
-                .loadItem(identifier).subscribe((item) -> {
-            System.out.println(item);
-            if (item instanceof TrackLoaded trackLoaded) {
-                final Track track = trackLoaded.getTrack();
-                TrackQueue.add(guildId, SlashEventHelper.createTrackContextFromEvent(track, event));
 
-                System.out.println("Размер очереди - " + TrackQueue.size(guildId));
+        VoiceHelper.getLink(client, guildId).loadItem(identifier)
+                .subscribe((item) -> {
+                    System.out.println(item);
+                    if (item instanceof TrackLoaded trackLoaded) {
+                        final Track track = trackLoaded.getTrack();
 
-                VoiceHelper.queue(client, link, guildId);
-                event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
-                        .queue();
-            } else if (item instanceof PlaylistLoaded playlistLoaded) {
-                final List<Track> tracks = playlistLoaded.getTracks();
-                if (tracks.isEmpty()) {
-                    event.getHook().sendMessage("В этом плейлисте нет треков").queue();
-                    return;
-                } else if (tracks.size() >= 10000) {
-                    event.getHook().sendMessage("Этот плейлист слишком большой").queue();
-                    return;
-                }
+                        musicService.queue(track, guildId, event.getMember(), event.getChannel().asTextChannel(), client);
 
-                List<TrackContext> trackContextList = tracks.stream()
-                        .map(track -> SlashEventHelper.createTrackContextFromEvent(track, event)).toList();
+                        event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
+                                .addActionRow(new AddToQueueButton().asJDAButton())
+                                .queue();
+                    } else if (item instanceof PlaylistLoaded playlistLoaded) {
+                        final List<Track> tracks = playlistLoaded.getTracks();
+                        if (tracks.isEmpty()) {
+                            event.getHook().sendMessage("В этом плейлисте нет треков").queue();
+                            return;
+                        } else if (tracks.size() >= 10000) {
+                            event.getHook().sendMessage("Этот плейлист слишком большой").queue();
+                            return;
+                        }
+                        musicService.queue(tracks, guildId, event.getMember(), event.getChannel().asTextChannel(), client);
 
-                TrackQueue.addAll(guildId, trackContextList);
-                final int trackCount = tracks.size();
+                        final int trackCount = tracks.size();
+                        event.getHook().sendMessage("Этот плейлист имеет " + trackCount + " треков! Запускаю - " + tracks.get(0).getInfo().getTitle())
+                                .queue();
+                    } else if (item instanceof SearchResult searchResult) {
+                        final List<Track> tracks = searchResult.getTracks();
 
-                VoiceHelper.queue(client, link, guildId);
-                event.getHook().sendMessage("Этот плейлист имеет " + trackCount + " треков! Запускаю - " + tracks.get(0).getInfo().getTitle())
-                        .queue();
-            } else if (item instanceof SearchResult searchResult) {
-                final List<Track> tracks = searchResult.getTracks();
+                        if (tracks.isEmpty()) {
+                            event.getHook().sendMessage("Ни одного трека не найдено!").queue();
+                            return;
+                        }
 
-                if (tracks.isEmpty()) {
-                    event.getHook().sendMessage("Ни одного трека не найдено!").queue();
-                    return;
-                }
+                        final Track firstTrack = tracks.get(0);
 
-                final Track firstTrack = tracks.get(0);
-                final TrackContext trackContext = SlashEventHelper.createTrackContextFromEvent(firstTrack, event);
+                        musicService.queue(firstTrack, guildId, event.getMember(), event.getChannel().asTextChannel(), client);
 
-                TrackQueue.add(guildId, trackContext);
-
-                VoiceHelper.queue(client, link, guildId);
-
-                event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(firstTrack, event.getMember(), "Добавлен в очередь"))
-                        .queue();
-            } else if (item instanceof NoMatches) {
-                event.getHook().sendMessage("Ничего не найдено по вашему запросу!").queue();
-            } else if (item instanceof LoadFailed fail) {
-                event.getHook().sendMessage("ЕБАТЬ НЕ ПОЛУЧИЛОСЬ ЗАГРУЗИТЬ АУДИО! Ашибка: " + fail.getException().getMessage()).queue();
-            }
-        });
+                        event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(firstTrack, event.getMember(), "Добавлен в очередь"))
+                                .addActionRow(new AddToQueueButton().asJDAButton())
+                                .queue();
+                    } else if (item instanceof NoMatches) {
+                        event.getHook().sendMessage("Ничего не найдено по вашему запросу!").queue();
+                    } else if (item instanceof LoadFailed fail) {
+                        event.getHook().sendMessage("ЕБАТЬ НЕ ПОЛУЧИЛОСЬ ЗАГРУЗИТЬ АУДИО! Ашибка: " + fail.getException().getMessage()).queue();
+                    }
+                });
     }
 }

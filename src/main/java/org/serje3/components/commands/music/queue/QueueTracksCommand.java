@@ -3,6 +3,7 @@ package org.serje3.components.commands.music.queue;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.protocol.Track;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.domain.TrackContext;
@@ -10,6 +11,7 @@ import org.serje3.meta.abs.Command;
 import org.serje3.utils.TrackQueue;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -32,12 +34,29 @@ public class QueueTracksCommand extends Command {
         List<Track> tracks = trackContextList.stream().map(TrackContext::getTrack).collect(Collectors.toList());
         System.out.println(tracks);
 
-        AtomicReference<Integer> count = new AtomicReference<>(0);
-        String tracksList = tracks.stream().map((t) -> {
-            count.updateAndGet(v -> v + 1);
-            return count + " " + t.getInfo().getTitle();
-        }).collect(Collectors.joining("\n"));
-        String content = "Играет сейчас: " + (now != null ? now.getTrack().getInfo().getTitle() : "Ничего") + "\nСейчас в очереди: \n" + ((!tracksList.isEmpty()) ? tracksList : "Пусто");
-        event.reply(content).queue();
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle("Текущий плейлист и трек");
+
+        if (now != null) {
+            embedBuilder.addField("Играет сейчас:", now.getTrack().getInfo().getTitle(), false);
+        } else {
+            embedBuilder.addField("Играет сейчас:", "Ничего", false);
+        }
+
+        StringBuilder trackListBuilder = new StringBuilder();
+        AtomicInteger count = new AtomicInteger(0);
+        tracks.forEach(track -> {
+            count.incrementAndGet();
+            trackListBuilder.append(count).append(". ").append(track.getInfo().getTitle()).append("\n");
+        });
+
+        String tracksList = trackListBuilder.toString();
+        if (!tracksList.isEmpty()) {
+            embedBuilder.addField("Сейчас в очереди:", tracksList, false);
+        } else {
+            embedBuilder.addField("Сейчас в очереди:", "Пусто", false);
+        }
+
+        event.replyEmbeds(embedBuilder.build()).queue();
     }
 }

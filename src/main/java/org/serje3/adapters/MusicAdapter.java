@@ -58,15 +58,15 @@ public class MusicAdapter extends BaseListenerAdapter {
 
     private void registerLavalinkNodes() {
         List<NodeRef> nodes = null;
-        try{
+        try {
             nodes = this.nodeRestHandler.getNodes();
             System.out.println(nodes);
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
 //            throw new RuntimeException("Error with nodes receive: " + e.getMessage());
         }
 
-        if (nodes == null || nodes.isEmpty()){
+        if (nodes == null || nodes.isEmpty()) {
             nodes = List.of(new NodeRef(0, "ws://localhost:2333", "testing", "EUROPE"));
         }
 
@@ -85,13 +85,14 @@ public class MusicAdapter extends BaseListenerAdapter {
                         event.getTrack().getInfo()
                 );
             });
+
             node.on(TrackEndEvent.class).subscribe((data) -> {
-                System.out.println("TRACK ENDED " + data.getEndReason());
-                Long guildId = data.getGuildId();
-                if (data.getEndReason() == Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason.LOAD_FAILED){
-                    User userById = Bot.getUserById(263430624080035841L);
-                    userById.openPrivateChannel().queue((channel) -> channel.sendMessage("Трек " + data.getTrack().getInfo().getTitle() + " закончился с ошибкой").queue());
+                if (data.getEndReason().equals(Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason.LOAD_FAILED)){
+                    logger.error("TRACK ENDED {}", data.getEndReason());
+                } else {
+                    logger.info("TRACK ENDED {}", data.getEndReason());
                 }
+                Long guildId = data.getGuildId();
                 try {
                     TrackContext newTrack = TrackQueue.skip(client, guildId, true);
                     onNextTrack(newTrack);
@@ -99,6 +100,10 @@ public class MusicAdapter extends BaseListenerAdapter {
                     //pass
                     logger.warn("No Tracks in Queue in guild {}", guildId);
                 }
+            });
+
+            node.on(TrackStuckEvent.class).subscribe(data -> {
+                logger.warn("Track {} is stuck. Threshold is {} on node {}", data.getTrack().getInfo().getTitle(), data.getThresholdMs(), data.getNode().getName());
             });
         });
     }
@@ -133,9 +138,9 @@ public class MusicAdapter extends BaseListenerAdapter {
         MessageHistory history = textChannel.getHistoryAround(textChannel.getLatestMessageId(), 10).submit().join();
         List<net.dv8tion.jda.api.entities.Message> retrievedHistory = history.getRetrievedHistory();
         List<net.dv8tion.jda.api.entities.Message> messageToDelete = new ArrayList<>();
-        for (net.dv8tion.jda.api.entities.Message message: retrievedHistory){
+        for (net.dv8tion.jda.api.entities.Message message : retrievedHistory) {
             net.dv8tion.jda.api.entities.Message.Interaction interaction = message.getInteraction();
-            if (checkInteractionValidForDelete(interaction)){
+            if (checkInteractionValidForDelete(interaction)) {
                 messageToDelete.add(message);
             }
         }

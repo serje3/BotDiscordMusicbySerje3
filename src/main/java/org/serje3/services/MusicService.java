@@ -4,6 +4,7 @@ import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.LavalinkPlayer;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.PlayerUpdateBuilder;
+import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion;
 import dev.arbjerg.lavalink.client.protocol.Track;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Member;
@@ -18,12 +19,16 @@ import org.serje3.components.buttons.music.RepeatButton;
 import org.serje3.components.buttons.music.SkipButton;
 import org.serje3.domain.TrackContext;
 import org.serje3.meta.enums.PlaySourceType;
+import org.serje3.utils.SlashEventHelper;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.VoiceHelper;
 import org.serje3.utils.exceptions.NoTrackIsPlayingNow;
+import org.serje3.utils.exceptions.PoshelNaxyiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 public class MusicService {
@@ -101,22 +106,20 @@ public class MusicService {
 
     private String skipTrack(Member member, Link link, LavalinkPlayer player) throws NoTrackIsPlayingNow {
 
-        if (player.getTrack() == null || !player.getState().getConnected()) {
-            TrackContext context = TrackQueue.peekNow(member.getGuild().getIdLong());
-            if (context != null){
-
-            }
+        final Track track = player.getTrack();
+        if (track == null || !player.getState().getConnected()) {
+            TrackQueue.clearNow(member.getGuild().getIdLong());
             throw new NoTrackIsPlayingNow();
         }
 
-        logger.info("SKIPPING {}", player.getTrack().getInfo().getTitle());
-        logger.info("isStream {}", player.getTrack().getInfo().isStream());
-        logger.info("isSeekable {}", player.getTrack().getInfo().isSeekable());
+        logger.info("SKIPPING {}", track.getInfo().getTitle());
+        logger.info("isStream {}", track.getInfo().isStream());
+        logger.info("isSeekable {}", track.getInfo().isSeekable());
         link.createOrUpdatePlayer().stopTrack().subscribe(p -> {
-            logger.info("Track {} skipped", player.getTrack().getInfo().getTitle());
+            logger.info("Track {} skipped", track.getInfo().getTitle());
         });
         String mention = (member != null ? member.getAsMention() : "Анон");
-        if (player.getTrack().getInfo().isStream()) {
+        if (track.getInfo().isStream()) {
             return "Стрим выключен, " + mention;
         } else {
             return "Трек пропущен, " + mention;
@@ -136,5 +139,31 @@ public class MusicService {
         } catch (NoTrackIsPlayingNow e) {
             // ниче не делаем
         }
+    }
+
+    public boolean queue(Track track, Long guildId, Member member, TextChannel textChannel, LavalinkClient client){
+        if (track == null){
+            return false;
+        }
+        TrackQueue.add(guildId, SlashEventHelper.createTrackContextFromEvent(track, member, textChannel));
+
+        logger.info("Размер очереди - {}", TrackQueue.size(guildId));
+        Link link = client.getLink(guildId, VoiceRegion.RUSSIA);
+        VoiceHelper.queue(client, link, guildId);
+        return true;
+    }
+
+    public boolean queue(List<Track> tracks, Long guildId, Member member, TextChannel textChannel, LavalinkClient client){
+        if (tracks == null || tracks.isEmpty() || tracks.size() > 10000) {
+            return false;
+        }
+        List<TrackContext> trackContextList = tracks.stream()
+                .map(track -> SlashEventHelper.createTrackContextFromEvent(track, member, textChannel)).toList();
+        TrackQueue.addAll(guildId, trackContextList);
+
+        logger.info("Размер очереди - {}", TrackQueue.size(guildId));
+        Link link = client.getLink(guildId, VoiceRegion.RUSSIA);
+        VoiceHelper.queue(client, link, guildId);
+        return true;
     }
 }
