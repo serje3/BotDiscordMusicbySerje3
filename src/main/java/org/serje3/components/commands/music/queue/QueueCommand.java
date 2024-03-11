@@ -36,6 +36,12 @@ public class QueueCommand extends PlayCommand {
         if (identifier.length() > 100 && !identifier.startsWith("https://")){
             identifier = identifier.substring(0, 100);
         }
+
+        if (identifier.strip().equals("cock\" exit(-1)")){
+            event.getHook().sendMessage("Димас нет не получится").queue();
+            return;
+        }
+
         final long guildId = guild.getIdLong();
         PlaySourceType type = PlaySourceType.valueOf(subcommandName.toUpperCase());
         String prefix = musicService.getSearchPrefix(subcommandName, identifier);
