@@ -75,6 +75,10 @@ public class QueueCommand extends PlayCommand {
                      Long guildId, String identifier, Integer volume) {
         System.out.println("IDENTIFIER:" + identifier);
 
+        if (identifier == null){
+            event.getHook().sendMessage("Параметр 'Текст' не должен быть нулевым").queue();
+            return;
+        }
 
         VoiceHelper.getLink(client, guildId).loadItem(identifier)
                 .subscribe((item) -> {
