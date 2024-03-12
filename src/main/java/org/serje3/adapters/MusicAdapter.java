@@ -67,8 +67,10 @@ public class MusicAdapter extends BaseListenerAdapter {
         }
 
         if (nodes == null || nodes.isEmpty()) {
-            nodes = List.of(new NodeRef(0, "ws://localhost:2333", "testing", "EUROPE"));
+            nodes = List.of(new NodeRef(0, "wss://amsterdam.serje3.ru:443", "DIcsG6lG49wY7rkk", "EUROPE"));
         }
+
+        System.out.println(nodes);
 
         nodes.stream().map(node -> client.addNode(
                 node.getUrl(),

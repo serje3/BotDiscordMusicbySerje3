@@ -80,7 +80,7 @@ public class QueueCommand extends PlayCommand {
             return;
         }
 
-        VoiceHelper.getLink(client, guildId).loadItem(identifier)
+        client.getLink(guildId).loadItem(identifier)
                 .subscribe((item) -> {
                     System.out.println(item);
                     if (item instanceof TrackLoaded trackLoaded) {

@@ -44,7 +44,7 @@ public class AddToQueueButton extends Button {
         String url = embed.getUrl();
 
         assert url != null;
-        VoiceHelper.getLink(client, guildId)
+        client.getLink(guildId)
                 .loadItem(url)
                 .subscribe((item) -> {
                     if (item instanceof TrackLoaded trackLoaded) {
