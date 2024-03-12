@@ -18,6 +18,8 @@ import org.serje3.utils.SlashEventHelper;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.VoiceHelper;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 
 public class QueueCommand extends PlayCommand {
     private final YoutubeRestHandler youtubeRestHandler = new YoutubeRestHandler();
+    private final Logger logger = LoggerFactory.getLogger(QueueCommand.class);
 
     @Override
     @JoinVoiceChannel
@@ -79,7 +82,7 @@ public class QueueCommand extends PlayCommand {
             event.getHook().sendMessage("Параметр 'Текст' не должен быть нулевым").queue();
             return;
         }
-
+        logger.info("Now {} nodes active", client.getNodes().size());
         client.getLink(guildId).loadItem(identifier)
                 .subscribe((item) -> {
                     System.out.println(item);
