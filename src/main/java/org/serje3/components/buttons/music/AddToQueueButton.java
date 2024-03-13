@@ -5,7 +5,7 @@ import dev.arbjerg.lavalink.client.protocol.LoadFailed;
 import dev.arbjerg.lavalink.client.protocol.NoMatches;
 import dev.arbjerg.lavalink.client.protocol.Track;
 import dev.arbjerg.lavalink.client.protocol.TrackLoaded;
-import lombok.RequiredArgsConstructor;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -37,6 +37,9 @@ public class AddToQueueButton extends Button {
     public void handle(ButtonInteractionEvent event, LavalinkClient client) {
         // логика сильно связана с URL на видео в title
         event.deferReply().queue();
+
+        joinChannel(event);
+
         Long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
         Member member = event.getMember();
         TextChannel textChannel = event.getChannel().asTextChannel();
@@ -70,5 +73,15 @@ public class AddToQueueButton extends Button {
     @Override
     public Emoji getLabelEmoji() {
         return Emoji.fromFormatted("➕");
+    }
+
+
+    private void joinChannel(ButtonInteractionEvent event) {
+        final Guild guild = event.getGuild();
+        // We are already connected, go ahead and play
+        if (!guild.getSelfMember().getVoiceState().inAudioChannel()) {
+            // Connect to VC first
+            VoiceHelper.joinHelper(event);
+        }
     }
 }

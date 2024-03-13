@@ -5,6 +5,7 @@ import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion;
 import dev.arbjerg.lavalink.client.protocol.Track;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ public class VoiceHelper {
     private static final Logger logger = LoggerFactory.getLogger(VoiceHelper.class);
 
 
-    public static void joinHelper(SlashCommandInteractionEvent event) {
+    public static void joinHelper(GenericInteractionCreateEvent event) {
         final Member member = event.getMember();
         final Guild guild = event.getGuild();
         final GuildVoiceState memberVoiceState = member.getVoiceState();
