@@ -33,6 +33,8 @@ public class DickRestHandler extends AbstractBaseClient {
             return new DickResponse("Хуй хуёвый");
         } catch (ExecutionException e) {
             return new DickResponse("Хуй хуёвее");
+        } catch (Exception e){
+            return new DickResponse("А вот хуй тебе");
         }
     }
 }

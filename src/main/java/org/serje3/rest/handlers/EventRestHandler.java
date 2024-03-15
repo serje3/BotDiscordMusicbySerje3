@@ -16,6 +16,9 @@ public class EventRestHandler extends BaseRestClient {
         String fullCommandString = event.getFullCommandName();
         net.dv8tion.jda.api.entities.Member discordMember = event.getMember();
         net.dv8tion.jda.api.entities.Guild discordGuild = event.getGuild();
+        if (discordMember == null || discordGuild == null) {
+            return;
+        }
         Member member = Member.fromDiscordMember(discordMember);
         Guild guild = Guild.fromDiscordGuild(discordGuild);
         SlashCommandEventRequest request = new SlashCommandEventRequest(
