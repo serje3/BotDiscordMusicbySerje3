@@ -2,9 +2,11 @@ package org.serje3.components.commands.music;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
+import dev.arbjerg.lavalink.client.protocol.Track;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
+import org.serje3.utils.TrackQueue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,7 @@ public class LeaveCommand extends Command {
 
     @Override
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+        TrackQueue.clear(event.getGuild().getIdLong());
         event.getJDA().getDirectAudioController().disconnect(Objects.requireNonNull(event.getGuild()));
         Link link = client.getLink(event.getGuild().getIdLong());
         link.destroyPlayer().subscribe(System.out::println);

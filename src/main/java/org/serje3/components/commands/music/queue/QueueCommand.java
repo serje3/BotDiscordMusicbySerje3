@@ -84,7 +84,7 @@ public class QueueCommand extends PlayCommand {
                     System.out.println(item);
                     if (item instanceof TrackLoaded trackLoaded) {
                         Track track = trackLoaded.getTrack();
-                        track = musicService.cockinizeTrackIfNowIsTheTime(track);
+                        track = musicService.cockinizeTrackIfNowIsTheTime(guildId, track);
 
                         musicService.queue(track, guildId, event.getMember(), event.getChannel().asTextChannel(), client);
 
@@ -102,7 +102,7 @@ public class QueueCommand extends PlayCommand {
                             return;
                         }
 
-                        tracks = musicService.cockinizeTrackIfNowIsTheTime(tracks);
+                        tracks = musicService.cockinizeTrackIfNowIsTheTime(guildId, tracks);
 
                         musicService.queue(tracks, guildId, event.getMember(), event.getChannel().asTextChannel(), client);
 
@@ -117,7 +117,7 @@ public class QueueCommand extends PlayCommand {
                             return;
                         }
 
-                        final Track firstTrack = musicService.cockinizeTrackIfNowIsTheTime(tracks.get(0));
+                        final Track firstTrack = musicService.cockinizeTrackIfNowIsTheTime(guildId, tracks.get(0));
 
                         musicService.queue(firstTrack, guildId, event.getMember(), event.getChannel().asTextChannel(), client);
 

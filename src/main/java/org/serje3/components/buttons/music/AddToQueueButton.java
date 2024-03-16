@@ -52,7 +52,7 @@ public class AddToQueueButton extends Button {
                 .subscribe((item) -> {
                     if (item instanceof TrackLoaded trackLoaded) {
                         Track track = trackLoaded.getTrack();
-                        track = musicService.cockinizeTrackIfNowIsTheTime(track);
+                        track = musicService.cockinizeTrackIfNowIsTheTime(guildId, track);
                         musicService.queue(track, guildId, member, textChannel, client);
                         event.getHook().sendMessage("Успешно добавлено - " + track.getInfo().getTitle() + "!").queue();
                     } else if (item instanceof NoMatches) {

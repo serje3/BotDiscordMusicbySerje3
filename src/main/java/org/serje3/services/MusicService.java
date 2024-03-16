@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.serje3.components.buttons.music.*;
+import org.serje3.config.GuildConfig;
 import org.serje3.domain.TrackContext;
 import org.serje3.meta.enums.PlaySourceType;
 import org.serje3.rest.handlers.DickRestHandler;
@@ -175,20 +176,20 @@ public class MusicService {
         return true;
     }
 
-    public Track cockinizeTrackIfNowIsTheTime(Track track) {
+    public Track cockinizeTrackIfNowIsTheTime(Long guildId, Track track) {
         LocalDateTime now = LocalDateTime.now();
 
-        if (now.getMonth() == Month.APRIL && now.getDayOfMonth() == 1) {
+        if ((now.getMonth() == Month.APRIL && now.getDayOfMonth() == 1) || GuildConfig.getSettings(guildId).isCockinize()) {
             return wrapDickTrack(track);
         }
         return track;
     }
 
 
-    public List<Track> cockinizeTrackIfNowIsTheTime(List<Track> tracks) {
+    public List<Track> cockinizeTrackIfNowIsTheTime(Long guildId, List<Track> tracks) {
         LocalDateTime now = LocalDateTime.now();
 
-        if (now.getMonth() == Month.APRIL && now.getDayOfMonth() == 1) {
+        if (now.getMonth() == Month.APRIL && now.getDayOfMonth() == 1 || GuildConfig.getSettings(guildId).isCockinize()) {
             return wrapDickTrack(tracks);
         }
         return tracks;
