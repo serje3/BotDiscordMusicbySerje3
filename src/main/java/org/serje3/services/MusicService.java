@@ -6,6 +6,8 @@ import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.PlayerUpdateBuilder;
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion;
 import dev.arbjerg.lavalink.client.protocol.Track;
+import dev.arbjerg.lavalink.internal.JsonParserKt;
+import dev.arbjerg.lavalink.protocol.v4.TrackInfo;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -16,19 +18,26 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.serje3.components.buttons.music.*;
 import org.serje3.domain.TrackContext;
 import org.serje3.meta.enums.PlaySourceType;
+import org.serje3.rest.handlers.DickRestHandler;
+import org.serje3.rest.responses.DickResponse;
 import org.serje3.utils.SlashEventHelper;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.VoiceHelper;
 import org.serje3.utils.exceptions.NoTrackIsPlayingNow;
-import org.serje3.utils.exceptions.PoshelNaxyiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
 public class MusicService {
+    private final DickRestHandler dickRestHandler = new DickRestHandler();
     private final Logger logger = LoggerFactory.getLogger(MusicService.class);
 
     public void pauseMusic(SlashCommandInteractionEvent event, LavalinkClient client) {
@@ -139,10 +148,11 @@ public class MusicService {
         }
     }
 
-    public boolean queue(Track track, Long guildId, Member member, TextChannel textChannel, LavalinkClient client){
-        if (track == null){
+    public boolean queue(Track track, Long guildId, Member member, TextChannel textChannel, LavalinkClient client) {
+        if (track == null) {
             return false;
         }
+
         TrackQueue.add(guildId, SlashEventHelper.createTrackContextFromEvent(track, member, textChannel));
 
         logger.info("Размер очереди - {}", TrackQueue.size(guildId));
@@ -151,7 +161,7 @@ public class MusicService {
         return true;
     }
 
-    public boolean queue(List<Track> tracks, Long guildId, Member member, TextChannel textChannel, LavalinkClient client){
+    public boolean queue(List<Track> tracks, Long guildId, Member member, TextChannel textChannel, LavalinkClient client) {
         if (tracks == null || tracks.isEmpty() || tracks.size() > 10000) {
             return false;
         }
@@ -163,5 +173,83 @@ public class MusicService {
         Link link = client.getLink(guildId, VoiceRegion.RUSSIA);
         VoiceHelper.queue(client, link, guildId);
         return true;
+    }
+
+    public Track cockinizeTrackIfNowIsTheTime(Track track) {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (now.getMonth() == Month.APRIL && now.getDayOfMonth() == 1) {
+            return wrapDickTrack(track);
+        }
+        return track;
+    }
+
+
+    public List<Track> cockinizeTrackIfNowIsTheTime(List<Track> tracks) {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (now.getMonth() == Month.APRIL && now.getDayOfMonth() == 1) {
+            return wrapDickTrack(tracks);
+        }
+        return tracks;
+    }
+
+    private List<Track> wrapDickTrack(List<Track> tracks) {
+        if (tracks == null || tracks.isEmpty()) return tracks;
+        List<String> titles = tracks.stream()
+                .map(track -> track.getInfo().getTitle())
+                .toList();
+        List<String> authors = tracks.stream()
+                .map(track -> track.getInfo().getAuthor())
+                .toList();
+        List<String> dickTitles = dickRestHandler.generateDickName(titles).stream().map(DickResponse::getDickName).toList();
+        List<String> dickAuthors = dickRestHandler.generateDickName(authors).stream().map(DickResponse::getDickName).toList();
+        List<Track> dickTracks = new ArrayList<>();
+        for (int i = 0; i < tracks.size(); i++) {
+            TrackInfo oldInfo = tracks.get(i).getInfo();
+            TrackInfo dickInfo = new TrackInfo(
+                    oldInfo.getIdentifier(),
+                    oldInfo.isSeekable(),
+                    dickAuthors.get(i),
+                    oldInfo.getLength(),
+                    oldInfo.isStream(),
+                    oldInfo.getPosition(),
+                    dickTitles.get(i),
+                    oldInfo.getUri(),
+                    oldInfo.getSourceName(),
+                    oldInfo.getArtworkUrl(),
+                    oldInfo.getIsrc()
+            );
+            Track track = tracks.get(i);
+            dickTracks.add(
+                    new Track(new dev.arbjerg.lavalink.protocol.v4.Track(track.getEncoded(), dickInfo,
+                            JsonParserKt.toKotlin(track.getPluginInfo()), JsonParserKt.toKotlin(track.getUserData())))
+            );
+        }
+
+        return dickTracks;
+    }
+
+    private Track wrapDickTrack(Track track) {
+        if (track == null) return null;
+        TrackInfo oldInfo = track.getInfo();
+        String dickTitle = dickRestHandler.generateDickName(oldInfo.getTitle()).getDickName();
+        String dickAuthor = dickRestHandler.generateDickName(oldInfo.getAuthor()).getDickName();
+        TrackInfo dickInfo = new TrackInfo(
+                oldInfo.getIdentifier(),
+                oldInfo.isSeekable(),
+                dickAuthor,
+                oldInfo.getLength(),
+                oldInfo.isStream(),
+                oldInfo.getPosition(),
+                dickTitle,
+                oldInfo.getUri(),
+                oldInfo.getSourceName(),
+                oldInfo.getArtworkUrl(),
+                oldInfo.getIsrc()
+        );
+
+        return new Track(new dev.arbjerg.lavalink.protocol.v4.Track(track.getEncoded(), dickInfo,
+                JsonParserKt.toKotlin(track.getPluginInfo()), JsonParserKt.toKotlin(track.getUserData())));
     }
 }

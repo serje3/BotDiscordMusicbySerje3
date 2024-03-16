@@ -10,7 +10,6 @@ public class RequestBody {
     public HttpRequest.BodyPublisher toBodyPublisher(){
         Gson gson = new Gson();
         String json = gson.toJson(this); // Преобразование объекта в JSON
-        System.out.println(json);
         return HttpRequest.BodyPublishers.ofString(json);
     };
 }

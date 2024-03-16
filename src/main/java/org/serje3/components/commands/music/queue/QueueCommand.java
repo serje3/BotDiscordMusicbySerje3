@@ -1,32 +1,28 @@
 package org.serje3.components.commands.music.queue;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
-import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion;
 import dev.arbjerg.lavalink.client.protocol.*;
-
+import dev.arbjerg.lavalink.internal.JsonParserKt;
+import dev.arbjerg.lavalink.protocol.v4.TrackInfo;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.serje3.components.buttons.music.AddToQueueButton;
 import org.serje3.components.commands.music.PlayCommand;
-import org.serje3.domain.TrackContext;
 import org.serje3.meta.annotations.JoinVoiceChannel;
 import org.serje3.meta.enums.PlaySourceType;
 import org.serje3.rest.domain.Tracks;
+import org.serje3.rest.handlers.DickRestHandler;
 import org.serje3.rest.handlers.YoutubeRestHandler;
-import org.serje3.utils.SlashEventHelper;
-import org.serje3.utils.TrackQueue;
 import org.serje3.utils.VoiceHelper;
-import org.serje3.utils.exceptions.NoTracksInQueueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 public class QueueCommand extends PlayCommand {
     private final YoutubeRestHandler youtubeRestHandler = new YoutubeRestHandler();
+    private final DickRestHandler dickRestHandler = new DickRestHandler();
     private final Logger logger = LoggerFactory.getLogger(QueueCommand.class);
 
     @Override
@@ -36,11 +32,11 @@ public class QueueCommand extends PlayCommand {
         final Guild guild = event.getGuild();
         String subcommandName = event.getSubcommandName();
         String identifier = event.getOption("текст").getAsString();
-        if (identifier.length() > 100 && !identifier.startsWith("https://")){
+        if (identifier.length() > 100 && !identifier.startsWith("https://")) {
             identifier = identifier.substring(0, 100);
         }
 
-        if (identifier.strip().equals("cock\" exit(-1)")){
+        if (identifier.strip().equals("cock\" exit(-1)")) {
             event.getHook().sendMessage("Димас нет не получится").queue();
             return;
         }
@@ -78,7 +74,7 @@ public class QueueCommand extends PlayCommand {
                      Long guildId, String identifier, Integer volume) {
         System.out.println("IDENTIFIER:" + identifier);
 
-        if (identifier == null){
+        if (identifier == null) {
             event.getHook().sendMessage("Параметр 'Текст' не должен быть нулевым").queue();
             return;
         }
@@ -87,15 +83,17 @@ public class QueueCommand extends PlayCommand {
                 .subscribe((item) -> {
                     System.out.println(item);
                     if (item instanceof TrackLoaded trackLoaded) {
-                        final Track track = trackLoaded.getTrack();
+                        Track track = trackLoaded.getTrack();
+                        track = musicService.cockinizeTrackIfNowIsTheTime(track);
 
                         musicService.queue(track, guildId, event.getMember(), event.getChannel().asTextChannel(), client);
+
 
                         event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
                                 .addActionRow(new AddToQueueButton().asJDAButton())
                                 .queue();
                     } else if (item instanceof PlaylistLoaded playlistLoaded) {
-                        final List<Track> tracks = playlistLoaded.getTracks();
+                        List<Track> tracks = playlistLoaded.getTracks();
                         if (tracks.isEmpty()) {
                             event.getHook().sendMessage("В этом плейлисте нет треков").queue();
                             return;
@@ -103,6 +101,9 @@ public class QueueCommand extends PlayCommand {
                             event.getHook().sendMessage("Этот плейлист слишком большой").queue();
                             return;
                         }
+
+                        tracks = musicService.cockinizeTrackIfNowIsTheTime(tracks);
+
                         musicService.queue(tracks, guildId, event.getMember(), event.getChannel().asTextChannel(), client);
 
                         final int trackCount = tracks.size();
@@ -116,13 +117,14 @@ public class QueueCommand extends PlayCommand {
                             return;
                         }
 
-                        final Track firstTrack = tracks.get(0);
+                        final Track firstTrack = musicService.cockinizeTrackIfNowIsTheTime(tracks.get(0));
 
                         musicService.queue(firstTrack, guildId, event.getMember(), event.getChannel().asTextChannel(), client);
 
                         event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(firstTrack, event.getMember(), "Добавлен в очередь"))
                                 .addActionRow(new AddToQueueButton().asJDAButton())
                                 .queue();
+
                     } else if (item instanceof NoMatches) {
                         event.getHook().sendMessage("Ничего не найдено по вашему запросу!").queue();
                     } else if (item instanceof LoadFailed fail) {
