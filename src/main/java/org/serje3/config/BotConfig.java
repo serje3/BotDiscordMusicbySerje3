@@ -7,9 +7,11 @@ import java.util.Properties;
 
 public class BotConfig {
     private static final String FILE_PATH = "bot.properties";
-    private final Properties properties;
+    private static Properties properties;
 
     public BotConfig() throws IOException {
+        if (properties != null) return;
+
         properties = new Properties();
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(FILE_PATH)) {
             if (inputStream != null) {

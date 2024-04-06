@@ -2,6 +2,7 @@ package org.serje3.components.commands.music.queue;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.serje3.components.buttons.music.*;
@@ -37,7 +38,7 @@ public class QueueNowCommand extends Command {
                                 playPauseBtn,
                                 new SkipButton().asJDAButton(),
                                 Button.link(player.getTrack().getInfo().getUri(), "Ссылка на трек")
-                        ).queue();
+                        ).queue(null, Sentry::captureException);
             } catch (NoTrackIsPlayingNow e) {
                 event.reply(e.getMessage()).queue();
             }

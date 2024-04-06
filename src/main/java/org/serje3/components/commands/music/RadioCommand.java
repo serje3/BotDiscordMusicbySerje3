@@ -60,7 +60,7 @@ public class RadioCommand extends Command {
                 return "https://www.youtube.com/watch?v=4xDzrJKXOOY";
             }
             case DARKAMBIENT -> {
-                return "https://www.youtube.com/watch?v=SKhpl1OMqEY";
+                return "https://www.youtube.com/watch?v=S_MOd40zlYU";
             }
         }
         return null;

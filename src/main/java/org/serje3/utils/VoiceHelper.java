@@ -4,6 +4,7 @@ import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion;
 import dev.arbjerg.lavalink.client.protocol.Track;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -36,7 +37,7 @@ public class VoiceHelper {
                 .setNoReplace(false)
                 .setEndTime(track.getInfo().getLength())
                 .subscribe((ignored) -> {
-                });
+                }, Sentry::captureException);
     }
 
 
@@ -70,6 +71,7 @@ public class VoiceHelper {
                     null
             );
         } catch (URISyntaxException e) {
+            Sentry.captureException(e);
             throw new RuntimeException(e);
         }
     }
@@ -93,12 +95,6 @@ public class VoiceHelper {
                     // а если вы на linux или macos, то напишите rm -rf /. И проблема исчезнет
                 }
             }
-        });
-    }
-
-
-    public static Link getLink(LavalinkClient client, Long guildId){
-        return client
-                .getLink(guildId);
+        }, Sentry::captureException);
     }
 }

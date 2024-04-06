@@ -39,8 +39,8 @@ public class JoinCommand extends Command {
         responses.add("жопа жопа жопа жопа ");
         responses.add(" пенис пенис пенис пенис ");
         responses.add("ЖАЛЬ ЧТО ТЫ РОДИЛСЯ " + memberName);
-
-
+        responses.add("УНИКАЛЬНЫЙ ОТВЕТ ДЛЯ ДЕБИЛА " + memberName);
+        responses.add("Город может и маленький только из этого города ТУЛУП вышел");
         return responses.get(random.nextInt(responses.size()));
     }
 }

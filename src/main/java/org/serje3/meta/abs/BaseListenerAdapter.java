@@ -1,6 +1,9 @@
 package org.serje3.meta.abs;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
+import io.sentry.Hint;
+import io.sentry.Sentry;
+import io.sentry.SentryEvent;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -45,7 +48,12 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
         if (command != null) {
             System.out.println(getLogPrefix() + "Command Name: " + event.getName());
             eventRestHandler.handleSlashEvent(event);
-            command.execute(event, client);
+            try {
+                command.execute(event, client);
+            } catch (Exception e) {
+                Sentry.captureException(e);
+                throw e;
+            }
         }
     }
 
@@ -53,8 +61,12 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
     public void onButtonInteraction(ButtonInteractionEvent event) {
         Button button = this.buttons.get(event.getComponentId());
         if (button != null) {
-            System.out.println(getLogPrefix() + "Button interaction: " + event.getComponentId());
-            button.handle(event, client);
+            try{
+                button.handle(event, client);
+            } catch (Exception ex){
+                Sentry.captureException(ex);
+                throw ex;
+            }
         }
     }
 
@@ -62,7 +74,12 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
     public void onCommandAutoCompleteInteraction(CommandAutoCompleteInteractionEvent event) {
         AutoComplete complete = this.autoComplete.get(event.getName());
         if (complete != null) {
-            complete.handle(event, client);
+            try{
+                complete.handle(event, client);
+            } catch (Exception e) {
+                Sentry.captureException(e);
+                throw e;
+            }
         }
     }
 

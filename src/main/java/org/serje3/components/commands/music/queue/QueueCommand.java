@@ -4,6 +4,7 @@ import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.protocol.*;
 import dev.arbjerg.lavalink.internal.JsonParserKt;
 import dev.arbjerg.lavalink.protocol.v4.TrackInfo;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.serje3.components.buttons.music.AddToQueueButton;
@@ -11,7 +12,6 @@ import org.serje3.components.commands.music.PlayCommand;
 import org.serje3.meta.annotations.JoinVoiceChannel;
 import org.serje3.meta.enums.PlaySourceType;
 import org.serje3.rest.domain.Tracks;
-import org.serje3.rest.handlers.DickRestHandler;
 import org.serje3.rest.handlers.YoutubeRestHandler;
 import org.serje3.utils.VoiceHelper;
 import org.slf4j.Logger;
@@ -22,7 +22,6 @@ import java.util.concurrent.ExecutionException;
 
 public class QueueCommand extends PlayCommand {
     private final YoutubeRestHandler youtubeRestHandler = new YoutubeRestHandler();
-    private final DickRestHandler dickRestHandler = new DickRestHandler();
     private final Logger logger = LoggerFactory.getLogger(QueueCommand.class);
 
     @Override
@@ -57,7 +56,7 @@ public class QueueCommand extends PlayCommand {
         try {
             tracks = youtubeRestHandler.searchCached(identifier);
         } catch (InterruptedException | ExecutionException e) {
-            System.out.println(e);
+            Sentry.captureException(e);
             return prefix + identifier;
         }
         if (tracks.getItems() == null || tracks.getItems().isEmpty()) {
@@ -130,6 +129,6 @@ public class QueueCommand extends PlayCommand {
                     } else if (item instanceof LoadFailed fail) {
                         event.getHook().sendMessage("ЕБАТЬ НЕ ПОЛУЧИЛОСЬ ЗАГРУЗИТЬ АУДИО! Ашибка: " + fail.getException().getMessage()).queue();
                     }
-                });
+                }, Sentry::captureException);
     }
 }

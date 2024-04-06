@@ -4,6 +4,8 @@ import dev.arbjerg.lavalink.client.*;
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
 import dev.arbjerg.lavalink.protocol.v4.Message;
+import io.sentry.Hint;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -60,17 +62,15 @@ public class MusicAdapter extends BaseListenerAdapter {
         List<NodeRef> nodes = null;
         try {
             nodes = this.nodeRestHandler.getNodes();
-            System.out.println(nodes);
         } catch (Exception e) {
             System.out.println(e.getMessage());
-//            throw new RuntimeException("Error with nodes receive: " + e.getMessage());
+            Sentry.captureException(e);
         }
 
         if (nodes == null || nodes.isEmpty()) {
             nodes = List.of(new NodeRef(0, "wss://amsterdam.serje3.ru:443", "DIcsG6lG49wY7rkk", "EUROPE"));
         }
 
-        System.out.println(nodes);
 
         nodes.stream().map(node -> client.addNode(
                 node.getUrl(),
@@ -91,6 +91,7 @@ public class MusicAdapter extends BaseListenerAdapter {
             node.on(TrackEndEvent.class).subscribe((data) -> {
                 if (data.getEndReason().equals(Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason.LOAD_FAILED)){
                     logger.error("TRACK ENDED {}", data.getEndReason());
+                    Sentry.captureMessage("TRACK ENDED, REASON: " + data.getEndReason());
                 } else {
                     logger.info("TRACK ENDED {}", data.getEndReason());
                 }

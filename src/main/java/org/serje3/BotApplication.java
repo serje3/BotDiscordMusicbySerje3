@@ -3,6 +3,8 @@ package org.serje3;
 import dev.arbjerg.lavalink.client.Helpers;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener;
+import io.sentry.Sentry;
+import io.sentry.SentryLevel;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -14,6 +16,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.serje3.adapters.DefaultAdapter;
 import org.serje3.adapters.LogAdapter;
 import org.serje3.adapters.MusicAdapter;
+import org.serje3.utils.SentryUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +33,9 @@ public class BotApplication {
         }
         LavalinkClient client = new LavalinkClient(Helpers.getUserIdFromToken(token));
 
+        SentryUtil.initSentry();
+
+        Sentry.captureMessage("Bot is starting", SentryLevel.DEBUG);
 
         Bot = JDABuilder.createDefault(token)
                 .setVoiceDispatchInterceptor(new JDAVoiceUpdateListener(client))

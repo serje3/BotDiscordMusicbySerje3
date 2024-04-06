@@ -8,6 +8,7 @@ import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion;
 import dev.arbjerg.lavalink.client.protocol.Track;
 import dev.arbjerg.lavalink.internal.JsonParserKt;
 import dev.arbjerg.lavalink.protocol.v4.TrackInfo;
+import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -45,7 +46,7 @@ public class MusicService {
         pauseMusic(event.getGuild().getIdLong(), client)
                 .subscribe((player) -> {
                     event.reply("Плеер " + (player.getPaused() ? "на паузе" : "возобновлён") + "!").queue();
-                });
+                },  Sentry::captureException);
     }
 
     public Mono<LavalinkPlayer> pauseMusic(Long guildId, LavalinkClient client) {
