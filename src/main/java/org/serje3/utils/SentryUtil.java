@@ -20,7 +20,7 @@ public class SentryUtil {
             sentryOptions.setDsn(dsn);
 
             sentryOptions.setTracesSampleRate(1.0);
-            sentryOptions.setDebug(true);
+            sentryOptions.setDebug(false);
             initialized = true;
         });
     }
