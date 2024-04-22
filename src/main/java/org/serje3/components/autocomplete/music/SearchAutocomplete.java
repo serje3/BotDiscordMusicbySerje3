@@ -5,6 +5,7 @@ import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.protocol.LoadFailed;
 import dev.arbjerg.lavalink.client.protocol.SearchResult;
 import dev.arbjerg.lavalink.client.protocol.Track;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import org.serje3.domain.TrackContext;
@@ -41,7 +42,7 @@ public class SearchAutocomplete extends AutoComplete {
         logger.info(event.getSubcommandName());
         logger.info(event.getFocusedOption().getValue());
         String identifier = event.getFocusedOption().getValue();
-        if (identifier.length() > 100){
+        if (identifier.length() > 100) {
             identifier = identifier.substring(0, 100);
         }
         String subCommand = event.getSubcommandName();
@@ -50,12 +51,12 @@ public class SearchAutocomplete extends AutoComplete {
             event.replyChoices(Collections.emptyList()).queue();
             return;
         }
-        if (playSourceType.equals(PlaySourceType.YOUTUBE)){
+        if (playSourceType.equals(PlaySourceType.YOUTUBE)) {
             try {
                 logger.info("CACHED YOUTUBE SEARCH");
                 cachedYoutubeAutocomplete(identifier, event);
                 return;
-            } catch (Exception e){
+            } catch (Exception e) {
                 // then pass & try default search youtube method
                 logger.info(e.getMessage());
             }
@@ -93,9 +94,9 @@ public class SearchAutocomplete extends AutoComplete {
     private void cachedYoutubeAutocomplete(String identifier, CommandAutoCompleteInteractionEvent event) {
         logger.info("WTF NEXT IS YOUTUBE RESPONSE");
         Tracks tracks;
-        try{
+        try {
             tracks = youtubeRestHandler.searchCached(identifier);
-        } catch (ExecutionException | InterruptedException e){
+        } catch (ExecutionException | InterruptedException e) {
             logger.info(e.getMessage());
             emptyChoices(event);
             return;
@@ -117,11 +118,12 @@ public class SearchAutocomplete extends AutoComplete {
         event.replyChoices(options).queue((s) -> {
             logger.info("success");
         }, (e) -> {
-            logger.info("Error");
+            logger.info("Error {}", e.getMessage());
+            Sentry.captureException(e);
         });
     }
 
-    private void emptyChoices(CommandAutoCompleteInteractionEvent event){
+    private void emptyChoices(CommandAutoCompleteInteractionEvent event) {
         event.replyChoices(Collections.emptyList()).queue();
     }
 }
