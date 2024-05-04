@@ -1,14 +1,15 @@
 package org.serje3.adapters;
 
 import dev.arbjerg.lavalink.client.*;
+
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
 import dev.arbjerg.lavalink.protocol.v4.Message;
-import io.sentry.Hint;
 import io.sentry.Sentry;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageHistory;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import org.serje3.domain.TrackContext;
 import org.serje3.meta.abs.AdapterContext;
 import org.serje3.meta.abs.BaseListenerAdapter;
@@ -42,6 +43,7 @@ public class MusicAdapter extends BaseListenerAdapter {
         this.client.getLoadBalancer().addPenaltyProvider(new VoiceRegionPenaltyProvider());
         this.registerLavalinkNodes();
         this.registerLavalinkListeners();
+        this.registerLavalinkWebsocketClosed();
 
         this.setClient(client);
         this.musicService = new MusicService();
@@ -56,6 +58,27 @@ public class MusicAdapter extends BaseListenerAdapter {
     @Override
     protected Command convertCommand(Command command) {
         return new MusicCommandDecorator(command);
+    }
+
+
+    private void registerLavalinkWebsocketClosed() {
+        client.on(WebSocketClosedEvent.class).subscribe((event) -> {
+            logger.warn("Websocket closed Code: {}, Reason: {}", event.getCode(), event.getReason());
+            if (event.getCode() == 4006) {
+                Long guildId = event.getGuildId();
+                Guild guild = Bot.getGuildById(guildId);
+                if (guild == null) {
+                    return;
+                }
+
+                AudioChannelUnion connectedChannel = guild.getSelfMember().getVoiceState().getChannel();
+                if (connectedChannel == null) {
+                    return;
+                }
+
+                Bot.getDirectAudioController().reconnect(connectedChannel);
+            }
+        });
     }
 
     private void registerLavalinkNodes() {
@@ -89,7 +112,7 @@ public class MusicAdapter extends BaseListenerAdapter {
             });
 
             node.on(TrackEndEvent.class).subscribe((data) -> {
-                if (data.getEndReason().equals(Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason.LOAD_FAILED)){
+                if (data.getEndReason().equals(Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason.LOAD_FAILED)) {
                     logger.error("TRACK ENDED {}", data.getEndReason());
                     Sentry.captureMessage("TRACK ENDED, REASON: " + data.getEndReason());
                 } else {

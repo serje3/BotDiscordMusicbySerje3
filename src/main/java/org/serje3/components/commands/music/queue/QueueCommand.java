@@ -2,8 +2,6 @@ package org.serje3.components.commands.music.queue;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.protocol.*;
-import dev.arbjerg.lavalink.internal.JsonParserKt;
-import dev.arbjerg.lavalink.protocol.v4.TrackInfo;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
