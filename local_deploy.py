@@ -45,7 +45,7 @@ if __name__ == "__main__":
     password = os.environ.get('COCKER_PASSWORD', None)
     username = os.environ.get('COCKER_USERNAME', None)
 
-    local_dir = os.path.join(f'/build/distributions/{file_name}')
+    local_dir = os.path.join(os.getcwd(), 'build', 'distributions', file_name)
     app_dir = os.path.join(os.environ.get('APP_DIR'), file_name)
 
     if hostname is None or password is None:
