@@ -76,7 +76,9 @@ public class PlayCommand extends Command {
                                         "Строка поиска Youtube Music",
                                         true,
                                         true
-                                )
+                                ),
+                        new SubcommandData(PlaySourceType.LOCAL.name().toLowerCase(), "Проигрывание из локальных файлов")
+                                .addOption(OptionType.ATTACHMENT, "файл", "wdasdksdaasdjasdjkl")
                 );
     }
 

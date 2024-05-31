@@ -111,3 +111,16 @@ sentry {
     projectName = "java"
     authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
+
+tasks.register("deploy", Exec) {
+    dependsOn build
+
+    def pythonExecutable
+    if (System.getProperty("os.name").toLowerCase().contains("win")) {
+        pythonExecutable = "${projectDir}/venv/Scripts/python.exe"
+    } else {
+        pythonExecutable = "${projectDir}/venv/bin/python"
+    }
+
+    commandLine pythonExecutable, 'local_deploy.py'
+}

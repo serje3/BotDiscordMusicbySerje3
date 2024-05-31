@@ -76,7 +76,8 @@ public class MusicAdapter extends BaseListenerAdapter {
                     return;
                 }
 
-                Bot.getDirectAudioController().reconnect(connectedChannel);
+                logger.error("CODE 4006");
+//                Bot.getDirectAudioController().reconnect(connectedChannel);
             }
         });
     }

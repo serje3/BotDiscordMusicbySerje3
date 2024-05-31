@@ -11,7 +11,8 @@ public enum PlaySourceType {
     SOUNDCLOUD("soundcloud", "scsearch:"),
     YANDEXMUSIC("yandexmusic", "ymsearch:"),
     SPOTIFY("spotify", "spsearch:"),
-    TEXT_TO_SPEECH("tts", null);
+    TEXT_TO_SPEECH("tts", null),
+    LOCAL("local", "local:");
 
 
     private final String title;

@@ -5,13 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GuildConfig {
-    public static ConcurrentHashMap<Long, Settings> _settings = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Long, Settings> _settings = new ConcurrentHashMap<>();
 
     private static void init(Long guildId) {
         Set<Long> keySet = _settings.keySet();
