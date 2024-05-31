@@ -27,7 +27,7 @@ def local_deploy(hostname, username, password, local_build, app_dir):
     commands = [
         "cd " + os.environ.get('APP_DIR'),
         "systemctl stop cocker.service",
-        "unzip -o " + local_build.split('/')[-1],
+        "unzip -o " + file_name,
         "systemctl start cocker.service"
     ]
 
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     username = os.environ.get('COCKER_USERNAME', None)
 
     local_dir = os.path.join(f'/build/distributions/{file_name}')
-    app_dir = os.environ.get('APP_DIR') + file_name
+    app_dir = os.path.join(os.environ.get('APP_DIR'), file_name)
 
     if hostname is None or password is None:
         raise Exception("No hostname or password")
