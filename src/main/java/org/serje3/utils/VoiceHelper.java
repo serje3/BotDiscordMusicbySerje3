@@ -34,7 +34,7 @@ public class VoiceHelper {
         link.createOrUpdatePlayer()
                 .setEncodedTrack(track.getEncoded())
                 .setVolume(volume)
-                .setNoReplace(false)
+                .setNoReplace(true)
                 .setEndTime(track.getInfo().getLength())
                 .subscribe((ignored) -> {
                 }, Sentry::captureException);
