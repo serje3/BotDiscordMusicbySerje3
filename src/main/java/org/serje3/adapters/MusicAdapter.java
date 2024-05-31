@@ -5,6 +5,7 @@ import dev.arbjerg.lavalink.client.*;
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
 import dev.arbjerg.lavalink.protocol.v4.Message;
+import dev.arbjerg.lavalink.protocol.v4.Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageHistory;
@@ -36,6 +37,10 @@ public class MusicAdapter extends BaseListenerAdapter {
     private final Logger logger = LoggerFactory.getLogger(MusicAdapter.class);
 
 
+    private final List<AudioTrackEndReason> audioTrackEndReasonsToSkip = List.of(
+            AudioTrackEndReason.REPLACED
+    );
+
     public MusicAdapter(LavalinkClient client) {
         super();
         this.nodeRestHandler = new NodeRestHandler();
@@ -65,7 +70,7 @@ public class MusicAdapter extends BaseListenerAdapter {
         client.on(WebSocketClosedEvent.class).subscribe((event) -> {
             logger.warn("Websocket closed Code: {}, Reason: {}", event.getCode(), event.getReason());
             if (event.getCode() == 4006) {
-                Long guildId = event.getGuildId();
+                long guildId = event.getGuildId();
                 Guild guild = Bot.getGuildById(guildId);
                 if (guild == null) {
                     return;
@@ -113,11 +118,14 @@ public class MusicAdapter extends BaseListenerAdapter {
             });
 
             node.on(TrackEndEvent.class).subscribe((data) -> {
-                if (data.getEndReason().equals(Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason.LOAD_FAILED)) {
-                    logger.error("TRACK ENDED {}", data.getEndReason());
-                    Sentry.captureMessage("TRACK ENDED, REASON: " + data.getEndReason());
-                } else {
-                    logger.info("TRACK ENDED {}", data.getEndReason());
+                AudioTrackEndReason endReason = data.getEndReason();
+                logger.warn("TRACK ENDED {}", data.getEndReason());
+
+
+                if (endReason.equals(AudioTrackEndReason.LOAD_FAILED)) {
+                    Sentry.captureMessage("TRACK ENDED, REASON: " + endReason);
+                } else if (audioTrackEndReasonsToSkip.contains(endReason)) {
+                    return;
                 }
                 Long guildId = data.getGuildId();
                 try {
@@ -161,17 +169,6 @@ public class MusicAdapter extends BaseListenerAdapter {
 
     private void onNextTrack(TrackContext newTrack) {
         TextChannel textChannel = newTrack.getTextChannel();
-        if (textChannel == null) return;
-        MessageHistory history = textChannel.getHistoryAround(textChannel.getLatestMessageId(), 10).submit().join();
-        List<net.dv8tion.jda.api.entities.Message> retrievedHistory = history.getRetrievedHistory();
-        List<net.dv8tion.jda.api.entities.Message> messageToDelete = new ArrayList<>();
-        for (net.dv8tion.jda.api.entities.Message message : retrievedHistory) {
-            net.dv8tion.jda.api.entities.Message.Interaction interaction = message.getInteraction();
-            if (checkInteractionValidForDelete(interaction)) {
-                messageToDelete.add(message);
-            }
-        }
-        if (!messageToDelete.isEmpty()) textChannel.deleteMessages(messageToDelete).queue();
         musicService.whatsPlayingNowWithoutInteraction(textChannel, newTrack);
     }
 
