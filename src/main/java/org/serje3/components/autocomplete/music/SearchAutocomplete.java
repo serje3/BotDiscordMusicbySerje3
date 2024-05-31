@@ -61,7 +61,7 @@ public class SearchAutocomplete extends AutoComplete {
                 logger.info(e.getMessage());
             }
         }
-        logger.info("WTF???????");
+
         String searchPrefix = musicService.getSearchPrefix(subCommand, identifier);
         client.getLink(event.getGuild().getIdLong())
                 .loadItem(searchPrefix + identifier)
@@ -92,7 +92,6 @@ public class SearchAutocomplete extends AutoComplete {
     }
 
     private void cachedYoutubeAutocomplete(String identifier, CommandAutoCompleteInteractionEvent event) {
-        logger.info("WTF NEXT IS YOUTUBE RESPONSE");
         Tracks tracks;
         try {
             tracks = youtubeRestHandler.searchCached(identifier);
@@ -101,8 +100,7 @@ public class SearchAutocomplete extends AutoComplete {
             emptyChoices(event);
             return;
         }
-        logger.info("NEXT IS YOUTUBE RESPONSE");
-        logger.info("{} {}", tracks, tracks.getItems());
+
         if (tracks.getItems() == null || tracks.getItems().isEmpty()) {
             emptyChoices(event);
             return;
@@ -114,7 +112,7 @@ public class SearchAutocomplete extends AutoComplete {
                     String title = track.title();
                     return new Command.Choice(title, url != null ? url : title);
                 }).toList().subList(0, 25);
-        logger.info(options.toString());
+
         event.replyChoices(options).queue((s) -> {
             logger.info("success");
         }, (e) -> {
