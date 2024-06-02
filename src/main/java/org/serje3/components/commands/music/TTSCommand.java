@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.annotations.JoinVoiceChannel;
 
-
+@Deprecated
 public class TTSCommand extends Command {
     @Override
     public String getName() {

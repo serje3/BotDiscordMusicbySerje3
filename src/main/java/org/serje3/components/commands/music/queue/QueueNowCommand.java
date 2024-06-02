@@ -26,7 +26,10 @@ public class QueueNowCommand extends Command {
 
     @Override
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
-        Link link = client.getLink(event.getGuild().getIdLong());
+        Link link = client.getLinkIfCached(event.getGuild().getIdLong());
+        if (link == null) {
+            event.reply("Скорее всего щас ничего не играет либо я еблан").queue();
+        }
         link.getPlayer().subscribe((player) -> {
             try {
                 if (player.getTrack() == null) throw new NoTrackIsPlayingNow();

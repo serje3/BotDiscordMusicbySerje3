@@ -1,18 +1,15 @@
 package org.serje3.components.commands.music.queue;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
-import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.protocol.Track;
+import dev.arbjerg.lavalink.client.player.Track;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.domain.TrackContext;
 import org.serje3.meta.abs.Command;
 import org.serje3.utils.TrackQueue;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class QueueTracksCommand extends Command {

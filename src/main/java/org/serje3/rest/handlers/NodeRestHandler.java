@@ -1,5 +1,7 @@
 package org.serje3.rest.handlers;
 
+import dev.arbjerg.lavalink.client.NodeOptions;
+import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import org.serje3.rest.base.BaseRestClient;
 import org.serje3.rest.domain.NodeRef;
 
@@ -11,9 +13,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class NodeRestHandler extends BaseRestClient {
-    public List<NodeRef> getNodes() throws ExecutionException, InterruptedException {
+    public List<NodeOptions> getNodes() throws ExecutionException, InterruptedException {
 
-        return this.getList("/lavalink/nodes", NodeRef.class).get();
+        return this.getList("/lavalink/nodes", NodeRef.class).get().stream()
+                .map(node -> new NodeOptions.Builder()
+                        .setName("node_" +node.getId())
+                        .setServerUri(node.getUrl())
+                        .setPassword(node.getPassword())
+                        .build())
+                .toList();
     }
 
     protected CompletableFuture<List<NodeRef>> getList(String url, Class<NodeRef> responseClass) {

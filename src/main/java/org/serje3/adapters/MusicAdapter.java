@@ -2,13 +2,12 @@ package org.serje3.adapters;
 
 import dev.arbjerg.lavalink.client.*;
 
+import dev.arbjerg.lavalink.client.event.*;
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
-import dev.arbjerg.lavalink.protocol.v4.Message;
 import dev.arbjerg.lavalink.protocol.v4.Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import org.serje3.domain.TrackContext;
@@ -16,17 +15,14 @@ import org.serje3.meta.abs.AdapterContext;
 import org.serje3.meta.abs.BaseListenerAdapter;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.decorators.MusicCommandDecorator;
-import org.serje3.rest.domain.NodeRef;
 import org.serje3.rest.handlers.NodeRestHandler;
 import org.serje3.services.MusicService;
-import org.serje3.utils.commands.MusicAdapterContext;
+import org.serje3.utils.context.MusicAdapterContext;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.serje3.BotApplication.Bot;
@@ -88,7 +84,7 @@ public class MusicAdapter extends BaseListenerAdapter {
     }
 
     private void registerLavalinkNodes() {
-        List<NodeRef> nodes = null;
+        List<NodeOptions> nodes = null;
         try {
             nodes = this.nodeRestHandler.getNodes();
         } catch (Exception e) {
@@ -97,15 +93,17 @@ public class MusicAdapter extends BaseListenerAdapter {
         }
 
         if (nodes == null || nodes.isEmpty()) {
-            nodes = List.of(new NodeRef(0, "wss://amsterdam.serje3.ru:443", "DIcsG6lG49wY7rkk", "EUROPE"));
+            nodes = List.of(new NodeOptions.Builder()
+                            .setName("base")
+                            .setServerUri("wss://amsterdam.serje3.ru:443")
+                            .setPassword("DIcsG6lG49wY7rkk")
+                            .setRegionFilter(RegionGroup.EUROPE)
+                    .build());
         }
 
 
         nodes.stream().map(node -> client.addNode(
-                node.getUrl(),
-                URI.create(node.getUrl()),
-                node.getPassword(),
-                RegionGroup.EUROPE
+                node
         )).toList().forEach((node) -> {
             node.on(TrackStartEvent.class).subscribe((data) -> {
                 final LavalinkNode node1 = data.getNode();
@@ -144,11 +142,11 @@ public class MusicAdapter extends BaseListenerAdapter {
     }
 
     private void registerLavalinkListeners() {
-        this.client.on(dev.arbjerg.lavalink.client.ReadyEvent.class).subscribe((event) -> {
+        this.client.on(ReadyEvent.class).subscribe((event) -> {
             final LavalinkNode node = event.getNode();
 
-            System.out.printf(
-                    "Node '%s' is ready, session id is '%s'!%n",
+            logger.info(
+                    "Node '{}' is ready, session id is '{}'!",
                     node.getName(),
                     event.getSessionId()
             );
@@ -158,11 +156,12 @@ public class MusicAdapter extends BaseListenerAdapter {
             final LavalinkNode node = event.getNode();
 
 
-            System.out.printf(
-                    "Node '%s' has stats, current players: %d/%d%n",
+            logger.info(
+                    "Node '{}' has stats, current players: {}/{} (link count {})",
                     node.getName(),
                     event.getPlayingPlayers(),
-                    event.getPlayers()
+                    event.getPlayers(),
+                    client.getLinks().size()
             );
         });
     }
@@ -170,11 +169,5 @@ public class MusicAdapter extends BaseListenerAdapter {
     private void onNextTrack(TrackContext newTrack) {
         TextChannel textChannel = newTrack.getTextChannel();
         musicService.whatsPlayingNowWithoutInteraction(textChannel, newTrack);
-    }
-
-    private boolean checkInteractionValidForDelete(net.dv8tion.jda.api.entities.Message.Interaction interaction) {
-        if (interaction == null) return false;
-        String name = interaction.getName();
-        return name.equals("now") || name.startsWith("play") || name.startsWith("radio");
     }
 }

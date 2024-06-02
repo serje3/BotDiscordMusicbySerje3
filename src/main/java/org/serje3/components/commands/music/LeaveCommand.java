@@ -2,11 +2,12 @@ package org.serje3.components.commands.music;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.protocol.Track;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
 import org.serje3.utils.TrackQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,9 @@ import java.util.Objects;
 import java.util.Random;
 
 public class LeaveCommand extends Command {
+
+    Logger logger = LoggerFactory.getLogger(LeaveCommand.class);
+
     @Override
     public String getName() {
         return "leave";
@@ -28,13 +32,15 @@ public class LeaveCommand extends Command {
     public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
         TrackQueue.clear(event.getGuild().getIdLong());
         event.getJDA().getDirectAudioController().disconnect(Objects.requireNonNull(event.getGuild()));
-        Link link = client.getLink(event.getGuild().getIdLong());
-        link.destroyPlayer().subscribe(System.out::println);
-        event.reply(this.getReplyMessage(event, client)).queue();
+        Link link = client.getLinkIfCached(event.getGuild().getIdLong());
+        if (link != null) {
+            link.destroy().subscribe(u -> logger.info("Destroying link {}", u));
+        }
+        event.reply(this.getReplyMessage(event)).queue();
     }
 
 
-    private String getReplyMessage(SlashCommandInteractionEvent event, LavalinkClient client) {
+    private String getReplyMessage(SlashCommandInteractionEvent event) {
         Random random = new Random();
         List<String> responses = new ArrayList<>();
         String channelName = event.getMember().getVoiceState().getChannel().getName();

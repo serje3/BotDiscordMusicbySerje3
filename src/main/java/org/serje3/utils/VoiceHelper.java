@@ -2,12 +2,10 @@ package org.serje3.utils;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion;
-import dev.arbjerg.lavalink.client.protocol.Track;
+import dev.arbjerg.lavalink.client.player.Track;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +30,7 @@ public class VoiceHelper {
 
     public static void play(Link link, Track track, Integer volume) {
         link.createOrUpdatePlayer()
-                .setEncodedTrack(track.getEncoded())
+                .setTrack(track)
                 .setVolume(volume)
                 .setNoReplace(true)
                 .setEndTime(track.getInfo().getLength())

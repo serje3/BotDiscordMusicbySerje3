@@ -1,11 +1,11 @@
 package org.serje3.services;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
-import dev.arbjerg.lavalink.client.LavalinkPlayer;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.PlayerUpdateBuilder;
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion;
-import dev.arbjerg.lavalink.client.protocol.Track;
+import dev.arbjerg.lavalink.client.player.LavalinkPlayer;
+import dev.arbjerg.lavalink.client.player.PlayerUpdateBuilder;
+import dev.arbjerg.lavalink.client.player.Track;
 import dev.arbjerg.lavalink.internal.JsonParserKt;
 import dev.arbjerg.lavalink.protocol.v4.TrackInfo;
 import io.sentry.Sentry;
@@ -50,7 +50,7 @@ public class MusicService {
     }
 
     public Mono<LavalinkPlayer> pauseMusic(Long guildId, LavalinkClient client) {
-        return client.getLink(guildId)
+        return client.getOrCreateLink(guildId)
                 .getPlayer()
                 .flatMap((player) -> {
                     PlayerUpdateBuilder playerUpdateBuilder = player.setPaused(!player.getPaused());
@@ -72,7 +72,7 @@ public class MusicService {
     public void skipTrack(SlashCommandInteractionEvent event, LavalinkClient client) {
         event.deferReply().queue();
         long guildId = event.getGuild().getIdLong();
-        Link link = client.getLink(event.getGuild().getIdLong());
+        Link link = client.getOrCreateLink(event.getGuild().getIdLong());
         TrackQueue.repeat(guildId, false);
         link.getPlayer().subscribe(player -> {
             try {
@@ -88,7 +88,7 @@ public class MusicService {
     public void skipTrack(ButtonInteractionEvent event, LavalinkClient client) {
         event.deferReply().queue();
         long guildId = event.getGuild().getIdLong();
-        Link link = client.getLink(guildId);
+        Link link = client.getOrCreateLink(guildId);
         TrackQueue.repeat(guildId, false);
         link.getPlayer().subscribe(player -> {
             try {
@@ -158,7 +158,7 @@ public class MusicService {
         TrackQueue.add(guildId, SlashEventHelper.createTrackContextFromEvent(track, member, textChannel));
 
         logger.info("Размер очереди - {}", TrackQueue.size(guildId));
-        Link link = client.getLink(guildId, VoiceRegion.RUSSIA);
+        Link link = client.getOrCreateLink(guildId, VoiceRegion.RUSSIA);
         VoiceHelper.queue(client, link, guildId);
         return true;
     }
@@ -172,7 +172,7 @@ public class MusicService {
         TrackQueue.addAll(guildId, trackContextList);
 
         logger.info("Размер очереди - {}", TrackQueue.size(guildId));
-        Link link = client.getLink(guildId, VoiceRegion.RUSSIA);
+        Link link = client.getOrCreateLink(guildId, VoiceRegion.RUSSIA);
         VoiceHelper.queue(client, link, guildId);
         return true;
     }

@@ -2,9 +2,8 @@ package org.serje3.utils;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.protocol.Track;
+import dev.arbjerg.lavalink.client.player.Track;
 import org.serje3.domain.TrackContext;
-import org.serje3.utils.exceptions.NoTrackIsPlayingNow;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 
 import java.util.*;
@@ -50,7 +49,7 @@ public class TrackQueue {
         }
         Track track = trackContext.getTrack();
         System.out.println("BLYAT   " + TrackQueue.tracksQueue.get(guildId));
-        Link link = client.getLink(guildId);
+        Link link = client.getOrCreateLink(guildId);
         System.out.println("Next track is " + track.getInfo().getTitle() + " in guild " + guildId);
         VoiceHelper.play(link, track, 35);
         tracksNow.put(guildId, trackContext);

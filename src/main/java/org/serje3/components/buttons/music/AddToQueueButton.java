@@ -1,10 +1,10 @@
 package org.serje3.components.buttons.music;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
-import dev.arbjerg.lavalink.client.protocol.LoadFailed;
-import dev.arbjerg.lavalink.client.protocol.NoMatches;
-import dev.arbjerg.lavalink.client.protocol.Track;
-import dev.arbjerg.lavalink.client.protocol.TrackLoaded;
+import dev.arbjerg.lavalink.client.player.LoadFailed;
+import dev.arbjerg.lavalink.client.player.NoMatches;
+import dev.arbjerg.lavalink.client.player.Track;
+import dev.arbjerg.lavalink.client.player.TrackLoaded;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -47,7 +47,7 @@ public class AddToQueueButton extends Button {
         String url = embed.getUrl();
 
         assert url != null;
-        client.getLink(guildId)
+        client.getOrCreateLink(guildId)
                 .loadItem(url)
                 .subscribe((item) -> {
                     if (item instanceof TrackLoaded trackLoaded) {

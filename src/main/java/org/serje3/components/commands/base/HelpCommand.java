@@ -10,9 +10,9 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.serje3.meta.abs.Command;
-import org.serje3.utils.commands.DefaultAdapterContext;
-import org.serje3.utils.commands.LogAdapterContext;
-import org.serje3.utils.commands.MusicAdapterContext;
+import org.serje3.utils.context.DefaultAdapterContext;
+import org.serje3.utils.context.LogAdapterContext;
+import org.serje3.utils.context.MusicAdapterContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,15 +80,15 @@ public class HelpCommand extends Command {
         List<MessageEmbed.Field> fields = new ArrayList<>();
         fields.add(new MessageEmbed.Field("Музыка", "", false, false));
         musicCommandList.forEachCommand(command ->
-                fields.add(new MessageEmbed.Field("/" + command.getName(), command.getDescription(), true, true)));
+                fields.add(new MessageEmbed.Field("/" + command.getCommandName(), command.getDescription(), true, true)));
         fields.add(new MessageEmbed.Field("", "", false, false));
         fields.add(new MessageEmbed.Field("Информация и статистика", "", false, false));
         logCommandList.forEachCommand(command ->
-                fields.add(new MessageEmbed.Field("/" + command.getName(), command.getDescription(), true)));
+                fields.add(new MessageEmbed.Field("/" + command.getCommandName(), command.getDescription(), true)));
         fields.add(new MessageEmbed.Field("", "", false, false));
         fields.add(new MessageEmbed.Field("Помощь различного рода", "", false, false));
         defaultCommandList.forEachCommand(command ->
-                fields.add(new MessageEmbed.Field("/" + command.getName(), command.getDescription(), true)));
+                fields.add(new MessageEmbed.Field("/" + command.getCommandName(), command.getDescription(), true)));
         return fields;
     }
 }

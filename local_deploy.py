@@ -23,12 +23,13 @@ def local_deploy(hostname, username, password, local_build, app_dir):
     scp.put(local_build, app_dir, callback=lambda x1, x2: print(x1, x2))
     print("Sended build zip to server")
     scp.close()
+    service_name = os.environ.get('SERVICE_NAME')
 
     commands = [
         "cd " + os.environ.get('APP_DIR'),
-        "systemctl stop cocker.service",
+        f"systemctl stop {service_name}",
         "unzip -o " + file_name,
-        "systemctl start cocker.service"
+        f"systemctl start {service_name}"
     ]
 
     _, stdout, err = client.exec_command('; '.join(commands))

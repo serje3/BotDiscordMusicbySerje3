@@ -34,8 +34,8 @@ repositories {
 }
 
 dependencies {
-    implementation "dev.arbjerg:lavalink-client:2.2.0"
-    implementation "dev.arbjerg:lavaplayer:2.0.2"
+    implementation "dev.arbjerg:lavalink-client:3.0.0"
+    implementation "dev.arbjerg:lavaplayer:2.1.2"
     implementation "net.dv8tion:JDA:5.0.0-beta.15"
     implementation "com.github.topi314.lavasearch:lavasearch:1.0.0-beta.2"
     implementation "com.github.topi314.lavasrc:lavasrc:4.0.0-beta.7"
@@ -101,16 +101,16 @@ compileTestKotlin {
     }
 }
 
-sentry {
-    // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
-    // This enables source context, allowing you to see your source
-    // code as part of your stack traces in Sentry.
-    includeSourceContext = true
-
-    org = "sergey-erin"
-    projectName = "java"
-    authToken = System.getenv("SENTRY_AUTH_TOKEN")
-}
+//sentry {
+//    // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
+//    // This enables source context, allowing you to see your source
+//    // code as part of your stack traces in Sentry.
+//    includeSourceContext = true
+//
+//    org = "sergey-erin"
+//    projectName = "java"
+//    authToken = System.getenv("SENTRY_AUTH_TOKEN")
+//}
 
 tasks.register("deploy", Exec) {
     dependsOn build

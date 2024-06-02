@@ -1,16 +1,21 @@
 package org.serje3.components.commands.music.queue;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
-import dev.arbjerg.lavalink.client.protocol.*;
+import dev.arbjerg.lavalink.client.player.*;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import org.serje3.components.buttons.music.AddToQueueButton;
 import org.serje3.components.commands.music.PlayCommand;
+import org.serje3.meta.abs.Command;
 import org.serje3.meta.annotations.JoinVoiceChannel;
 import org.serje3.meta.enums.PlaySourceType;
 import org.serje3.rest.domain.Tracks;
 import org.serje3.rest.handlers.YoutubeRestHandler;
+import org.serje3.services.MusicService;
 import org.serje3.utils.VoiceHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +23,69 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class QueueCommand extends PlayCommand {
+public class QueueCommand extends Command {
+    private final MusicService musicService = new MusicService();
     private final YoutubeRestHandler youtubeRestHandler = new YoutubeRestHandler();
     private final Logger logger = LoggerFactory.getLogger(QueueCommand.class);
+
+    @Override
+    public String getName() {
+        return "play";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Включает музыку. Доступно для выбора несколько источников воспроизведения";
+    }
+
+    @Override
+    public SlashCommandData getSlashCommand() {
+        return super.getSlashCommand()
+                .addSubcommands(
+                        new SubcommandData(PlaySourceType.YOUTUBE.name().toLowerCase(), "Поиск из ютуба")
+                                .addOption(
+                                        OptionType.STRING,
+                                        "текст".toLowerCase(),
+                                        "Строка поиска youtube",
+                                        true,
+                                        true
+                                ),
+                        new SubcommandData(PlaySourceType.SOUNDCLOUD.name().toLowerCase(), "Поиск из soundclound")
+                                .addOption(
+                                        OptionType.STRING,
+                                        "текст",
+                                        "Строка поиска soundcloud",
+                                        true,
+                                        true
+                                ),
+                        new SubcommandData(PlaySourceType.YANDEXMUSIC.name().toLowerCase(), "Поиск из Yandex Music")
+                                .addOption(
+                                        OptionType.STRING,
+                                        "текст",
+                                        "Строка поиска Yandex Music",
+                                        true,
+                                        true
+                                ),
+                        new SubcommandData(PlaySourceType.SPOTIFY.name().toLowerCase(), "Поиск из spotify")
+                                .addOption(
+                                        OptionType.STRING,
+                                        "текст",
+                                        "Строка поиска Spotify",
+                                        true,
+                                        true
+                                ),
+                        new SubcommandData(PlaySourceType.YOUTUBEMUSIC.name().toLowerCase(), "Поиск из Youtube Music")
+                                .addOption(
+                                        OptionType.STRING,
+                                        "текст",
+                                        "Строка поиска Youtube Music",
+                                        true,
+                                        true
+                                ),
+                        new SubcommandData(PlaySourceType.LOCAL.name().toLowerCase(), "Проигрывание из локальных файлов")
+                                .addOption(OptionType.ATTACHMENT, "файл", "wdasdksdaasdjasdjkl")
+                );
+    }
 
     @Override
     @JoinVoiceChannel
@@ -66,7 +131,11 @@ public class QueueCommand extends PlayCommand {
         return track.getYoutubeURL();
     }
 
-    @Override
+    public void play(LavalinkClient client, SlashCommandInteractionEvent event,
+                     Long guildId, String identifier) {
+        this.play(client, event, guildId, identifier, 35);
+    }
+
     public void play(LavalinkClient client, SlashCommandInteractionEvent event,
                      Long guildId, String identifier, Integer volume) {
         System.out.println("IDENTIFIER:" + identifier);
@@ -76,7 +145,7 @@ public class QueueCommand extends PlayCommand {
             return;
         }
         logger.info("Now {} nodes active", client.getNodes().size());
-        client.getLink(guildId).loadItem(identifier)
+        client.getOrCreateLink(guildId).loadItem(identifier)
                 .subscribe((item) -> {
                     System.out.println(item);
                     if (item instanceof TrackLoaded trackLoaded) {

@@ -103,15 +103,15 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
     }
 
     private void registerCommands() {
-        getAdapterContext().forEachCommand(command -> this.commands.put(command.getName(), convertCommand(command)));
+        getAdapterContext().forEachCommand(command -> this.commands.put(command.getCommandName(), convertCommand(command)));
     }
 
     private void registerButtons() {
-        getAdapterContext().forEachButton(button -> this.buttons.put(button.getComponentId(), convertButton(button)));
+        getAdapterContext().forEachButton(button -> this.buttons.put(button.getButtonComponentId(), convertButton(button)));
     }
 
     private void registerAutoComplete(){
-        getAdapterContext().forEachAutoComplete(autoComplete -> this.autoComplete.put(autoComplete.getName(), convertAutoComplete(autoComplete)));
+        getAdapterContext().forEachAutoComplete(autoComplete -> this.autoComplete.put(autoComplete.getAutoCompleteName(), convertAutoComplete(autoComplete)));
     }
 
     private String getLogPrefix(){

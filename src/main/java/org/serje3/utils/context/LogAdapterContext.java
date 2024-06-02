@@ -1,4 +1,4 @@
-package org.serje3.utils.commands;
+package org.serje3.utils.context;
 
 import org.serje3.components.commands.log.DickCommand;
 import org.serje3.components.commands.log.InfoCommand;

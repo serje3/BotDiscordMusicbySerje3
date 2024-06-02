@@ -1,4 +1,4 @@
-package org.serje3.utils.commands;
+package org.serje3.utils.context;
 
 import org.serje3.components.autocomplete.music.SearchAutocomplete;
 import org.serje3.components.buttons.music.*;
@@ -19,7 +19,6 @@ public class MusicAdapterContext extends AdapterContext {
                 add(PauseCommand.class);
                 add(JoinCommand.class);
                 add(LeaveCommand.class);
-                add(TTSCommand.class);
                 add(QueueCommand.class);
                 add(QueueTracksCommand.class);
                 add(QueueSkipCommand.class);

@@ -41,7 +41,7 @@ public class NormalizeFilterCommand extends Command {
                 defaultFilters.getLowPass(),
                 defaultFilters.getPluginFilters());
         System.out.println(filters.getVolume() + " " + filters.getEqualizer());
-        client.getLink(event.getGuild().getIdLong()).createOrUpdatePlayer()
+        client.getOrCreateLink(event.getGuild().getIdLong()).createOrUpdatePlayer()
                 .setFilters(filters)
                 .subscribe(p -> {
                     System.out.println(p);

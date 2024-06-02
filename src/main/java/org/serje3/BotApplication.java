@@ -38,7 +38,7 @@ public class BotApplication {
                 .setVoiceDispatchInterceptor(new JDAVoiceUpdateListener(client))
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES)
                 .enableCache(CacheFlag.VOICE_STATE)
-                .setActivity(Activity.customStatus("иди нахуй"))
+                .setActivity(Activity.customStatus("я sosu"))
                 .build();
         Bot.awaitReady();
         // Bot is ready
@@ -47,7 +47,7 @@ public class BotApplication {
         LogAdapter logAdapter = new LogAdapter();
         MusicAdapter musicAdapter = new MusicAdapter(client);
         DefaultAdapter defaultAdapter = new DefaultAdapter();
-        // Clear commands
+        // Clear context
         Bot.updateCommands()
                 .addCommands(new ArrayList<>() {
                     {
