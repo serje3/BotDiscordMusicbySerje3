@@ -30,7 +30,7 @@ public class AddToQueueButton extends Button {
 
     @Override
     public ButtonType getButtonType() {
-        return ButtonType.PRIMARY;
+        return ButtonType.SECONDARY;
     }
 
     @Override
@@ -73,7 +73,7 @@ public class AddToQueueButton extends Button {
 
     @Override
     public Emoji getLabelEmoji() {
-        return Emoji.fromFormatted("➕");
+        return Emoji.fromFormatted("<:Plus48ThemeFilled:1248968099387019274>");
     }
 
 

@@ -21,7 +21,7 @@ public class SkipButton extends Button {
 
     @Override
     public Emoji getLabelEmoji() {
-        return Emoji.fromFormatted("⏭\uFE0F");
+        return Emoji.fromFormatted("<:Skip48ThemeFilled:1248968712459915285>");
     }
 
     @Override

@@ -20,7 +20,7 @@ public class PausePlayButton extends Button {
 
     @Override
     public Emoji getLabelEmoji() {
-        return Emoji.fromFormatted("▶\uFE0F");
+        return Emoji.fromFormatted("<:Play48ThemeFilled:1248965623971708988>");
     }
 
     @Override

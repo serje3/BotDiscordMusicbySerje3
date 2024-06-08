@@ -21,7 +21,7 @@ public class RepeatButton extends Button {
 
     @Override
     public Emoji getLabelEmoji() {
-        return Emoji.fromFormatted("\uD83D\uDD01");
+        return Emoji.fromFormatted("<:Repeat24ThemeFilled2X:1248966142098411622>");
     }
 
     @Override
