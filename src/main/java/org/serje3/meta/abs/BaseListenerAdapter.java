@@ -14,6 +14,8 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 import org.serje3.meta.interfaces.ContainSlashCommands;
 import org.serje3.rest.handlers.EventRestHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,10 +30,15 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
     protected final HashMap<String, Button> buttons = new HashMap<>();
     protected final HashMap<String, AutoComplete> autoComplete = new HashMap<>();
     protected LavalinkClient client;
+    private Logger logger;
 
     public BaseListenerAdapter() {
+        logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
+        logger.info("register commands {}", getAdapterContext().getCommands().size());
         registerCommands();
+        logger.info("register buttons {}", getAdapterContext().getButtons().size());
         registerButtons();
+        logger.info("register autocompletes {}", getAdapterContext().getAutoCompletes().size());
         registerAutoComplete();
     }
 
@@ -61,9 +68,9 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
     public void onButtonInteraction(ButtonInteractionEvent event) {
         Button button = this.buttons.get(event.getComponentId());
         if (button != null) {
-            try{
+            try {
                 button.handle(event, client);
-            } catch (Exception ex){
+            } catch (Exception ex) {
                 Sentry.captureException(ex);
                 throw ex;
             }
@@ -74,7 +81,7 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
     public void onCommandAutoCompleteInteraction(CommandAutoCompleteInteractionEvent event) {
         AutoComplete complete = this.autoComplete.get(event.getName());
         if (complete != null) {
-            try{
+            try {
                 complete.handle(event, client);
             } catch (Exception e) {
                 Sentry.captureException(e);
@@ -90,31 +97,43 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
 
     protected abstract AdapterContext getAdapterContext();
 
-    protected Command convertCommand(Command command){
+    protected Command convertCommand(Command command) {
         return command;
     }
 
-    protected Button convertButton(Button button){
+    protected Button convertButton(Button button) {
         return button;
     }
 
-    protected AutoComplete convertAutoComplete(AutoComplete autoComplete){
+    protected AutoComplete convertAutoComplete(AutoComplete autoComplete) {
         return autoComplete;
     }
 
     private void registerCommands() {
-        getAdapterContext().forEachCommand(command -> this.commands.put(command.getCommandName(), convertCommand(command)));
+        getAdapterContext().forEachCommand(command -> {
+            logger.info("___registering command {}", command.getCommandName());
+            this.commands.put(command.getCommandName(), convertCommand(command));
+            return null;
+        });
     }
 
     private void registerButtons() {
-        getAdapterContext().forEachButton(button -> this.buttons.put(button.getButtonComponentId(), convertButton(button)));
+        getAdapterContext().forEachButton(button -> {
+            logger.info("___registering button for component id {}", button.getButtonComponentId());
+            this.buttons.put(button.getButtonComponentId(), convertButton(button));
+            return null;
+        });
     }
 
-    private void registerAutoComplete(){
-        getAdapterContext().forEachAutoComplete(autoComplete -> this.autoComplete.put(autoComplete.getAutoCompleteName(), convertAutoComplete(autoComplete)));
+    private void registerAutoComplete() {
+        getAdapterContext().forEachAutoComplete(autoComplete -> {
+            logger.info("___registering autocomplete for command {}", autoComplete.getName());
+            this.autoComplete.put(autoComplete.getAutoCompleteName(), convertAutoComplete(autoComplete));
+            return null;
+        });
     }
 
-    private String getLogPrefix(){
-        return "[" + this.getClass().getName() + "] ";
+    private String getLogPrefix() {
+        return "[" + this.getClass().getSimpleName() + "] ";
     }
 }

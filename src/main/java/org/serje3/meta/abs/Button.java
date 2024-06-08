@@ -17,7 +17,6 @@ public abstract class Button {
             isTest = BotConfig.getProperty("test").equals("true");
         } catch (IOException ignored) {
         }
-
         String prefix = isTest ? "test_" : "";
         return prefix + getComponentId();
     };

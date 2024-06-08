@@ -42,7 +42,7 @@ public class BotApplication {
                 .build();
         Bot.awaitReady();
         // Bot is ready
-        System.out.println("BOT IS READY");
+        System.out.println("BOT IS READY!!!!");
 
         LogAdapter logAdapter = new LogAdapter();
         MusicAdapter musicAdapter = new MusicAdapter(client);

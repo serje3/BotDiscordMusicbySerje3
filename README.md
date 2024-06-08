@@ -3,6 +3,7 @@
 ## Deploy
 Python 3.10
 
+Must be test=true or false set in bot.properties on server
 ```shell
 python -m virtualenv venv
 source ./venv/bin/activate

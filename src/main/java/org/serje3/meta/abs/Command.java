@@ -20,6 +20,7 @@ public abstract class Command {
         } catch (IOException ignored) {
         }
 
+
         String prefix = isTest ? "test_" : "";
         return prefix + getName();
     }

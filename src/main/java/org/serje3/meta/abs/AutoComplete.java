@@ -15,8 +15,8 @@ public abstract class AutoComplete {
         } catch (IOException ignored) {
         }
 
-        String prefix = isTest ? "test_" : "";
 
+        String prefix = isTest ? "test_" : "";
         return prefix + getName();
     }
     public abstract void handle(CommandAutoCompleteInteractionEvent event, LavalinkClient client);
