@@ -5,6 +5,8 @@ import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.player.Track;
 import org.serje3.domain.TrackContext;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TrackQueue {
     private static final ConcurrentHashMap<Long, Deque<TrackContext>> tracksQueue = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Long, TrackContext> tracksNow = new ConcurrentHashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(TrackQueue.class);
 
     private static void init(Long guildId) {
         Set<Long> keySet = tracksQueue.keySet();
@@ -37,7 +40,7 @@ public class TrackQueue {
         init(guildId);
         TrackContext trackNow = peekNow(guildId);
         TrackContext trackContext;
-        if (emitByEvent && trackNow != null && trackNow.isRepeat()){
+        if (emitByEvent && trackNow != null && trackNow.isRepeat()) {
             trackContext = trackNow;
         } else {
             trackContext = TrackQueue.pop(guildId);
@@ -48,22 +51,22 @@ public class TrackQueue {
             throw new NoTracksInQueueException();
         }
         Track track = trackContext.getTrack();
-        System.out.println("BLYAT   " + TrackQueue.tracksQueue.get(guildId));
+        logger.info("Guild: {}. Current tracks in queue is {}",guildId, TrackQueue.tracksQueue.get(guildId));
         Link link = client.getOrCreateLink(guildId);
-        System.out.println("Next track is " + track.getInfo().getTitle() + " in guild " + guildId);
+        logger.info("Guild: {}. Next track is {}", guildId, track.getInfo().getTitle());
         VoiceHelper.play(link, track, 35);
         tracksNow.put(guildId, trackContext);
         return trackContext;
     }
 
-    public static TrackContext repeat(Long guildId, Boolean repeat){
+    public static TrackContext repeat(Long guildId, Boolean repeat) {
         return tracksNow.computeIfPresent(guildId, (id, trackContext) -> {
             trackContext.setRepeat(repeat);
             return trackContext;
         });
     }
 
-    public static void pause(Long guildId, boolean paused){
+    public static void pause(Long guildId, boolean paused) {
         tracksNow.computeIfPresent(guildId, (id, trackContext) -> {
             trackContext.setPaused(paused);
             return trackContext;
@@ -77,7 +80,7 @@ public class TrackQueue {
         return updatedTrackContext.isRepeat();
     }
 
-    public static TrackContext peekNow(Long guildId){
+    public static TrackContext peekNow(Long guildId) {
         init(guildId);
         return tracksNow.get(guildId);
     }
