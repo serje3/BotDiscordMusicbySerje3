@@ -43,5 +43,6 @@ public class QueueNowCommand extends Command {
             } catch (NoTrackIsPlayingNow e) {
                 event.reply(e.getMessage()).queue();
             }
-        });    }
+        });
+    }
 }

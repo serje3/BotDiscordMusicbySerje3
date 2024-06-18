@@ -13,11 +13,11 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.serje3.adapters.DefaultAdapter;
 import org.serje3.adapters.LogAdapter;
 import org.serje3.adapters.MusicAdapter;
+import org.serje3.config.BotConfig;
 import org.serje3.services.LavalinkService;
 import org.serje3.utils.SentryUtil;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class BotApplication {
@@ -36,11 +36,13 @@ public class BotApplication {
 
         Sentry.captureMessage("Bot is starting", SentryLevel.DEBUG);
 
+        boolean isTest = Boolean.parseBoolean(BotConfig.getProperty("test"));
+
         Bot = JDABuilder.createDefault(token)
                 .setVoiceDispatchInterceptor(new JDAVoiceUpdateListener(clientService.getClient()))
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES)
                 .enableCache(CacheFlag.VOICE_STATE)
-                .setActivity(Activity.customStatus("я sosu"))
+                .setActivity(Activity.customStatus(isTest ? "я sosu" : "идите нахуй"))
                 .build();
         Bot.awaitReady();
         // Bot is ready

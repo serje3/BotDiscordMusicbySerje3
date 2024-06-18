@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
@@ -62,8 +63,22 @@ public class MusicService {
         if (track == null || player.getPosition() >= track.getInfo().getLength()) {
             throw new NoTrackIsPlayingNow();
         }
-        ;
-        return VoiceHelper.wrapTrackEmbed(track, member, "");
+
+        Duration position = Duration.ofMillis(player.getPosition() < 0 ? 0 : player.getPosition());
+        Duration length = Duration.ofMillis(player.getTrack().getInfo().getLength());
+
+
+        String description = "";
+        String positionTiming = String.format("%02d", position.toMinutes() % 60) + ":" + String.format("%02d", position.toSeconds() % 60);
+        String lengthTiming = String.format("%02d", length.toMinutes() % 60) + ":" + String.format("%02d", length.toSeconds() % 60);
+        if (length.toHours() > 0) {
+            description = position.toHours() + ":" + positionTiming
+                    + " / " + length.toHours() + ":" + lengthTiming;
+        } else {
+            description = positionTiming + " / " + lengthTiming;
+        }
+
+        return VoiceHelper.wrapTrackEmbed(track, member, description);
     }
 
     public void skipTrack(SlashCommandInteractionEvent event) {
