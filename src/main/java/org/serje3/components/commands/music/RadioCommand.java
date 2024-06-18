@@ -88,7 +88,7 @@ public class RadioCommand extends Command {
                             title,
                             "В my anal играет",
                             "Gachi bass radio",
-                            song.getArt(),
+                            "https://i.ytimg.com/vi/akHAQD3o1NA/maxresdefault_live.jpg",
                             event.getMember(),
                             song.getArtist(),
                             song.getArt()
