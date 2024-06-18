@@ -36,6 +36,7 @@ public class LavalinkService {
 
 
     private LavalinkService() {
+        logger.info("Creating LavalinkService...");
         String token = System.getenv("BOT_TOKEN");
         if (token == null) {
             throw new RuntimeException("No token provided");
@@ -45,8 +46,9 @@ public class LavalinkService {
 
         client.getLoadBalancer().addPenaltyProvider(new VoiceRegionPenaltyProvider());
 
-        nodeService = new NodeService();
+        nodeService = new NodeService(this);
         nodeService.register();
+        logger.info("LavalinkService created");
     }
 
 
@@ -56,7 +58,5 @@ public class LavalinkService {
         }
         return instance;
     }
-
-
 
 }

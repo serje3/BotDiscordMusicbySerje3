@@ -17,6 +17,7 @@ import org.serje3.utils.exceptions.NoTracksInQueueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.serje3.BotApplication.Bot;
@@ -28,19 +29,30 @@ public class NodeService {
             Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason.REPLACED
     );
 
-    public void register(){
-        registerLavalinkNodes();
+    private final LavalinkService lavalinkService;
+
+    public NodeService(LavalinkService service) {
+        this.lavalinkService = service;
+    }
+
+    public NodeService() {
+        this.lavalinkService = LavalinkService.getInstance();
+    }
+
+    public void register() {
         registerLavalinkListeners();
+        registerLavalinkNodes();
         registerLavalinkWebsocketClosed();
     }
 
     private void registerLavalinkNodes() {
         List<NodeOptions> nodes = null;
         try {
+            logger.info("Getting nodes");
             nodes = this.nodeRestHandler.getNodes();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             Sentry.captureException(e);
+            logger.error(e.getMessage());
         }
 
         if (nodes == null || nodes.isEmpty()) {
@@ -52,7 +64,7 @@ public class NodeService {
                     .build());
         }
 
-        nodes.stream().map(LavalinkService.getInstance().getClient()::addNode).toList().forEach((node) -> {
+        nodes.stream().map(lavalinkService.getClient()::addNode).toList().forEach((node) -> {
             node.on(TrackStartEvent.class).subscribe((data) -> {
                 final LavalinkNode chosenNode = data.getNode();
                 final var event = data;
@@ -91,7 +103,7 @@ public class NodeService {
     }
 
     private void registerLavalinkListeners() {
-        LavalinkClient client = LavalinkService.getInstance().getClient();
+        LavalinkClient client = lavalinkService.getClient();
         client.on(ReadyEvent.class).subscribe((event) -> {
             final LavalinkNode node = event.getNode();
 
@@ -106,6 +118,15 @@ public class NodeService {
         client.on(StatsEvent.class).subscribe((event) -> {
             final LavalinkNode node = event.getNode();
 
+            Duration duration = Duration.ofMillis(event.getUptime());
+
+            // Получение целых дней, часов, минут, секунд и миллисекунд
+            long days = duration.toDays();
+            long hours = duration.toHours() % 24;
+            long minutes = duration.toMinutes() % 60;
+            long seconds = duration.getSeconds() % 60;
+
+            String upTimeFormatted = days + " дней " + String.format("%02d", hours) + ":" + String.format("%02d", minutes) + ":" + seconds;
 
             logger.info(
                     "Node '{}' has stats, current players: {}/{} (link count {}). Lavalink load {}. System load {}. Cores {}. Memory {}/{}. Up time {}",
@@ -113,18 +134,18 @@ public class NodeService {
                     event.getPlayingPlayers(),
                     event.getPlayers(),
                     client.getLinks().size(),
-                    event.getCpu().getLavalinkLoad(),
-                    event.getCpu().getSystemLoad(),
+                    Math.round(event.getCpu().getLavalinkLoad() * 100) + "%",
+                    Math.round(event.getCpu().getSystemLoad() * 100) + "%",
                     event.getCpu().getCores(),
                     event.getMemory().getUsed(),
                     event.getMemory().getReservable(),
-                    event.getUptime()
+                    upTimeFormatted
             );
         });
     }
 
     private void registerLavalinkWebsocketClosed() {
-        LavalinkClient client = LavalinkService.getInstance().getClient();
+        LavalinkClient client = lavalinkService.getClient();
 
         client.on(WebSocketClosedEvent.class).subscribe((event) -> {
             logger.warn("Websocket closed Code: {}, Reason: {}", event.getCode(), event.getReason());

@@ -37,7 +37,8 @@ public abstract class AbstractBaseClient {
 
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
-                    System.out.println(response + " body:" + response.body() + " " + responseClass);
+                    String body = response.body();
+                    System.out.println(response + " body:" + (body.length() > 300 ? body.substring(0, 300) + "(truncated " + (body.length() - 300) + " symbols)" : body) + " " + responseClass);
                     return fromJson(response.body(), responseClass);
                 });
     }
@@ -90,11 +91,8 @@ public abstract class AbstractBaseClient {
     }
 
 
-    protected  <T> T fromJson(String json, Class<T> def) {
-        System.out.println("CALLED json:" + json + " " + def);
-        T t = gson.fromJson(json, def);
-        System.out.println("WTF:" + json + " " + t + " " + def);
-        return t;
+    protected <T> T fromJson(String json, Class<T> def) {
+        return gson.fromJson(json, def);
     }
 
     protected <T> List<T> fromJsonList(String json, Class<T> clazz) {
