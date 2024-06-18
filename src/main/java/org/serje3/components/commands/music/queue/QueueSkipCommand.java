@@ -21,7 +21,7 @@ public class QueueSkipCommand extends Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
-        musicService.skipTrack(event, client);
+    public void execute(SlashCommandInteractionEvent event) {
+        musicService.skipTrack(event);
     }
 }

@@ -1,7 +1,5 @@
 package org.serje3.components.commands.music;
 
-import dev.arbjerg.lavalink.client.LavalinkClient;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -77,22 +75,8 @@ public class PlayCommand extends Command {
 
     @Override
     @JoinVoiceChannel
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
-        final Guild guild = event.getGuild();
-
-        final String identifier = event.getOption("текст").getAsString();
-        final long guildId = guild.getIdLong();
-
-        this.play(client, event, guildId, musicService.getSearchPrefix(event.getSubcommandName(), identifier) + identifier);
+    public void execute(SlashCommandInteractionEvent event) {
+        // Nothing
     }
 
-    public void play(LavalinkClient client, SlashCommandInteractionEvent event,
-                     Long guildId, String identifier) {
-        this.play(client, event, guildId, identifier, 35);
-    }
-
-    public void play(LavalinkClient client, SlashCommandInteractionEvent event,
-                     Long guildId, String identifier, Integer volume) {
-
-    }
 }

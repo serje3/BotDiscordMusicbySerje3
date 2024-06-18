@@ -20,7 +20,7 @@ public class PauseCommand extends Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
-        musicService.pauseMusic(event, client);
+    public void execute(SlashCommandInteractionEvent event) {
+        musicService.pauseMusic(event);
     }
 }

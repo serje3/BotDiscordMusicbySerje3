@@ -34,7 +34,7 @@ public class HelpCommand extends Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+    public void execute(SlashCommandInteractionEvent event) {
         event.replyEmbeds(createHelpEmbed(event))
                 .addActionRow(
                         Button.link("https://vk.com/club200458779", Emoji.fromFormatted("<:VK_EMOJI:1170054842077683842>")),
@@ -49,7 +49,6 @@ public class HelpCommand extends Command {
         Member member = event.getMember();
         String memberName = member != null ? member.getEffectiveName() : null;
         String memberAvatar = member != null ? member.getAvatarUrl() : null;
-        String memberMention = member != null ? member.getAsMention() : null;
 
         return new MessageEmbed(
                 null,

@@ -23,7 +23,7 @@ public abstract class Button {
 
     public abstract ButtonType getButtonType();
 
-    public abstract void handle(ButtonInteractionEvent event, LavalinkClient client);
+    public abstract void handle(ButtonInteractionEvent event);
 
     public abstract String getLabel();
 

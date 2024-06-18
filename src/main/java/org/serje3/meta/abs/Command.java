@@ -35,5 +35,5 @@ public abstract class Command {
         return Commands.slash(getCommandName(), description.length() > 99 ? description.substring(0, 99) : description);
     }
 
-    public abstract void execute(SlashCommandInteractionEvent event, LavalinkClient client);
+    public abstract void execute(SlashCommandInteractionEvent event);
 }

@@ -1,8 +1,6 @@
 package org.serje3.services;
 
-import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion;
 import dev.arbjerg.lavalink.client.player.LavalinkPlayer;
 import dev.arbjerg.lavalink.client.player.PlayerUpdateBuilder;
 import dev.arbjerg.lavalink.client.player.Track;
@@ -15,6 +13,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.serje3.components.buttons.music.*;
 import org.serje3.config.GuildConfig;
@@ -29,8 +28,6 @@ import org.serje3.utils.exceptions.NoTrackIsPlayingNow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -42,15 +39,15 @@ public class MusicService {
     private final DickRestHandler dickRestHandler = new DickRestHandler();
     private final Logger logger = LoggerFactory.getLogger(MusicService.class);
 
-    public void pauseMusic(SlashCommandInteractionEvent event, LavalinkClient client) {
-        pauseMusic(event.getGuild().getIdLong(), client)
+    public void pauseMusic(SlashCommandInteractionEvent event) {
+        pauseMusic(event.getGuild().getIdLong())
                 .subscribe((player) -> {
                     event.reply("Плеер " + (player.getPaused() ? "на паузе" : "возобновлён") + "!").queue();
                 },  Sentry::captureException);
     }
 
-    public Mono<LavalinkPlayer> pauseMusic(Long guildId, LavalinkClient client) {
-        return client.getOrCreateLink(guildId)
+    public Mono<LavalinkPlayer> pauseMusic(Long guildId) {
+        return LavalinkService.getInstance().getLink(guildId)
                 .getPlayer()
                 .flatMap((player) -> {
                     PlayerUpdateBuilder playerUpdateBuilder = player.setPaused(!player.getPaused());
@@ -69,35 +66,28 @@ public class MusicService {
         return VoiceHelper.wrapTrackEmbed(track, member, "");
     }
 
-    public void skipTrack(SlashCommandInteractionEvent event, LavalinkClient client) {
+    public void skipTrack(SlashCommandInteractionEvent event) {
         event.deferReply().queue();
-        long guildId = event.getGuild().getIdLong();
-        Link link = client.getOrCreateLink(event.getGuild().getIdLong());
-        TrackQueue.repeat(guildId, false);
-        link.getPlayer().subscribe(player -> {
-            try {
-                event.getHook().sendMessage(skipTrack(event.getMember(), link, player)).queue();
-            } catch (NoTrackIsPlayingNow e) {
-                event.getHook().sendMessage(e.getMessage()).queue();
-            }
-        }, (e) -> {
-            event.getHook().sendMessage("Что-то пошло не по плану (а возможно и по плану)").queue();
-        });
+        skipTrack(event.getMember(), event.getHook());
     }
 
-    public void skipTrack(ButtonInteractionEvent event, LavalinkClient client) {
+    public void skipTrack(ButtonInteractionEvent event) {
         event.deferReply().queue();
-        long guildId = event.getGuild().getIdLong();
-        Link link = client.getOrCreateLink(guildId);
+        skipTrack(event.getMember(), event.getHook());
+    }
+
+    public void skipTrack(Member member, InteractionHook interactionHook) {
+        Long guildId = member.getGuild().getIdLong();
+        Link link = LavalinkService.getInstance().getLink(guildId);
         TrackQueue.repeat(guildId, false);
         link.getPlayer().subscribe(player -> {
             try {
-                event.getHook().sendMessage(skipTrack(event.getMember(), link, player)).queue();
+                interactionHook.sendMessage(skipTrack(member, link, player)).queue();
             } catch (NoTrackIsPlayingNow e) {
-                event.getHook().sendMessage(e.getMessage()).queue();
+                interactionHook.sendMessage(e.getMessage()).queue();
             }
         }, (e) -> {
-            event.getHook().sendMessage("Что-то пошло не по плану (а возможно и по плану)").queue();
+            interactionHook.sendMessage("Что-то пошло не по плану (а возможно и по плану)").queue();
         });
     }
 
@@ -150,7 +140,7 @@ public class MusicService {
         }
     }
 
-    public boolean queue(Track track, Long guildId, Member member, TextChannel textChannel, LavalinkClient client) {
+    public boolean queue(Track track, Long guildId, Member member, TextChannel textChannel) {
         if (track == null) {
             return false;
         }
@@ -158,12 +148,12 @@ public class MusicService {
         TrackQueue.add(guildId, SlashEventHelper.createTrackContextFromEvent(track, member, textChannel));
 
         logger.info("Размер очереди - {}", TrackQueue.size(guildId));
-        Link link = client.getOrCreateLink(guildId, VoiceRegion.RUSSIA);
-        VoiceHelper.queue(client, link, guildId);
+        Link link = LavalinkService.getInstance().getLink(guildId);
+        VoiceHelper.queue(link, guildId);
         return true;
     }
 
-    public boolean queue(List<Track> tracks, Long guildId, Member member, TextChannel textChannel, LavalinkClient client) {
+    public boolean queue(List<Track> tracks, Long guildId, Member member, TextChannel textChannel) {
         if (tracks == null || tracks.isEmpty() || tracks.size() > 10000) {
             return false;
         }
@@ -172,8 +162,9 @@ public class MusicService {
         TrackQueue.addAll(guildId, trackContextList);
 
         logger.info("Размер очереди - {}", TrackQueue.size(guildId));
-        Link link = client.getOrCreateLink(guildId, VoiceRegion.RUSSIA);
-        VoiceHelper.queue(client, link, guildId);
+
+        Link link = LavalinkService.getInstance().getLink(guildId);
+        VoiceHelper.queue(link, guildId);
         return true;
     }
 

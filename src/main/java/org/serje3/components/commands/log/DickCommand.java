@@ -33,7 +33,7 @@ public class DickCommand extends Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+    public void execute(SlashCommandInteractionEvent event) {
         event.deferReply().queue();
         DickResponse dickResponse = dickRestHandler.generateDickName(event.getOption(option).getAsString());
 

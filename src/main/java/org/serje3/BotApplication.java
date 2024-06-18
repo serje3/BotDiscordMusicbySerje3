@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.serje3.adapters.DefaultAdapter;
 import org.serje3.adapters.LogAdapter;
 import org.serje3.adapters.MusicAdapter;
+import org.serje3.services.LavalinkService;
 import org.serje3.utils.SentryUtil;
 
 import java.util.ArrayList;
@@ -28,14 +29,15 @@ public class BotApplication {
         if (token == null) {
             throw new Exception("No token provided");
         }
-        LavalinkClient client = new LavalinkClient(Helpers.getUserIdFromToken(token));
+        // creating instance
+        LavalinkService clientService = LavalinkService.getInstance();
 
         SentryUtil.initSentry();
 
         Sentry.captureMessage("Bot is starting", SentryLevel.DEBUG);
 
         Bot = JDABuilder.createDefault(token)
-                .setVoiceDispatchInterceptor(new JDAVoiceUpdateListener(client))
+                .setVoiceDispatchInterceptor(new JDAVoiceUpdateListener(clientService.getClient()))
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES)
                 .enableCache(CacheFlag.VOICE_STATE)
                 .setActivity(Activity.customStatus("я sosu"))
@@ -45,7 +47,7 @@ public class BotApplication {
         System.out.println("BOT IS READY!!!!");
 
         LogAdapter logAdapter = new LogAdapter();
-        MusicAdapter musicAdapter = new MusicAdapter(client);
+        MusicAdapter musicAdapter = new MusicAdapter();
         DefaultAdapter defaultAdapter = new DefaultAdapter();
         // Clear context
         Bot.updateCommands()

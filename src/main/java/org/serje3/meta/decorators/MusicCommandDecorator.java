@@ -36,20 +36,20 @@ public class MusicCommandDecorator extends Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
-        this.preExecute(event, client);
-        this.command.execute(event, client);
+    public void execute(SlashCommandInteractionEvent event) {
+        this.preExecute(event);
+        this.command.execute(event);
     }
 
 
-    private void preExecute(SlashCommandInteractionEvent event, LavalinkClient client) {
+    private void preExecute(SlashCommandInteractionEvent event) {
         Class<?> commandClass = this.command.getClass();
         try {
             JoinVoiceChannel joinAnnotation = commandClass.getDeclaredMethod(
-                            "execute", SlashCommandInteractionEvent.class, LavalinkClient.class)
+                            "execute", SlashCommandInteractionEvent.class)
                     .getAnnotation(JoinVoiceChannel.class);
             if (joinAnnotation != null) {
-                this.annotationJoin(event, client);
+                this.annotationJoin(event);
                 logger.info("Bot joined in voice channel in {} guild", event.getGuild().getId());
             }
         } catch (NoSuchMethodException e) {
@@ -61,7 +61,7 @@ public class MusicCommandDecorator extends Command {
         }
     }
 
-    private void annotationJoin(SlashCommandInteractionEvent event, LavalinkClient client) {
+    private void annotationJoin(SlashCommandInteractionEvent event) {
         final Guild guild = event.getGuild();
         // We are already connected, go ahead and play
         if (!guild.getSelfMember().getVoiceState().inAudioChannel()) {

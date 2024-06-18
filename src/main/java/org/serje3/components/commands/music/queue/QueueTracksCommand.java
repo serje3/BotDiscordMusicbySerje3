@@ -24,7 +24,7 @@ public class QueueTracksCommand extends Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+    public void execute(SlashCommandInteractionEvent event) {
         Long guildId = event.getGuild().getIdLong();
         List<TrackContext> trackContextList = TrackQueue.listQueue(guildId);
         TrackContext now = TrackQueue.peekNow(guildId);

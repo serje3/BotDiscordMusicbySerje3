@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.serje3.components.buttons.music.*;
 import org.serje3.meta.abs.Command;
+import org.serje3.services.LavalinkService;
 import org.serje3.services.MusicService;
 import org.serje3.utils.exceptions.NoTrackIsPlayingNow;
 
@@ -25,12 +26,9 @@ public class QueueNowCommand extends Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
-        Link link = client.getLinkIfCached(event.getGuild().getIdLong());
-        if (link == null) {
-            event.reply("Скорее всего щас ничего не играет либо я еблан").queue();
-        }
-        link.getPlayer().subscribe((player) -> {
+    public void execute(SlashCommandInteractionEvent event) {
+
+        LavalinkService.getInstance().getLink(event.getGuild().getIdLong()).getPlayer().subscribe((player) -> {
             try {
                 if (player.getTrack() == null) throw new NoTrackIsPlayingNow();
                 Button playPauseBtn = player.getPaused() ? new PausePlayButton().asJDAButton() : new PauseButton().asJDAButton();

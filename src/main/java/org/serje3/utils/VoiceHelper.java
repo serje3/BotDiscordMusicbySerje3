@@ -1,6 +1,5 @@
 package org.serje3.utils;
 
-import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.player.Track;
 import io.sentry.Sentry;
@@ -74,7 +73,7 @@ public class VoiceHelper {
         }
     }
 
-    public static void queue(LavalinkClient client, Link link, Long guildId) {
+    public static void queue(Link link, Long guildId) {
         link.getPlayer().subscribe((player) -> {
 
             logger.info("Queue. Player state - {}", player.getState());
@@ -84,7 +83,7 @@ public class VoiceHelper {
             if (isStopped) {
                 try {
                     logger.info("START QUEUE");
-                    TrackQueue.skip(client, guildId, false);
+                    TrackQueue.skip(guildId, false);
                 } catch (NoTracksInQueueException e) {
                     // Такое может произойти в очень редких случаях
                     // с учётом того что перед тем как запустить queue,

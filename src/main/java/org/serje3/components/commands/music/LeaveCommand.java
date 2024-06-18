@@ -5,6 +5,7 @@ import dev.arbjerg.lavalink.client.Link;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
+import org.serje3.services.LavalinkService;
 import org.serje3.utils.TrackQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +30,10 @@ public class LeaveCommand extends Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+    public void execute(SlashCommandInteractionEvent event) {
         TrackQueue.clear(event.getGuild().getIdLong());
         event.getJDA().getDirectAudioController().disconnect(Objects.requireNonNull(event.getGuild()));
-        Link link = client.getLinkIfCached(event.getGuild().getIdLong());
-        if (link != null) {
-            link.destroy().subscribe(u -> logger.info("Destroying link {}", u));
-        }
+        LavalinkService.getInstance().destroyLink(event.getGuild().getIdLong());
         event.reply(this.getReplyMessage(event)).queue();
     }
 

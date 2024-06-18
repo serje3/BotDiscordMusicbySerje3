@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.serje3.meta.abs.Button;
+import org.serje3.services.LavalinkService;
 import org.serje3.services.MusicService;
 import org.serje3.utils.VoiceHelper;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ public class AddToQueueButton extends Button {
     }
 
     @Override
-    public void handle(ButtonInteractionEvent event, LavalinkClient client) {
+    public void handle(ButtonInteractionEvent event) {
         // логика сильно связана с URL на видео в title
         event.deferReply().queue();
 
@@ -47,13 +48,13 @@ public class AddToQueueButton extends Button {
         String url = embed.getUrl();
 
         assert url != null;
-        client.getOrCreateLink(guildId)
+       LavalinkService.getInstance().getLink(guildId)
                 .loadItem(url)
                 .subscribe((item) -> {
                     if (item instanceof TrackLoaded trackLoaded) {
                         Track track = trackLoaded.getTrack();
                         track = musicService.cockinizeTrackIfNowIsTheTime(guildId, track);
-                        musicService.queue(track, guildId, member, textChannel, client);
+                        musicService.queue(track, guildId, member, textChannel);
                         event.getHook().sendMessage("Успешно добавлено - " + track.getInfo().getTitle() + "!").queue();
                     } else if (item instanceof NoMatches) {
                         event.getHook().sendMessage("Ничего не найдено по вашему запросу!").queue();

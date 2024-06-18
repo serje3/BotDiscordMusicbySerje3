@@ -17,8 +17,8 @@ public class QueueCockinizeCommand extends Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
-        Boolean cockinize = GuildConfig.toggleCockinize(event.getGuild().getIdLong());
+    public void execute(SlashCommandInteractionEvent event) {
+        boolean cockinize = GuildConfig.toggleCockinize(event.getGuild().getIdLong());
         String state = cockinize ? "Включена" : "Отключена";
         event.reply("Хуизация теперь `" + state + "`").queue();
     }

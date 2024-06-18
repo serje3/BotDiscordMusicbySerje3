@@ -18,7 +18,7 @@ public class DonateCommand extends Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+    public void execute(SlashCommandInteractionEvent event) {
         event.reply("""
                         Поддержать:
                         USDT TRC20 - THwRveqYjoRCcpUM2Ardxs687KBfU37GiS \s

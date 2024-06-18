@@ -4,6 +4,7 @@ import dev.arbjerg.lavalink.client.LavalinkClient;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.serje3.meta.abs.Button;
+import org.serje3.services.LavalinkService;
 import org.serje3.services.MusicService;
 
 public class PausePlayButton extends Button {
@@ -29,8 +30,8 @@ public class PausePlayButton extends Button {
     }
 
     @Override
-    public void handle(ButtonInteractionEvent event, LavalinkClient client) {
-        musicService.pauseMusic(event.getGuild().getIdLong(), client).subscribe(player -> {
+    public void handle(ButtonInteractionEvent event) {
+        musicService.pauseMusic(event.getGuild().getIdLong()).subscribe(player -> {
             event.editButton(player.getPaused() ? new PausePlayButton().asJDAButton() : new PauseButton().asJDAButton()).queue();
         });
     }

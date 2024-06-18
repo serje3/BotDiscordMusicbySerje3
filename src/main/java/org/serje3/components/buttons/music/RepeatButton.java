@@ -30,7 +30,7 @@ public class RepeatButton extends Button {
     }
 
     @Override
-    public void handle(ButtonInteractionEvent event, LavalinkClient client) {
+    public void handle(ButtonInteractionEvent event) {
         Boolean repeat = TrackQueue.toggleRepeat(event.getGuild().getIdLong());
 
         if (repeat){

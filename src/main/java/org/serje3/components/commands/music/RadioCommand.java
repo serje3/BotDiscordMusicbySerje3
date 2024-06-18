@@ -36,13 +36,13 @@ public class RadioCommand extends Command {
 
     @Override
     @JoinVoiceChannel
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+    public void execute(SlashCommandInteractionEvent event) {
         event.deferReply().queue();
         RadioType radioType = RadioType.valueOf(event.getSubcommandName().toUpperCase());
 
         final String identifier = chooseIdentifier(radioType);
         final long guildId = event.getGuild().getIdLong();
-        new QueueCommand().play(client, event, guildId, identifier);
+        new QueueCommand().play(event, guildId, identifier);
     }
 
     private String chooseIdentifier(RadioType type) {

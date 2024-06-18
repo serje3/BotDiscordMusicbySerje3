@@ -12,6 +12,7 @@ import org.serje3.meta.abs.AutoComplete;
 import org.serje3.meta.enums.PlaySourceType;
 import org.serje3.rest.domain.Tracks;
 import org.serje3.rest.handlers.YoutubeRestHandler;
+import org.serje3.services.LavalinkService;
 import org.serje3.services.MusicService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ public class SearchAutocomplete extends AutoComplete {
     }
 
     @Override
-    public void handle(CommandAutoCompleteInteractionEvent event, LavalinkClient client) {
+    public void handle(CommandAutoCompleteInteractionEvent event) {
         logger.info(event.toString());
         logger.info(event.getSubcommandName());
         logger.info(event.getFocusedOption().getValue());
@@ -41,7 +42,7 @@ public class SearchAutocomplete extends AutoComplete {
         }
         String subCommand = event.getSubcommandName();
         PlaySourceType playSourceType = PlaySourceType.valueOf(subCommand.toUpperCase());
-        if (client == null || identifier.isEmpty() || identifier.startsWith("https://") || playSourceType.equals(PlaySourceType.TEXT_TO_SPEECH)) {
+        if (identifier.isEmpty() || identifier.startsWith("https://") || playSourceType.equals(PlaySourceType.TEXT_TO_SPEECH)) {
             event.replyChoices(Collections.emptyList()).queue();
             return;
         }
@@ -57,7 +58,7 @@ public class SearchAutocomplete extends AutoComplete {
         }
 
         String searchPrefix = musicService.getSearchPrefix(subCommand, identifier);
-        client.getOrCreateLink(event.getGuild().getIdLong())
+        LavalinkService.getInstance().getLink(event.getGuild().getIdLong())
                 .loadItem(searchPrefix + identifier)
                 .subscribe(item -> {
                             if (item instanceof SearchResult searchResult) {

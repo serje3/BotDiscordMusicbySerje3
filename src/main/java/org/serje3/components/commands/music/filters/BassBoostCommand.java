@@ -23,8 +23,8 @@ public class BassBoostCommand extends NormalizeFilterCommand {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
-        super.execute(event, client);
+    public void execute(SlashCommandInteractionEvent event) {
+        super.execute(event);
     }
 
     protected List<Band> getEqualizer() {

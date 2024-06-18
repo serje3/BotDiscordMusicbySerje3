@@ -18,7 +18,7 @@ public class QueueClearCommand extends Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+    public void execute(SlashCommandInteractionEvent event) {
         TrackQueue.clear(event.getGuild().getIdLong());
         event.reply("Очередь очищена").queue();
     }

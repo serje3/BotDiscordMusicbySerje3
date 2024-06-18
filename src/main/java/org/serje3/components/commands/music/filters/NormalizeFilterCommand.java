@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.annotations.JoinVoiceChannel;
+import org.serje3.services.LavalinkService;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class NormalizeFilterCommand extends Command {
 
     @JoinVoiceChannel
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+    public void execute(SlashCommandInteractionEvent event) {
         Omissible<List<Band>> equalizer = Omissible.Companion.omittedIfNull(getEqualizer());
 
         Filters defaultFilters = new Filters();
@@ -41,7 +42,7 @@ public class NormalizeFilterCommand extends Command {
                 defaultFilters.getLowPass(),
                 defaultFilters.getPluginFilters());
         System.out.println(filters.getVolume() + " " + filters.getEqualizer());
-        client.getOrCreateLink(event.getGuild().getIdLong()).createOrUpdatePlayer()
+        LavalinkService.getInstance().getLink(event.getGuild().getIdLong()).createOrUpdatePlayer()
                 .setFilters(filters)
                 .subscribe(p -> {
                     System.out.println(p);

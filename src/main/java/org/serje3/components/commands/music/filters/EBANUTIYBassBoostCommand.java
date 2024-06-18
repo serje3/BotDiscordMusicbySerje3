@@ -53,8 +53,8 @@ public class EBANUTIYBassBoostCommand extends BassBoostCommand {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
-        super.execute(event, client);
+    public void execute(SlashCommandInteractionEvent event) {
+        super.execute(event);
     }
 
     protected List<Band> getEqualizer() {

@@ -4,6 +4,7 @@ import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.player.Track;
 import org.serje3.domain.TrackContext;
+import org.serje3.services.LavalinkService;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class TrackQueue {
         tracksQueue.get(guildId).addAll(tracks);
     }
 
-    public static TrackContext skip(LavalinkClient client, Long guildId, boolean emitByEvent) throws NoTracksInQueueException {
+    public static TrackContext skip(Long guildId, boolean emitByEvent) throws NoTracksInQueueException {
         // return: next track
         init(guildId);
         TrackContext trackNow = peekNow(guildId);
@@ -52,7 +53,7 @@ public class TrackQueue {
         }
         Track track = trackContext.getTrack();
         logger.info("Guild: {}. Current tracks in queue is {}",guildId, TrackQueue.tracksQueue.get(guildId));
-        Link link = client.getOrCreateLink(guildId);
+        Link link = LavalinkService.getInstance().getLink(guildId);
         logger.info("Guild: {}. Next track is {}", guildId, track.getInfo().getTitle());
         VoiceHelper.play(link, track, 35);
         tracksNow.put(guildId, trackContext);

@@ -22,12 +22,12 @@ public class JoinCommand extends Command {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+    public void execute(SlashCommandInteractionEvent event) {
         VoiceHelper.joinHelper(event);
-        event.reply(this.getReplyMessage(event, client)).queue();
+        event.reply(this.getReplyMessage(event)).queue();
     }
 
-    private String getReplyMessage(SlashCommandInteractionEvent event, LavalinkClient client) {
+    private String getReplyMessage(SlashCommandInteractionEvent event) {
         Random random = new Random();
         List<String> responses = new ArrayList<>();
         String channelName = event.getMember().getVoiceState().getChannel().getName();

@@ -19,5 +19,5 @@ public abstract class AutoComplete {
         String prefix = isTest ? "test_" : "";
         return prefix + getName();
     }
-    public abstract void handle(CommandAutoCompleteInteractionEvent event, LavalinkClient client);
+    public abstract void handle(CommandAutoCompleteInteractionEvent event);
 }

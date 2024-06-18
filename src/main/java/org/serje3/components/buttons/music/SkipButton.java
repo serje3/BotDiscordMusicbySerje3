@@ -30,7 +30,7 @@ public class SkipButton extends Button {
     }
 
     @Override
-    public void handle(ButtonInteractionEvent event, LavalinkClient client) {
-        musicService.skipTrack(event, client);
+    public void handle(ButtonInteractionEvent event) {
+        musicService.skipTrack(event);
     }
 }

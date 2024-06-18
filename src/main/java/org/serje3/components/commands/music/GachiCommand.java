@@ -27,9 +27,9 @@ public class GachiCommand extends Command {
 
     @Override
     @JoinVoiceChannel
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+    public void execute(SlashCommandInteractionEvent event) {
         final String identifier = "https://www.youtube.com/watch?v=akHAQD3o1NA";
         final long guildId = event.getGuild().getIdLong();
-        new QueueCommand().play(client, event, guildId, identifier);
+        new QueueCommand().play(event, guildId, identifier);
     }
 }

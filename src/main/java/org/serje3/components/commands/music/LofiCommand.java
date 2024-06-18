@@ -22,9 +22,9 @@ public class LofiCommand extends Command {
 
     @Override
     @JoinVoiceChannel
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+    public void execute(SlashCommandInteractionEvent event) {
         final String identifier = "https://www.youtube.com/watch?v=rUxyKA_-grg";
         final long guildId = event.getGuild().getIdLong();
-        new QueueCommand().play(client, event, guildId, identifier);
+        new QueueCommand().play(event, guildId, identifier);
     }
 }

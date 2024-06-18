@@ -1,6 +1,8 @@
 package org.serje3.components.commands.music.queue;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
+import dev.arbjerg.lavalink.client.Link;
+import dev.arbjerg.lavalink.client.LinkState;
 import dev.arbjerg.lavalink.client.player.*;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.Guild;
@@ -15,6 +17,7 @@ import org.serje3.meta.annotations.JoinVoiceChannel;
 import org.serje3.meta.enums.PlaySourceType;
 import org.serje3.rest.domain.Tracks;
 import org.serje3.rest.handlers.YoutubeRestHandler;
+import org.serje3.services.LavalinkService;
 import org.serje3.services.MusicService;
 import org.serje3.utils.VoiceHelper;
 import org.slf4j.Logger;
@@ -89,8 +92,10 @@ public class QueueCommand extends Command {
 
     @Override
     @JoinVoiceChannel
-    public void execute(SlashCommandInteractionEvent event, LavalinkClient client) {
+    public void execute(SlashCommandInteractionEvent event) {
         event.deferReply().queue();
+
+
         final Guild guild = event.getGuild();
         String subcommandName = event.getSubcommandName();
         String identifier = event.getOption("текст").getAsString();
@@ -108,10 +113,10 @@ public class QueueCommand extends Command {
         String prefix = musicService.getSearchPrefix(subcommandName, identifier);
         if (type == PlaySourceType.YOUTUBE && !identifier.startsWith("https://")) {
             String url = trySearchCachedUrl(prefix, identifier);
-            this.play(client, event, guildId, url);
+            this.play(event, guildId, url);
             return;
         }
-        this.play(client, event, guildId, prefix + identifier);
+        this.play(event, guildId, prefix + identifier);
     }
 
     private String trySearchCachedUrl(String prefix, String identifier) {
@@ -131,12 +136,12 @@ public class QueueCommand extends Command {
         return track.getYoutubeURL();
     }
 
-    public void play(LavalinkClient client, SlashCommandInteractionEvent event,
+    public void play(SlashCommandInteractionEvent event,
                      Long guildId, String identifier) {
-        this.play(client, event, guildId, identifier, 35);
+        this.play(event, guildId, identifier, 35);
     }
 
-    public void play(LavalinkClient client, SlashCommandInteractionEvent event,
+    public void play(SlashCommandInteractionEvent event,
                      Long guildId, String identifier, Integer volume) {
         System.out.println("IDENTIFIER:" + identifier);
 
@@ -144,15 +149,17 @@ public class QueueCommand extends Command {
             event.getHook().sendMessage("Параметр 'Текст' не должен быть нулевым").queue();
             return;
         }
-        logger.info("Now {} nodes active", client.getNodes().size());
-        client.getOrCreateLink(guildId).loadItem(identifier)
+
+        LavalinkService service = LavalinkService.getInstance();
+        logger.info("Now {} nodes active", service.getClient().getNodes().size());
+        service.getLink(guildId).loadItem(identifier)
                 .subscribe((item) -> {
                     System.out.println(item);
                     if (item instanceof TrackLoaded trackLoaded) {
                         Track track = trackLoaded.getTrack();
                         track = musicService.cockinizeTrackIfNowIsTheTime(guildId, track);
 
-                        musicService.queue(track, guildId, event.getMember(), event.getChannel().asTextChannel(), client);
+                        musicService.queue(track, guildId, event.getMember(), event.getChannel().asTextChannel());
 
 
                         event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
@@ -170,7 +177,7 @@ public class QueueCommand extends Command {
 
                         tracks = musicService.cockinizeTrackIfNowIsTheTime(guildId, tracks);
 
-                        musicService.queue(tracks, guildId, event.getMember(), event.getChannel().asTextChannel(), client);
+                        musicService.queue(tracks, guildId, event.getMember(), event.getChannel().asTextChannel());
 
                         final int trackCount = tracks.size();
                         event.getHook().sendMessage("Этот плейлист имеет " + trackCount + " треков! Запускаю - " + tracks.get(0).getInfo().getTitle())
@@ -185,7 +192,7 @@ public class QueueCommand extends Command {
 
                         final Track firstTrack = musicService.cockinizeTrackIfNowIsTheTime(guildId, tracks.get(0));
 
-                        musicService.queue(firstTrack, guildId, event.getMember(), event.getChannel().asTextChannel(), client);
+                        musicService.queue(firstTrack, guildId, event.getMember(), event.getChannel().asTextChannel());
 
                         event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(firstTrack, event.getMember(), "Добавлен в очередь"))
                                 .addActionRow(new AddToQueueButton().asJDAButton())

@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 import org.serje3.meta.interfaces.ContainSlashCommands;
 import org.serje3.rest.handlers.EventRestHandler;
+import org.serje3.services.LavalinkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,6 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
     protected final HashMap<String, Command> commands = new HashMap<>();
     protected final HashMap<String, Button> buttons = new HashMap<>();
     protected final HashMap<String, AutoComplete> autoComplete = new HashMap<>();
-    protected LavalinkClient client;
     private Logger logger;
 
     public BaseListenerAdapter() {
@@ -56,7 +56,7 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
             System.out.println(getLogPrefix() + "Command Name: " + event.getName());
             eventRestHandler.handleSlashEvent(event);
             try {
-                command.execute(event, client);
+                command.execute(event);
             } catch (Exception e) {
                 Sentry.captureException(e);
                 throw e;
@@ -69,7 +69,7 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
         Button button = this.buttons.get(event.getComponentId());
         if (button != null) {
             try {
-                button.handle(event, client);
+                button.handle(event);
             } catch (Exception ex) {
                 Sentry.captureException(ex);
                 throw ex;
@@ -82,7 +82,7 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
         AutoComplete complete = this.autoComplete.get(event.getName());
         if (complete != null) {
             try {
-                complete.handle(event, client);
+                complete.handle(event);
             } catch (Exception e) {
                 Sentry.captureException(e);
                 throw e;
