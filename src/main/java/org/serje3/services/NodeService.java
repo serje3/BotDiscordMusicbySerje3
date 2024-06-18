@@ -29,20 +29,27 @@ public class NodeService {
             Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason.REPLACED
     );
 
+    private static boolean nodesRegistered = false;
+
     private final LavalinkService lavalinkService;
 
     public NodeService(LavalinkService service) {
         this.lavalinkService = service;
+        register();
     }
 
     public NodeService() {
         this.lavalinkService = LavalinkService.getInstance();
+        register();
     }
 
-    public void register() {
-        registerLavalinkListeners();
-        registerLavalinkNodes();
-        registerLavalinkWebsocketClosed();
+    private void register() {
+        if (!nodesRegistered){
+            registerLavalinkListeners();
+            registerLavalinkNodes();
+            registerLavalinkWebsocketClosed();
+            nodesRegistered = true;
+        }
     }
 
     private void registerLavalinkNodes() {

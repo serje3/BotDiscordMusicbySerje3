@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.serje3.meta.abs.Button;
+import org.serje3.rest.handlers.YoutubeRestHandler;
 import org.serje3.services.LavalinkService;
 import org.serje3.services.MusicService;
 import org.serje3.utils.VoiceHelper;
@@ -23,6 +24,10 @@ import java.util.Objects;
 public class AddToQueueButton extends Button {
     private final Logger logger = LoggerFactory.getLogger(AddToQueueButton.class);
     private final MusicService musicService = new MusicService();
+    private final YoutubeRestHandler youtubeRestHandler = new YoutubeRestHandler();
+
+    public AddToQueueButton() {
+    }
 
     @Override
     public String getComponentId() {
@@ -45,11 +50,18 @@ public class AddToQueueButton extends Button {
         Member member = event.getMember();
         TextChannel textChannel = event.getChannel().asTextChannel();
         MessageEmbed embed = event.getMessage().getEmbeds().get(0);
-        String url = embed.getUrl();
+        String identifier = embed.getUrl();
+        if (identifier == null) {
+            String authorPrefix = embed.getAuthor() != null ? embed.getAuthor().getName() + " - " : "";
+            identifier = youtubeRestHandler.trySearchCachedUrl( authorPrefix + embed.getTitle());
+            if (identifier == null) {
+                event.getHook().sendMessage("Ничего не найдено по вашему запросу!").queue();
+                return;
+            }
+        }
 
-        assert url != null;
-       LavalinkService.getInstance().getLink(guildId)
-                .loadItem(url)
+        LavalinkService.getInstance().getLink(guildId)
+                .loadItem(identifier)
                 .subscribe((item) -> {
                     if (item instanceof TrackLoaded trackLoaded) {
                         Track track = trackLoaded.getTrack();
@@ -86,4 +98,6 @@ public class AddToQueueButton extends Button {
             VoiceHelper.joinHelper(event);
         }
     }
+
+
 }

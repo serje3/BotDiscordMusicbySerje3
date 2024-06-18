@@ -3,7 +3,6 @@ package org.serje3.services;
 import dev.arbjerg.lavalink.client.*;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
 import lombok.Getter;
-import org.serje3.rest.handlers.NodeRestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,6 @@ public class LavalinkService {
         client.getLoadBalancer().addPenaltyProvider(new VoiceRegionPenaltyProvider());
 
         nodeService = new NodeService(this);
-        nodeService.register();
         logger.info("LavalinkService created");
     }
 

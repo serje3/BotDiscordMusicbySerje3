@@ -46,31 +46,42 @@ public class VoiceHelper {
         String artUrl = track.getInfo().getArtworkUrl();
         String source = track.getInfo().getSourceName();
         try {
-            URI uri = new URI("https", "cataas.com", "/cat/says/" + title, "fontSize=30&fontColor=red",null);
+            URI uri = new URI("https", "cataas.com", "/cat/says/" + title, "fontSize=30&fontColor=red", null);
             String thumbnailUrl = uri.toString();
-            int color = member.getColorRaw();
 
             System.out.println(thumbnailUrl);
 
-            return new MessageEmbed(
-                    url,
-                    title,
-                    description + "\nИсточник: " + source,
-                    EmbedType.AUTO_MODERATION,
-                    null,
-                    color,
-                    new MessageEmbed.Thumbnail(thumbnailUrl, thumbnailUrl, 100, 100),
-                    null,
-                    new MessageEmbed.AuthorInfo(author, url, null, null),
-                    null,
-                    new MessageEmbed.Footer(member.getEffectiveName(), member.getEffectiveAvatarUrl(), member.getEffectiveAvatarUrl()),
-                    new MessageEmbed.ImageInfo(artUrl, artUrl, 100, 100),
-                    null
-            );
+            return getMessageEmbed(url, title, description, source, thumbnailUrl, member, author, artUrl);
         } catch (URISyntaxException e) {
             Sentry.captureException(e);
             throw new RuntimeException(e);
         }
+    }
+
+    public static MessageEmbed getMessageEmbed(String url,
+                                               String title,
+                                               String description,
+                                               String source,
+                                               String thumbnailUrl,
+                                               Member member,
+                                               String author,
+                                               String artUrl
+    ) {
+        return new MessageEmbed(
+                url,
+                title,
+                description + "\nИсточник: " + source,
+                EmbedType.AUTO_MODERATION,
+                null,
+                member.getColorRaw(),
+                new MessageEmbed.Thumbnail(thumbnailUrl, thumbnailUrl, 100, 100),
+                null,
+                new MessageEmbed.AuthorInfo(author, url, null, null),
+                null,
+                new MessageEmbed.Footer(member.getEffectiveName(), member.getEffectiveAvatarUrl(), member.getEffectiveAvatarUrl()),
+                new MessageEmbed.ImageInfo(artUrl, artUrl, 100, 100),
+                null
+        );
     }
 
     public static void queue(Link link, Long guildId) {
