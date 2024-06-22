@@ -139,21 +139,6 @@ public class MusicService {
         }
     }
 
-    public void whatsPlayingNowWithoutInteraction(TextChannel textChannel, TrackContext track) {
-        try {
-            if (track == null) throw new NoTrackIsPlayingNow();
-            textChannel.sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track.getTrack(), track.getMember(), ""))
-                    .addActionRow(
-                            new AddToQueueButton().asJDAButton(),
-                            track.isRepeat() ? new RepeatButton.On().asJDAButton() : new RepeatButton().asJDAButton(),
-                            track.isPaused() ? new PausePlayButton().asJDAButton() : new PauseButton().asJDAButton(),
-                            new SkipButton().asJDAButton(),
-                            Button.link(track.getTrack().getInfo().getUri(), "Ссылка на трек")
-                    ).queue();
-        } catch (NoTrackIsPlayingNow e) {
-            // ниче не делаем
-        }
-    }
 
     public boolean queue(Track track, Long guildId, Member member, TextChannel textChannel) {
         if (track == null) {

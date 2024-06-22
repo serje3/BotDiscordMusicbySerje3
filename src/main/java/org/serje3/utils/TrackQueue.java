@@ -3,6 +3,7 @@ package org.serje3.utils;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.player.Track;
+import org.serje3.config.GuildConfig;
 import org.serje3.domain.TrackContext;
 import org.serje3.services.LavalinkService;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
@@ -30,6 +31,20 @@ public class TrackQueue {
         tracksQueue.get(guildId).addLast(track);
     }
 
+    public static void addNextToFirst(Long guildId, TrackContext track) {
+        init(guildId);
+        List<TrackContext> dequeList = new ArrayList<>(listQueue(guildId));
+        try {
+            dequeList.add(1, track);
+        } catch (IndexOutOfBoundsException e) {
+            dequeList.add(track);
+        }
+
+        set(guildId, dequeList);
+
+    }
+
+
     public static void addAll(Long guildId, Collection<TrackContext> tracks) {
         init(guildId);
 
@@ -52,7 +67,7 @@ public class TrackQueue {
             throw new NoTracksInQueueException();
         }
         Track track = trackContext.getTrack();
-        logger.info("Guild: {}. Current tracks in queue is {}",guildId, TrackQueue.tracksQueue.get(guildId));
+        logger.info("Guild: {}. Current tracks in queue is {}", guildId, TrackQueue.tracksQueue.get(guildId));
         Link link = LavalinkService.getInstance().getLink(guildId);
         logger.info("Guild: {}. Next track is {}", guildId, track.getInfo().getTitle());
         VoiceHelper.play(link, track, 35);
@@ -117,6 +132,11 @@ public class TrackQueue {
             return new ArrayList<>();
         }
         return tracks.stream().toList();
+    }
 
+    public static void set(Long guildId, List<TrackContext> tracks) {
+        init(guildId);
+        clear(guildId);
+        addAll(guildId, tracks);
     }
 }

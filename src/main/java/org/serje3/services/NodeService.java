@@ -5,13 +5,16 @@ import dev.arbjerg.lavalink.client.LavalinkNode;
 import dev.arbjerg.lavalink.client.NodeOptions;
 import dev.arbjerg.lavalink.client.event.*;
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
+import dev.arbjerg.lavalink.client.player.Track;
 import dev.arbjerg.lavalink.protocol.v4.Message;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
+import org.serje3.config.GuildConfig;
 import org.serje3.domain.TrackContext;
 import org.serje3.rest.handlers.NodeRestHandler;
+import org.serje3.utils.SlashEventHelper;
 import org.serje3.utils.TrackQueue;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 import org.slf4j.Logger;
@@ -44,7 +47,7 @@ public class NodeService {
     }
 
     private void register() {
-        if (!nodesRegistered){
+        if (!nodesRegistered) {
             registerLavalinkListeners();
             registerLavalinkNodes();
             registerLavalinkWebsocketClosed();
@@ -80,6 +83,27 @@ public class NodeService {
                         chosenNode.getName(),
                         event.getTrack().getInfo()
                 );
+            });
+
+            node.on(TrackExceptionEvent.class).subscribe((data) -> {
+                logger.error("TrackExceptionEvent {} {}", data.getException().getMessage(), data.getException().getCause());
+                TrackContext now = TrackQueue.peekNow(data.getGuildId());
+                if (now == null) {
+                    GuildConfig.Settings settings = GuildConfig.getSettings(data.getGuildId());
+                    if (settings.getLastInteractionChannel() == null || settings.getLastInteractedMember() == null) return;
+                    TrackQueue.addNextToFirst(data.getGuildId(), SlashEventHelper.createTrackContextFromEvent(data.getTrack(),
+                            settings.getLastInteractedMember(),
+                            settings.getLastInteractionChannel()));
+                    settings.getLastInteractionChannel().sendMessage("Бляздец. Ещё раз").queue();
+                    return;
+                }
+                ;
+                TrackContext track = SlashEventHelper.createTrackContextFromEvent(data.getTrack(), now.getMember(), now.getTextChannel());
+                if (track.getTextChannel() != null) {
+                    track.getTextChannel().sendMessage("Бля кажется пизда треку, попробую перезапустить").queue();
+                }
+
+                TrackQueue.addNextToFirst(data.getGuildId(), track);
             });
 
             node.on(TrackEndEvent.class).subscribe((data) -> {

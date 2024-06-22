@@ -34,11 +34,7 @@ public class QueueTracksCommand extends Command {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Текущий плейлист и трек");
 
-        if (now != null) {
-            embedBuilder.addField("Играет сейчас:", now.getTrack().getInfo().getTitle(), false);
-        } else {
-            embedBuilder.addField("Играет сейчас:", "Ничего", false);
-        }
+        embedBuilder.addField("Играет сейчас:", now != null ? now.getTrack().getInfo().getTitle() : "Ничего", false);
 
         StringBuilder trackListBuilder = new StringBuilder();
         AtomicInteger count = new AtomicInteger(0);
@@ -48,14 +44,11 @@ public class QueueTracksCommand extends Command {
         });
 
         String tracksList = trackListBuilder.toString();
-        if (tracksList.length() > 850){
+        if (tracksList.length() > 850) {
             tracksList = tracksList.substring(0, 850) + "\n...[не могу вывести всё]...";
         }
-        if (!tracksList.isEmpty()) {
-            embedBuilder.addField("Сейчас в очереди:", tracksList, false);
-        } else {
-            embedBuilder.addField("Сейчас в очереди:", "Пусто", false);
-        }
+
+        embedBuilder.addField("Сейчас в очереди:", !tracksList.isEmpty() ? tracksList : "Пусто", false);
 
         event.replyEmbeds(embedBuilder.build()).queue();
     }
