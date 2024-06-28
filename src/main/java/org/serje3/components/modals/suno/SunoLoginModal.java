@@ -28,7 +28,7 @@ public class SunoLoginModal extends Modal {
 
     @Override
     public void handle(ModalInteractionEvent event) {
-        event.deferReply().queue();
+        event.deferReply().setEphemeral(true).queue();
         String cookie = event.getValue(COOKIE_FIELD).getAsString();
         String session = event.getValue(SESSION_ID_FIELD).getAsString();
 
