@@ -6,6 +6,7 @@ import io.sentry.Sentry;
 import io.sentry.SentryEvent;
 import lombok.Getter;
 import lombok.Setter;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -30,6 +31,7 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
     protected final HashMap<String, Command> commands = new HashMap<>();
     protected final HashMap<String, Button> buttons = new HashMap<>();
     protected final HashMap<String, AutoComplete> autoComplete = new HashMap<>();
+    protected final HashMap<String, Modal> modals = new HashMap<>();
     private Logger logger;
 
     public BaseListenerAdapter() {
@@ -40,6 +42,8 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
         registerButtons();
         logger.info("register autocompletes {}", getAdapterContext().getAutoCompletes().size());
         registerAutoComplete();
+        logger.info("register modals {}", getAdapterContext().getModals().size());
+        registerModals();
     }
 
     @Override
@@ -91,6 +95,19 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
     }
 
     @Override
+    public void onModalInteraction(@NotNull ModalInteractionEvent event) {
+        Modal modal = this.modals.get(event.getModalId());
+        if (modal != null) {
+            try {
+                modal.handle(event);
+            } catch (Exception e) {
+                Sentry.captureException(e);
+                throw e;
+            }
+        }
+    }
+
+    @Override
     public List<SlashCommandData> getSlashCommands() {
         return this.commands.values().stream().map(Command::getSlashCommand).collect(Collectors.toList());
     }
@@ -109,19 +126,21 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
         return autoComplete;
     }
 
+    protected Modal convertModal(Modal modal) {
+        return modal;
+    }
+
     private void registerCommands() {
         getAdapterContext().forEachCommand(command -> {
             logger.info("___registering command {}", command.getCommandName());
             this.commands.put(command.getCommandName(), convertCommand(command));
-            return null;
         });
     }
 
     private void registerButtons() {
         getAdapterContext().forEachButton(button -> {
-            logger.info("___registering button for component id {}", button.getButtonComponentId());
+            logger.info("___registering button for component id {}", button.getComponentId());
             this.buttons.put(button.getButtonComponentId(), convertButton(button));
-            return null;
         });
     }
 
@@ -129,7 +148,13 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
         getAdapterContext().forEachAutoComplete(autoComplete -> {
             logger.info("___registering autocomplete for command {}", autoComplete.getName());
             this.autoComplete.put(autoComplete.getAutoCompleteName(), convertAutoComplete(autoComplete));
-            return null;
+        });
+    }
+
+    private void registerModals() {
+        getAdapterContext().forEachModal(modal -> {
+            logger.info("___registering modal {}", modal.getName());
+            this.modals.put(modal.getModalName(), convertModal(modal));
         });
     }
 

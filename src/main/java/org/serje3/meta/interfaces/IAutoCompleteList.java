@@ -4,10 +4,11 @@ import org.serje3.meta.abs.AutoComplete;
 import org.serje3.meta.abs.Command;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface IAutoCompleteList {
-    List<Class<?>> getAutoCompletes();
-    void setAutoCompletes(List<Class<?>> commands);
-    void forEachAutoComplete(Function<AutoComplete, ?> func);
+    List<Class<? extends AutoComplete>> getAutoCompletes();
+    void setAutoCompletes(List<Class<? extends AutoComplete>> commands);
+    void forEachAutoComplete(Consumer<AutoComplete> func);
 }

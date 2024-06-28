@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 public class NodeRestHandler extends BaseRestClient {
     public List<NodeOptions> getNodes() throws ExecutionException, InterruptedException {
 
-        return this.getList("/lavalink/nodes", NodeRef.class).get().stream()
+        return this.getListNodes("/lavalink/nodes", NodeRef.class).get().stream()
                 .map(node -> new NodeOptions.Builder()
                         .setName("node_" +node.getId())
                         .setServerUri(node.getUrl())
@@ -24,7 +24,7 @@ public class NodeRestHandler extends BaseRestClient {
                 .toList();
     }
 
-    protected CompletableFuture<List<NodeRef>> getList(String url, Class<NodeRef> responseClass) {
+    protected CompletableFuture<List<NodeRef>> getListNodes(String url, Class<NodeRef> responseClass) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(getFullUrl(url)))
                 .GET()

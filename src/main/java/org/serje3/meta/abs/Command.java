@@ -5,11 +5,12 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.config.BotConfig;
+import org.serje3.meta.interfaces.CommandExecutable;
 import org.serje3.utils.exceptions.NoTrackIsPlayingNow;
 
 import java.io.IOException;
 
-public abstract class Command {
+public abstract class Command implements CommandExecutable {
 
     public abstract String getName();
 
@@ -35,5 +36,4 @@ public abstract class Command {
         return Commands.slash(getCommandName(), description.length() > 99 ? description.substring(0, 99) : description);
     }
 
-    public abstract void execute(SlashCommandInteractionEvent event);
 }

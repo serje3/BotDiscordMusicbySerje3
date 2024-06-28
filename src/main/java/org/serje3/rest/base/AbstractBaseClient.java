@@ -43,6 +43,16 @@ public abstract class AbstractBaseClient {
                 });
     }
 
+    protected <T> CompletableFuture<List<T>> getList(String url, Class<T> responseClass) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(getFullUrl(url)))
+                .GET()
+                .build();
+
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(response -> fromJsonList(response.body(), responseClass));
+    }
+
     protected <T> CompletableFuture<T> post(String url, RequestBody requestBody, Class<T> responseClass) {
         HttpRequest request = createHttpRequestBuilder()
                 .uri(URI.create(getFullUrl(url)))

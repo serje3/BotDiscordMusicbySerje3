@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.serje3.adapters.DefaultAdapter;
 import org.serje3.adapters.LogAdapter;
 import org.serje3.adapters.MusicAdapter;
+import org.serje3.adapters.SunoAdapter;
 import org.serje3.config.BotConfig;
 import org.serje3.services.LavalinkService;
 import org.serje3.utils.SentryUtil;
@@ -51,6 +52,7 @@ public class BotApplication {
         LogAdapter logAdapter = new LogAdapter();
         MusicAdapter musicAdapter = new MusicAdapter();
         DefaultAdapter defaultAdapter = new DefaultAdapter();
+        SunoAdapter sunoAdapter = new SunoAdapter();
         // Clear context
         Bot.updateCommands()
                 .addCommands(new ArrayList<>() {
@@ -58,11 +60,13 @@ public class BotApplication {
                         addAll(logAdapter.getSlashCommands());
                         addAll(musicAdapter.getSlashCommands());
                         addAll(defaultAdapter.getSlashCommands());
+                        addAll(sunoAdapter.getSlashCommands());
                     }
                 })
                 .queue();
         Bot.addEventListener(logAdapter);
         Bot.addEventListener(musicAdapter);
         Bot.addEventListener(defaultAdapter);
+        Bot.addEventListener(sunoAdapter);
     }
 }
