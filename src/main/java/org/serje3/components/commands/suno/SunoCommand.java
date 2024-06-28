@@ -2,10 +2,13 @@ package org.serje3.components.commands.suno;
 
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import org.serje3.components.commands.suno.handlers.Feed;
 import org.serje3.components.commands.suno.handlers.Generate;
 import org.serje3.components.commands.suno.handlers.Login;
+import org.serje3.components.commands.suno.handlers.Play;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.interfaces.CommandExecutable;
 
@@ -25,7 +28,10 @@ public class SunoCommand extends Command {
         return super.getSlashCommand()
                 .addSubcommands(
                         new SubcommandData(SunoHandler.GENERATE.name().toLowerCase(), "Generates music by AI"),
-                        new SubcommandData(SunoHandler.LOGIN.name().toLowerCase(), "[REQUIRED] Login to suno account")
+                        new SubcommandData(SunoHandler.LOGIN.name().toLowerCase(), "[REQUIRED] Login to suno account"),
+                        new SubcommandData(SunoHandler.FEED.name().toLowerCase(), "List feed"),
+                        new SubcommandData(SunoHandler.PLAY.name().toLowerCase(), "Play track of feed")
+                                .addOption(OptionType.INTEGER, "index", "Feed index", true)
                 );
     }
 
@@ -41,7 +47,9 @@ public class SunoCommand extends Command {
 
     enum SunoHandler {
         LOGIN(Login.class),
-        GENERATE(Generate.class);
+        GENERATE(Generate.class),
+        FEED(Feed.class),
+        PLAY(Play.class);
 
         private final CommandExecutable handler;
 
