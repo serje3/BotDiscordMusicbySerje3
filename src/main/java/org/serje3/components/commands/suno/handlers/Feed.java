@@ -11,6 +11,7 @@ public class Feed implements CommandExecutable {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
+        event.deferReply().queue();
         sunoRestHandler.feed(event.getUser().getIdLong()).thenAccept((clips) -> {
             StringBuilder builder = new StringBuilder();
             builder.append("<@!").append(event.getUser().getIdLong()).append("> \n");
@@ -20,9 +21,9 @@ public class Feed implements CommandExecutable {
                 builder.append(clip.getTitle()).append(" - ").append(clip.getStatus()).append("\n");
             }
 
-            event.reply(builder.toString()).queue();
+            event.getHook().sendMessage(builder.toString()).queue();
         }).exceptionally((e) -> {
-            event.reply("Пиздец баля: " + e.getLocalizedMessage()).queue();
+            event.getHook().sendMessage("Пиздец баля: " + e.getLocalizedMessage()).queue();
             return null;
         });
     }

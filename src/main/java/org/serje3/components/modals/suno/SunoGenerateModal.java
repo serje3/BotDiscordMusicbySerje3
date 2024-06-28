@@ -25,16 +25,17 @@ public class SunoGenerateModal extends Modal {
 
     @Override
     public void handle(ModalInteractionEvent event) {
+        event.deferReply().queue();
         String prompt = event.getValue(PROMPT_INPUT).getAsString();
         String title = event.getValue(TITLE_INPUT).getAsString();
         String genre = event.getValue(GENRE_INPUT).getAsString();
 
         sunoRestHandler.generate(event.getUser().getIdLong(), new SunoGenerateRequest(prompt, "chirp-v3.5", title, genre))
                 .thenAccept((res) -> {
-                    event.reply("Генерация запущена. Ваша мать попущена").queue();
+                    event.getHook().sendMessage("Генерация запущена. Ваша мать попущена").queue();
                 })
                 .exceptionally(e -> {
-                    event.reply("Ошибка: " + e.getLocalizedMessage()).queue();
+                    event.getHook().sendMessage("Ошибка: " + e.getLocalizedMessage()).queue();
                     return null;
                 });
     }

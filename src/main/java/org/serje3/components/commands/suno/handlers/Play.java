@@ -24,16 +24,16 @@ public class Play implements CommandExecutable {
             try{
                 SunoClip clip = clips.get(playIndex);
                 if (clip.getAudioUrl() == null){
-                    event.reply("Аудио ещё не готово").queue();
+                    event.getHook().sendMessage("Аудио ещё не готово").queue();
                     return;
                 }
                 VoiceHelper.joinHelper(event);
                 new QueueCommand().play(event, event.getGuild().getIdLong(), clip.getAudioUrl());
             } catch (IndexOutOfBoundsException e) {
-                event.reply("Индекс неверный: " + e.getLocalizedMessage()).queue();
+                event.getHook().sendMessage("Индекс неверный: " + e.getLocalizedMessage()).queue();
             }
         }).exceptionally((e) -> {
-            event.reply("Пиздец баля: " + e.getLocalizedMessage()).queue();
+            event.getHook().sendMessage("Пиздец баля: " + e.getLocalizedMessage()).queue();
             return null;
         });
     }

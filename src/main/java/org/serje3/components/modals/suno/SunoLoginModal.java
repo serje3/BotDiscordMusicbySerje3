@@ -28,17 +28,18 @@ public class SunoLoginModal extends Modal {
 
     @Override
     public void handle(ModalInteractionEvent event) {
+        event.deferReply().queue();
         String cookie = event.getValue(COOKIE_FIELD).getAsString();
         String session = event.getValue(SESSION_ID_FIELD).getAsString();
 
         sunoRestHandler.login(event.getUser().getIdLong(), cookie, session)
                 .thenAccept((obj) -> {
-                    event.reply("Your auth token saved. Your cookie: " + cookie + "\nYour session id: " + session).setEphemeral(true).queue();
+                    event.getHook().sendMessage("Your auth token saved. Your cookie: " + cookie + "\nYour session id: " + session).setEphemeral(true).queue();
                 })
                 .exceptionally((e) -> {
                     Sentry.captureException(e);
                     logger.error(e.getLocalizedMessage());
-                    event.reply("Something went wrong!").setEphemeral(true).queue();
+                    event.getHook().sendMessage("Something went wrong!").setEphemeral(true).queue();
                     return null;
                 });
 
