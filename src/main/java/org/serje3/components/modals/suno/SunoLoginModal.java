@@ -34,7 +34,7 @@ public class SunoLoginModal extends Modal {
 
         sunoRestHandler.login(event.getUser().getIdLong(), cookie, session)
                 .thenAccept((obj) -> {
-                    event.getHook().sendMessage("Your auth token saved. Your cookie: " + cookie + "\nYour session id: " + session).setEphemeral(true).queue();
+                    event.getHook().sendMessage("Your auth token saved.").setEphemeral(true).queue();
                 })
                 .exceptionally((e) -> {
                     Sentry.captureException(e);

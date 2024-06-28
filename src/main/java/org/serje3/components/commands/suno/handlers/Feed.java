@@ -5,6 +5,8 @@ import org.serje3.meta.interfaces.CommandExecutable;
 import org.serje3.rest.domain.SunoClip;
 import org.serje3.rest.handlers.SunoRestHandler;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Feed implements CommandExecutable {
 
     private final SunoRestHandler sunoRestHandler = new SunoRestHandler();
@@ -15,11 +17,12 @@ public class Feed implements CommandExecutable {
         sunoRestHandler.feed(event.getUser().getIdLong()).thenAccept((clips) -> {
             StringBuilder builder = new StringBuilder();
             builder.append("<@!").append(event.getUser().getIdLong()).append("> \n");
-            for (int i = 0; i < clips.size(); i++) {
-                SunoClip clip = clips.get(i);
-                builder.append(i).append(". ");
+            AtomicInteger counter = new AtomicInteger(0);
+            clips.forEach(clip -> {
+                builder.append(counter.get()).append(": ");
                 builder.append(clip.getTitle()).append(" - ").append(clip.getStatus()).append("\n");
-            }
+                counter.incrementAndGet();
+            });
 
             event.getHook().sendMessage(builder.toString()).queue();
         }).exceptionally((e) -> {

@@ -46,6 +46,7 @@ public class TTSCommand extends Command {
         OptionMapping voiceOption = event.getOption("голос");
         String voiceQuery = (voiceOption != null) ? "?voice=" + voiceOption.getAsString() : "";
         final String url = "ftts://" + identifier + voiceQuery;
-        new QueueCommand().play(event, guildId, url.replaceAll(" ", "%20"), 100);
+//        new QueueCommand().play(event, guildId, url.replaceAll(" ", "%20"), 100);
+        event.reply("Иди нахуй ниче не буду делать").queue();
     }
 }

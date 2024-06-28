@@ -30,7 +30,7 @@ public class SunoGenerateModal extends Modal {
         String title = event.getValue(TITLE_INPUT).getAsString();
         String genre = event.getValue(GENRE_INPUT).getAsString();
 
-        sunoRestHandler.generate(event.getUser().getIdLong(), new SunoGenerateRequest(prompt, "chirp-v3.5", title, genre))
+        sunoRestHandler.generate(event.getUser().getIdLong(), new SunoGenerateRequest(prompt, "chirp-v3-5", title, genre))
                 .thenAccept((res) -> {
                     event.getHook().sendMessage("Генерация запущена. Ваша мать попущена").queue();
                 })

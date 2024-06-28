@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 public class QueueCommand extends Command {
     private final MusicService musicService = new MusicService();
@@ -138,11 +139,11 @@ public class QueueCommand extends Command {
 
     public void play(SlashCommandInteractionEvent event,
                      Long guildId, String identifier) {
-        this.play(event, guildId, identifier, 35);
+        this.play(event, guildId, identifier, 35, null);
     }
 
     public void play(SlashCommandInteractionEvent event,
-                     Long guildId, String identifier, Integer volume) {
+                     Long guildId, String identifier, Integer volume, Consumer<Track> onSuccess) {
         System.out.println("IDENTIFIER:" + identifier);
 
         if (identifier == null) {
@@ -161,7 +162,10 @@ public class QueueCommand extends Command {
 
                         musicService.queue(track, guildId, event.getMember(), event.getChannel().asTextChannel());
 
-
+                        if (onSuccess != null){
+                            onSuccess.accept(track);
+                            return;
+                        }
                         event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
                                 .addActionRow(new AddToQueueButton().asJDAButton())
                                 .queue();
