@@ -97,7 +97,8 @@ public class NodeService {
                     settings.getLastInteractionChannel().sendMessage("Бляздец. Ещё раз").queue();
                     return;
                 }
-                ;
+                if (now.isRepeat()) return;
+
                 TrackContext track = SlashEventHelper.createTrackContextFromEvent(data.getTrack(), now.getMember(), now.getTextChannel());
                 if (track.getTextChannel() != null) {
                     track.getTextChannel().sendMessage("Бля кажется пизда треку, попробую перезапустить").queue();
