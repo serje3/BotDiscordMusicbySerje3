@@ -53,7 +53,7 @@ public class SearchAutocomplete extends AutoComplete {
                 return;
             } catch (Exception e) {
                 // then pass & try default search youtube method
-                logger.info(e.getMessage());
+                logger.error(e.getMessage());
             }
         }
 
@@ -79,6 +79,7 @@ public class SearchAutocomplete extends AutoComplete {
                                 logger.info(options.toString());
                                 event.replyChoices(options).queue();
                             } else if (item instanceof LoadFailed loadFailed) {
+                                logger.error("{} {}", loadFailed.getException().getMessage(), loadFailed.getException().getCause());
                                 event.replyChoices(Collections.emptyList()).queue();
                             }
                         }
@@ -86,7 +87,7 @@ public class SearchAutocomplete extends AutoComplete {
 
     }
 
-    private void cachedYoutubeAutocomplete(String identifier, CommandAutoCompleteInteractionEvent event) {
+    private void  cachedYoutubeAutocomplete(String identifier, CommandAutoCompleteInteractionEvent event) {
         Tracks tracks;
         try {
             tracks = youtubeRestHandler.searchCached(identifier);
@@ -105,7 +106,7 @@ public class SearchAutocomplete extends AutoComplete {
                 .map(track -> {
                     String url = track.getYoutubeURL();
                     String title = track.title();
-                    return new Command.Choice(title, url != null ? url : title);
+                    return new Command.Choice(title.substring(0, 99), url != null ? url : title);
                 }).toList().subList(0, 25);
 
         event.replyChoices(options).queue((s) -> {
