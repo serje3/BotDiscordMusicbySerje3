@@ -33,7 +33,7 @@ public class SunoRestHandler extends BaseRestClient {
     }
 
     public CompletableFuture<SunoCredits> credits(Long userId) {
-        return this.get("/credits/"+userId, SunoCredits.class);
+        return this.get("/suno/credits/"+userId, SunoCredits.class);
     }
 
 
