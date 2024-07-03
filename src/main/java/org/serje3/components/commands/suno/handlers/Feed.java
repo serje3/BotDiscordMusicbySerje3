@@ -19,6 +19,10 @@ public class Feed implements CommandExecutable {
         int page;
         if (pageOption != null) {
             page = pageOption.getAsInt();
+            if (page < 0) {
+                event.getHook().sendMessage("Номер должен быть > 0!").queue();
+                return;
+            }
         } else {
             page = 0;
         }
