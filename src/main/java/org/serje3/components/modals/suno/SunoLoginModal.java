@@ -2,12 +2,19 @@ package org.serje3.components.modals.suno;
 
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.interactions.components.LayoutComponent;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.utils.data.DataObject;
+import org.jetbrains.annotations.NotNull;
 import org.serje3.meta.abs.Modal;
 import org.serje3.rest.handlers.SunoRestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Iterator;
+import java.util.List;
 
 public class SunoLoginModal extends Modal {
     private final String COOKIE_FIELD = "login-cookie";

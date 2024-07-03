@@ -30,7 +30,8 @@ public class SunoCommand extends Command {
                                 .addOption(OptionType.INTEGER, "page", "Page of feed. Starts with 0", false),
                         new SubcommandData(SunoHandler.PLAY.name().toLowerCase(), "Play track of feed")
                                 .addOption(OptionType.INTEGER, "index", "Feed index", true),
-                        new SubcommandData(SunoHandler.CREDITS.name().toLowerCase(), "Credits left")
+                        new SubcommandData(SunoHandler.CREDITS.name().toLowerCase(), "Credits left"),
+                        new SubcommandData(SunoHandler.HELP.name().toLowerCase(), "Show how use Suno service")
                 );
     }
 
@@ -49,7 +50,8 @@ public class SunoCommand extends Command {
         GENERATE(Generate.class),
         FEED(Feed.class),
         PLAY(Play.class),
-        CREDITS(Credits.class);
+        CREDITS(Credits.class),
+        HELP(Help.class);
 
         private final CommandExecutable handler;
 
