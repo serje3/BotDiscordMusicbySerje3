@@ -5,10 +5,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import org.serje3.components.commands.suno.handlers.Feed;
-import org.serje3.components.commands.suno.handlers.Generate;
-import org.serje3.components.commands.suno.handlers.Login;
-import org.serje3.components.commands.suno.handlers.Play;
+import org.serje3.components.commands.suno.handlers.*;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.interfaces.CommandExecutable;
 
@@ -32,7 +29,8 @@ public class SunoCommand extends Command {
                         new SubcommandData(SunoHandler.FEED.name().toLowerCase(), "List feed")
                                 .addOption(OptionType.INTEGER, "page", "Page of feed. Starts with 0", false),
                         new SubcommandData(SunoHandler.PLAY.name().toLowerCase(), "Play track of feed")
-                                .addOption(OptionType.INTEGER, "index", "Feed index", true)
+                                .addOption(OptionType.INTEGER, "index", "Feed index", true),
+                        new SubcommandData(SunoHandler.CREDITS.name().toLowerCase(), "Credits left")
                 );
     }
 
@@ -50,7 +48,8 @@ public class SunoCommand extends Command {
         LOGIN(Login.class),
         GENERATE(Generate.class),
         FEED(Feed.class),
-        PLAY(Play.class);
+        PLAY(Play.class),
+        CREDITS(Credits.class);
 
         private final CommandExecutable handler;
 

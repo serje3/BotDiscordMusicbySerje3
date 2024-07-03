@@ -1,6 +1,7 @@
 package org.serje3.components.commands.suno.handlers;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.serje3.components.buttons.music.AddToQueueButton;
 import org.serje3.components.commands.music.queue.QueueCommand;
 import org.serje3.meta.interfaces.CommandExecutable;
@@ -21,9 +22,14 @@ public class Play implements CommandExecutable {
             return;
         }
 
-        sunoRestHandler.feed(event.getUser().getIdLong()).thenAccept((clips) -> {
+
+        int page = playIndex / 20;
+
+        int localPlayIndex = playIndex % 20;
+
+        sunoRestHandler.feed(event.getUser().getIdLong(), page).thenAccept((clips) -> {
             try{
-                SunoClip clip = clips.get(playIndex);
+                SunoClip clip = clips.get(localPlayIndex);
                 if (clip.getAudioUrl() == null){
                     event.getHook().sendMessage("Аудио ещё не готово").queue();
                     return;

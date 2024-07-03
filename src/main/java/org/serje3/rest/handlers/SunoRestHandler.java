@@ -4,6 +4,7 @@ import org.serje3.rest.base.BaseRestClient;
 import org.serje3.rest.domain.SunoClip;
 import org.serje3.rest.requests.SunoGenerateRequest;
 import org.serje3.rest.requests.SunoLoginRequest;
+import org.serje3.rest.responses.SunoCredits;
 import org.serje3.rest.responses.SunoGenerateResponse;
 
 import java.util.List;
@@ -29,6 +30,10 @@ public class SunoRestHandler extends BaseRestClient {
 
     public CompletableFuture<SunoGenerateResponse> generate(Long userId, SunoGenerateRequest request) {
         return this.post("/suno/generate?userId=" + userId, request, SunoGenerateResponse.class);
+    }
+
+    public CompletableFuture<SunoCredits> credits(Long userId) {
+        return this.get("/credits/"+userId, SunoCredits.class);
     }
 
 
