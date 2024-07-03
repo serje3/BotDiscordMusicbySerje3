@@ -29,7 +29,8 @@ public class SunoCommand extends Command {
                 .addSubcommands(
                         new SubcommandData(SunoHandler.GENERATE.name().toLowerCase(), "Generates music by AI"),
                         new SubcommandData(SunoHandler.LOGIN.name().toLowerCase(), "[REQUIRED] Login to suno account"),
-                        new SubcommandData(SunoHandler.FEED.name().toLowerCase(), "List feed"),
+                        new SubcommandData(SunoHandler.FEED.name().toLowerCase(), "List feed")
+                                .addOption(OptionType.INTEGER, "page", "Page of feed. Starts with 0", false),
                         new SubcommandData(SunoHandler.PLAY.name().toLowerCase(), "Play track of feed")
                                 .addOption(OptionType.INTEGER, "index", "Feed index", true)
                 );

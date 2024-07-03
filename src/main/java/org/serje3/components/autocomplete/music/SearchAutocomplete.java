@@ -106,7 +106,7 @@ public class SearchAutocomplete extends AutoComplete {
                 .map(track -> {
                     String url = track.getYoutubeURL();
                     String title = track.title();
-                    return new Command.Choice(title.substring(0, 99), url != null ? url : title);
+                    return new Command.Choice(title.length() > 99 ? title.substring(0, 99) : title, url != null ? url : title);
                 }).toList().subList(0, 25);
 
         event.replyChoices(options).queue((s) -> {

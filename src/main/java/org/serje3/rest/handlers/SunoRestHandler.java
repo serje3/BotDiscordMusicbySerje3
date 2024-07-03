@@ -16,7 +16,15 @@ public class SunoRestHandler extends BaseRestClient {
     }
 
     public CompletableFuture<List<SunoClip>> feed(Long userId) {
-        return this.getList("/suno/feed?userId=" + userId, SunoClip.class);
+        return feed(userId, null);
+    }
+
+    public CompletableFuture<List<SunoClip>> feed(Long userId, Integer page) {
+        String feedUrl = "/suno/feed/" + userId;
+        if (page != null) {
+            feedUrl += "?page=" + page;
+        }
+        return this.getList(feedUrl, SunoClip.class);
     }
 
     public CompletableFuture<SunoGenerateResponse> generate(Long userId, SunoGenerateRequest request) {
