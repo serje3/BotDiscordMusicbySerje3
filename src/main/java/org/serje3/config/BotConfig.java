@@ -7,13 +7,12 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class BotConfig {
-    private static final String DEFAULT_FILE_PATH = "bot.properties";
-    private static Properties properties;
+    protected final String DEFAULT_FILE_PATH = "bot.properties";
+    private final Properties properties;
 
-    public BotConfig() throws IOException {
-        if (properties != null) return;
+    private static BotConfig instance;
 
-
+    private BotConfig() throws IOException {
         properties = new Properties();
         try (InputStream inputStream = createPropertiesInputStream()) {
             if (inputStream != null) {
@@ -26,11 +25,27 @@ public class BotConfig {
 
     // Метод для получения значения свойства из файла bot.properties
     public String get(String key) {
-        return properties.getProperty(key);
+        return get(key, null);
+    }
+
+    public String get(String key, String defaultValue) {
+        return properties.getProperty(key, defaultValue);
     }
 
     public static String getProperty(String key) throws IOException {
-        return new BotConfig().get(key);
+        return getInstance().get(key);
+    }
+
+    public static boolean getPropertyAsBoolean(String key) throws IOException {
+        return Boolean.parseBoolean(getProperty(key));
+    }
+
+
+    public static BotConfig getInstance() throws IOException {
+        if (instance == null) {
+            instance = new BotConfig();
+        }
+        return instance;
     }
 
     private InputStream createPropertiesInputStream() throws FileNotFoundException {

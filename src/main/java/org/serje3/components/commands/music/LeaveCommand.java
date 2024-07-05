@@ -2,8 +2,8 @@ package org.serje3.components.commands.music;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
+import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
 import org.serje3.services.LavalinkService;
 import org.serje3.utils.TrackQueue;
@@ -41,7 +41,9 @@ public class LeaveCommand extends Command {
     private String getReplyMessage(SlashCommandInteractionEvent event) {
         Random random = new Random();
         List<String> responses = new ArrayList<>();
-        String channelName = event.getMember().getVoiceState().getChannel().getName();
+        GuildVoiceState botVoiceState = event.getGuild().getSelfMember().getVoiceState();
+        String channelName = botVoiceState.inAudioChannel() ? botVoiceState.getChannel().getName() : null;
+
         String memberName = event.getMember().getEffectiveName();
         responses.add("Честно говоря я ваш " + channelName + " в рот ебал, отключаюсь");
         responses.add("От вас воняет я по съебам");
@@ -50,7 +52,7 @@ public class LeaveCommand extends Command {
         responses.add(memberName + " эта шваль меня выкинула");
         responses.add("У меня вот жопа щас начнет сверху лететь и вы в неё попадёте");
         responses.add("Да ПИЗДУЙте");
-        responses.add("Согласен, давайте лучше посмотрим anal на YouTube");
+        responses.add("покажи пыску");
         responses.add("Как бы вам сказать... Я предпочитаю общаться с cock suckers");
         responses.add("ВАШ ВИНДОУС ЗАБЛОКИРОВАН ЗА ПРОСМОТР ГЕЙ ПОРНО");
         responses.add("Простите, у меня сейчас важный sex, мне надо СЪЕБАТЬ");

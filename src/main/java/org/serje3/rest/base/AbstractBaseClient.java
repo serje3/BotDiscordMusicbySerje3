@@ -2,20 +2,17 @@ package org.serje3.rest.base;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import lombok.RequiredArgsConstructor;
-import org.serje3.config.BotConfig;
-import org.serje3.rest.domain.NodeRef;
 import org.serje3.utils.gson.LocalDateTimeTypeAdapter;
 
-import java.io.InputStream;
+
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -102,11 +99,31 @@ public abstract class AbstractBaseClient {
 
 
     protected <T> T fromJson(String json, Class<T> def) {
-        return gson.fromJson(json, def);
+        try {
+            return gson.fromJson(json, def);
+        } catch (JsonSyntaxException e) {
+            throw fromJsonError(json);
+        }
     }
 
-    protected <T> List<T> fromJsonList(String json, Class<T> clazz) {
-        Type listType = TypeToken.getParameterized(List.class, clazz).getType();
-        return gson.fromJson(json, listType);
+    protected <T> List<T> fromJsonList(String json, Class<T> _class) {
+        Type listType = TypeToken.getParameterized(List.class, _class).getType();
+        try {
+            return gson.fromJson(json, listType);
+        } catch (JsonSyntaxException e) {
+            throw fromJsonError(json);
+        }
+    }
+
+    protected IllegalArgumentException fromJsonError(String json) {
+        String errorMsg;
+        errorMsg = json;
+//        TODO: UNCOMMENT ON PROD
+//        try {
+//            errorMsg = BotConfig.getPropertyAsBoolean("test") ? json : "";
+//        } catch (IOException ex) {
+//            errorMsg = "";
+//        }
+        return new IllegalArgumentException("Cannot parse json, maybe another type received " + errorMsg);
     }
 }
