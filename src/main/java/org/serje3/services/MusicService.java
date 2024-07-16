@@ -145,7 +145,7 @@ public class MusicService {
             return false;
         }
 
-        TrackQueue.add(guildId, SlashEventHelper.createTrackContextFromEvent(track, member, textChannel));
+        TrackQueue.add(guildId, SlashEventHelper.createTrackContextFromDiscordMeta(track, member, textChannel));
 
         logger.info("Размер очереди - {}", TrackQueue.size(guildId));
         Link link = LavalinkService.getInstance().getLink(guildId);
@@ -158,7 +158,7 @@ public class MusicService {
             return false;
         }
         List<TrackContext> trackContextList = tracks.stream()
-                .map(track -> SlashEventHelper.createTrackContextFromEvent(track, member, textChannel)).toList();
+                .map(track -> SlashEventHelper.createTrackContextFromDiscordMeta(track, member, textChannel)).toList();
         TrackQueue.addAll(guildId, trackContextList);
 
         logger.info("Размер очереди - {}", TrackQueue.size(guildId));

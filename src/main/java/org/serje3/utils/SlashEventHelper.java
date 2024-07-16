@@ -8,16 +8,17 @@ import org.serje3.domain.TrackContext;
 
 public class SlashEventHelper {
     public static TrackContext createTrackContextFromEvent(Track track, SlashCommandInteractionEvent event) {
-        return createTrackContextFromEvent(track, event.getMember(), event.getChannel().asTextChannel());
+        return createTrackContextFromDiscordMeta(track, event.getMember(), event.getChannel().asTextChannel());
     }
 
-    public static TrackContext createTrackContextFromEvent(Track track, Member member, TextChannel textChannel) {
+    public static TrackContext createTrackContextFromDiscordMeta(Track track, Member member, TextChannel textChannel) {
         return TrackContext.builder()
                 .track(track)
                 .member(member)
                 .textChannel(textChannel)
                 .repeat(false)
                 .paused(false)
+                .retryCount(0)
                 .build();
     }
 }

@@ -90,20 +90,25 @@ public class NodeService {
                 TrackContext now = TrackQueue.peekNow(data.getGuildId());
                 if (now == null) {
                     GuildConfig.Settings settings = GuildConfig.getSettings(data.getGuildId());
-                    if (settings.getLastInteractionChannel() == null || settings.getLastInteractedMember() == null) return;
-                    TrackQueue.addNextToFirst(data.getGuildId(), SlashEventHelper.createTrackContextFromEvent(data.getTrack(),
+                    if (settings.getLastInteractionChannel() == null || settings.getLastInteractedMember() == null)
+                        return;
+                    TrackQueue.addNextToFirst(data.getGuildId(), SlashEventHelper.createTrackContextFromDiscordMeta(data.getTrack(),
                             settings.getLastInteractedMember(),
                             settings.getLastInteractionChannel()));
                     settings.getLastInteractionChannel().sendMessage("Бляздец. Ещё раз").queue();
                     return;
                 }
                 if (now.isRepeat()) return;
+                if (now.getRetryCount() >= 5 && now.getTextChannel() != null) {
+                    now.getTextChannel().sendMessage("Не вышло перезапустить трек... Вот ошибка читай не ебу не волнует " + data.getException().getMessage() + " " + data.getException().getCause()).queue();
+                    return;
+                }
 
-                TrackContext track = SlashEventHelper.createTrackContextFromEvent(data.getTrack(), now.getMember(), now.getTextChannel());
+                TrackContext track = SlashEventHelper.createTrackContextFromDiscordMeta(data.getTrack(), now.getMember(), now.getTextChannel());
                 if (track.getTextChannel() != null) {
                     track.getTextChannel().sendMessage("Бля кажется пизда треку, попробую перезапустить").queue();
                 }
-
+                track.setRetryCount(now.getRetryCount() + 1);
                 TrackQueue.addNextToFirst(data.getGuildId(), track);
             });
 

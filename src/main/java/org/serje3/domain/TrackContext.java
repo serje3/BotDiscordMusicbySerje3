@@ -16,4 +16,5 @@ public class TrackContext {
     private TextChannel textChannel;
     private volatile boolean repeat;
     private volatile boolean paused;
+    private volatile int retryCount;
 }
