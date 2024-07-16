@@ -92,7 +92,7 @@ public class NodeService {
                     GuildConfig.Settings settings = GuildConfig.getSettings(data.getGuildId());
                     if (settings.getLastInteractionChannel() == null || settings.getLastInteractedMember() == null)
                         return;
-                    TrackQueue.addNextToFirst(data.getGuildId(), SlashEventHelper.createTrackContextFromDiscordMeta(data.getTrack(),
+                    TrackQueue.add(data.getGuildId(), SlashEventHelper.createTrackContextFromDiscordMeta(data.getTrack(),
                             settings.getLastInteractedMember(),
                             settings.getLastInteractionChannel()));
                     settings.getLastInteractionChannel().sendMessage("Бляздец. Ещё раз").queue();
