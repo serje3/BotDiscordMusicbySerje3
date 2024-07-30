@@ -179,7 +179,7 @@ public class QueueCommand extends Command {
                             return;
                         }
 
-                        tracks = musicService.cockinizeTrackIfNowIsTheTime(guildId, tracks);
+                        tracks = musicService.cockinizeTracksIfNowIsTheTime(guildId, tracks);
 
                         musicService.queue(tracks, guildId, event.getMember(), event.getChannel().asTextChannel());
 

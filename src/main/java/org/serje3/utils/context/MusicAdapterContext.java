@@ -28,6 +28,7 @@ public class MusicAdapterContext extends AdapterContext {
                 add(BassBoostCommand.class);
                 add(EBANUTIYBassBoostCommand.class);
                 add(QueueCockinizeCommand.class);
+                add(RecentCommand.class);
             }
         });
         this.setButtons(new ArrayList<>(){

@@ -31,6 +31,7 @@ public class NodeService {
     private final List<Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason> audioTrackEndReasonsToIgnore = List.of(
             Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason.REPLACED
     );
+    private final MusicService musicService = new MusicService();
 
     private static boolean nodesRegistered = false;
 
@@ -83,6 +84,8 @@ public class NodeService {
                         chosenNode.getName(),
                         event.getTrack().getInfo()
                 );
+
+                musicService.saveRecentTrack(event.getGuildId(), event.getTrack());
             });
 
             node.on(TrackExceptionEvent.class).subscribe((data) -> {

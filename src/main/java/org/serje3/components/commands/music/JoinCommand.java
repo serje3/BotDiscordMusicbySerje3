@@ -23,6 +23,10 @@ public class JoinCommand extends Command {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
+        if (!event.getMember().getVoiceState().inAudioChannel()) {
+            event.reply("Давай познакомимся<3").queue();
+            return;
+        }
         VoiceHelper.joinHelper(event);
         event.reply(this.getReplyMessage(event)).queue();
     }

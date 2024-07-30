@@ -14,12 +14,13 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import org.serje3.components.buttons.music.*;
 import org.serje3.config.GuildConfig;
 import org.serje3.domain.TrackContext;
 import org.serje3.meta.enums.PlaySourceType;
+import org.serje3.rest.domain.RecentTrack;
 import org.serje3.rest.handlers.DickRestHandler;
+import org.serje3.rest.handlers.MusicRestHandler;
+import org.serje3.rest.requests.SaveRecentTrackRequest;
 import org.serje3.rest.responses.DickResponse;
 import org.serje3.utils.SlashEventHelper;
 import org.serje3.utils.TrackQueue;
@@ -38,13 +39,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MusicService {
     private final DickRestHandler dickRestHandler = new DickRestHandler();
+    private final MusicRestHandler musicRestHandler = new MusicRestHandler();
     private final Logger logger = LoggerFactory.getLogger(MusicService.class);
 
     public void pauseMusic(SlashCommandInteractionEvent event) {
         pauseMusic(event.getGuild().getIdLong())
                 .subscribe((player) -> {
                     event.reply("Плеер " + (player.getPaused() ? "на паузе" : "возобновлён") + "!").queue();
-                },  Sentry::captureException);
+                }, Sentry::captureException);
     }
 
     public Mono<LavalinkPlayer> pauseMusic(Long guildId) {
@@ -178,13 +180,24 @@ public class MusicService {
     }
 
 
-    public List<Track> cockinizeTrackIfNowIsTheTime(Long guildId, List<Track> tracks) {
+    public List<Track> cockinizeTracksIfNowIsTheTime(Long guildId, List<Track> tracks) {
         LocalDateTime now = LocalDateTime.now();
 
         if (now.getMonth() == Month.APRIL && now.getDayOfMonth() == 1 || GuildConfig.getSettings(guildId).isCockinize()) {
             return wrapDickTrack(tracks);
         }
         return tracks;
+    }
+
+    public void saveRecentTrack(Long guildId, Track track) {
+        String trackName = track.getInfo().getAuthor() + " - " + track.getInfo().getTitle();
+
+
+        musicRestHandler.saveRecentTrack(SaveRecentTrackRequest.builder()
+                .guildId(guildId)
+                .trackName(trackName)
+                .url(track.getInfo().getUri())
+                .build());
     }
 
     private List<Track> wrapDickTrack(List<Track> tracks) {
