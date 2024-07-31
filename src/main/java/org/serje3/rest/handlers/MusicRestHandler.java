@@ -17,7 +17,7 @@ public class MusicRestHandler extends BaseRestClient {
     }
 
     public void saveRecentTrack(SaveRecentTrackRequest request) {
-        this.post("/music/recent/", request, Object.class).thenAccept(ignored -> {
+        this.post("/music/recent", request, Object.class).thenAccept(ignored -> {
             logger.info("Successfully saved recent track");
         });
     }

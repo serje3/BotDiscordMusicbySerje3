@@ -28,6 +28,10 @@ public class RecentCommand extends Command {
         event.deferReply().queue();
         musicRestHandler.getRecentTracks(event.getGuild().getIdLong())
                 .thenAccept(tracks -> {
+                    if (tracks.isEmpty()){
+                        event.getHook().sendMessage("No recent").queue();
+                        return;
+                    }
                     event.getHook().sendMessage(tracks.stream().map(RecentTrack::getName).collect(Collectors.joining("\n"))).queue();
                 }).exceptionally(e -> {
                     e.printStackTrace();

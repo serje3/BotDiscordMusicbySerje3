@@ -84,8 +84,9 @@ public class NodeService {
                         chosenNode.getName(),
                         event.getTrack().getInfo()
                 );
-
-                musicService.saveRecentTrack(event.getGuildId(), event.getTrack());
+                if (!event.getTrack().getInfo().getTitle().equals("Unknown title")){
+                    musicService.saveRecentTrack(event.getGuildId(), event.getTrack());
+                }
             });
 
             node.on(TrackExceptionEvent.class).subscribe((data) -> {

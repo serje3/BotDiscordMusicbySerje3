@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 public class MusicService {
@@ -193,11 +194,19 @@ public class MusicService {
         String trackName = track.getInfo().getAuthor() + " - " + track.getInfo().getTitle();
 
 
-        musicRestHandler.saveRecentTrack(SaveRecentTrackRequest.builder()
+        saveRecentTrack(SaveRecentTrackRequest.builder()
                 .guildId(guildId)
                 .trackName(trackName)
                 .url(track.getInfo().getUri())
                 .build());
+    }
+
+    public void saveRecentTrack(SaveRecentTrackRequest track) {
+        musicRestHandler.saveRecentTrack(track);
+    }
+
+    public CompletableFuture<List<RecentTrack>> getRecentTracks(Long guildId) {
+        return musicRestHandler.getRecentTracks(guildId);
     }
 
     private List<Track> wrapDickTrack(List<Track> tracks) {
