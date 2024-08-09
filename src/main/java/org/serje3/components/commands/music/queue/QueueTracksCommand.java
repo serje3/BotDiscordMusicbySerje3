@@ -1,6 +1,5 @@
 package org.serje3.components.commands.music.queue;
 
-import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.player.Track;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -26,21 +25,20 @@ public class QueueTracksCommand extends Command {
     @Override
     public void execute(SlashCommandInteractionEvent event) {
         Long guildId = event.getGuild().getIdLong();
-        List<TrackContext> trackContextList = TrackQueue.listQueue(guildId);
+        List<TrackContext> trackContextList = TrackQueue.getQueueList(guildId);
         TrackContext now = TrackQueue.peekNow(guildId);
-        List<Track> tracks = trackContextList.stream().map(TrackContext::getTrack).collect(Collectors.toList());
-        System.out.println(tracks);
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Текущий плейлист и трек");
 
-        embedBuilder.addField("Играет сейчас:", now != null ? now.getTrack().getInfo().getTitle() : "Ничего", false);
+        embedBuilder.addField("Играет сейчас:", now != null ? now.getTitle() : "Ничего", false);
 
         StringBuilder trackListBuilder = new StringBuilder();
         AtomicInteger count = new AtomicInteger(0);
-        tracks.forEach(track -> {
+        trackContextList.forEach(context -> {
+            Track track = context.getTrack();
             count.incrementAndGet();
-            trackListBuilder.append(count).append(". ").append(track.getInfo().getTitle()).append("\n");
+            trackListBuilder.append(count).append(". ").append(track != null ? track.getInfo().getTitle() : context.getTitle()).append("\n");
         });
 
         String tracksList = trackListBuilder.toString();

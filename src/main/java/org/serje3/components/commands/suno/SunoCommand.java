@@ -28,6 +28,8 @@ public class SunoCommand extends Command {
                         new SubcommandData(SunoHandler.LOGIN.name().toLowerCase(), "[REQUIRED] Login to suno account"),
                         new SubcommandData(SunoHandler.FEED.name().toLowerCase(), "List feed")
                                 .addOption(OptionType.INTEGER, "page", "Page of feed. Starts with 0", false),
+                        new SubcommandData(SunoHandler.PLAYLIST.name().toLowerCase(), "List feed")
+                                .addOption(OptionType.INTEGER, "page", "Page of feed. Starts with 0", false),
                         new SubcommandData(SunoHandler.PLAY.name().toLowerCase(), "Play track of feed")
                                 .addOption(OptionType.INTEGER, "index", "Feed index", true),
                         new SubcommandData(SunoHandler.CREDITS.name().toLowerCase(), "Credits left"),
@@ -50,6 +52,7 @@ public class SunoCommand extends Command {
         GENERATE(Generate.class),
         FEED(Feed.class),
         PLAY(Play.class),
+        PLAYLIST(Playlist.class),
         CREDITS(Credits.class),
         HELP(Help.class);
 

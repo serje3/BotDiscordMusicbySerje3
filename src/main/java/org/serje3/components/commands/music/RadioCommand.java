@@ -1,25 +1,20 @@
 package org.serje3.components.commands.music;
 
-import dev.arbjerg.lavalink.client.LavalinkClient;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import org.serje3.components.buttons.music.AddToQueueButton;
 import org.serje3.components.commands.music.queue.QueueCommand;
 import org.serje3.meta.abs.Command;
-import org.serje3.meta.annotations.JoinVoiceChannel;
 import org.serje3.rest.domain.gachi.GachiResponse;
 import org.serje3.rest.domain.gachi.Song;
 import org.serje3.rest.handlers.GachiBassRestHandler;
-import org.serje3.services.LavalinkService;
+import org.serje3.services.EmbedService;
 import org.serje3.utils.VoiceHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 public class RadioCommand extends Command {
@@ -57,7 +52,7 @@ public class RadioCommand extends Command {
         RadioType radioType = RadioType.valueOf(event.getSubcommandName().toUpperCase());
 
         if (RadioType.getRadioList().contains(radioType)){
-            VoiceHelper.joinHelper(event);
+            VoiceHelper.joinMemberVoiceChannel(event);
             startRadio(radioType, event);
         } else if (radioType == RadioType.GACHINOW) {
             whatPlayingNowInGachi(event);
@@ -83,7 +78,7 @@ public class RadioCommand extends Command {
 
 
             event.getHook().sendMessageEmbeds(
-                    VoiceHelper.getMessageEmbed(
+                    EmbedService.getInstance().getMessageTrackEmbed(
                             null,
                             title,
                             "В my anal играет",

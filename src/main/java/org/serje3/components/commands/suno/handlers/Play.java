@@ -1,12 +1,12 @@
 package org.serje3.components.commands.suno.handlers;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.serje3.components.buttons.music.AddToQueueButton;
 import org.serje3.components.commands.music.queue.QueueCommand;
 import org.serje3.meta.interfaces.CommandExecutable;
 import org.serje3.rest.domain.SunoClip;
 import org.serje3.rest.handlers.SunoRestHandler;
+import org.serje3.services.EmbedService;
 import org.serje3.utils.VoiceHelper;
 
 public class Play implements CommandExecutable {
@@ -34,10 +34,10 @@ public class Play implements CommandExecutable {
                     event.getHook().sendMessage("Аудио ещё не готово").queue();
                     return;
                 }
-                VoiceHelper.joinHelper(event);
-                new QueueCommand().play(event, event.getGuild().getIdLong(), clip.getAudioUrl(), 35, (track) -> {
+                VoiceHelper.joinMemberVoiceChannel(event);
+                new QueueCommand().play(event, event.getGuild().getIdLong(), clip.getAudioUrl(), 35, ignored -> {
                     event.getHook().sendMessageEmbeds(
-                            VoiceHelper.getMessageEmbed(
+                            EmbedService.getInstance().getMessageTrackEmbed(
                                     clip.getVideoUrl(),
                                     clip.getTitle(),
                                     "Жанр: " + clip.getMetadata().get("tags"),

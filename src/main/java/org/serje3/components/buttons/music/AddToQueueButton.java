@@ -1,6 +1,5 @@
 package org.serje3.components.buttons.music;
 
-import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.player.LoadFailed;
 import dev.arbjerg.lavalink.client.player.NoMatches;
 import dev.arbjerg.lavalink.client.player.Track;
@@ -95,7 +94,7 @@ public class AddToQueueButton extends Button {
         // We are already connected, go ahead and play
         if (!guild.getSelfMember().getVoiceState().inAudioChannel()) {
             // Connect to VC first
-            VoiceHelper.joinHelper(event);
+            VoiceHelper.joinMemberVoiceChannel(event);
         }
     }
 

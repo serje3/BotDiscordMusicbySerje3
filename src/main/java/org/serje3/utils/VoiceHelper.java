@@ -5,18 +5,17 @@ import dev.arbjerg.lavalink.client.player.Track;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
+import org.serje3.domain.TrackContext;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 
 public class VoiceHelper {
     private static final Logger logger = LoggerFactory.getLogger(VoiceHelper.class);
 
 
-    public static void joinHelper(GenericInteractionCreateEvent event) {
+    public static void joinMemberVoiceChannel(GenericInteractionCreateEvent event) {
         final Member member = event.getMember();
         final Guild guild = event.getGuild();
         final GuildVoiceState memberVoiceState = member.getVoiceState();
@@ -27,7 +26,22 @@ public class VoiceHelper {
         }
     }
 
-    public static void play(Link link, Track track, Integer volume) {
+    public static void play(Link link, TrackContext context, Integer volume) {
+        Track track = context.getTrack();
+        if (track == null && context.getIdentifier() != null) {
+            context.retrieveTrackByIdentifier(_track -> {
+                turnOnTrack(link, _track, volume);
+            }, (res) -> {});
+            return;
+        }
+        if (track == null) {
+            throw new RuntimeException();
+        }
+        turnOnTrack(link, track, volume);
+    }
+
+
+    private static void turnOnTrack(Link link, Track track, Integer volume) {
         link.createOrUpdatePlayer()
                 .setTrack(track)
                 .setVolume(volume)
@@ -35,53 +49,6 @@ public class VoiceHelper {
                 .setEndTime(track.getInfo().getLength())
                 .subscribe((ignored) -> {
                 }, Sentry::captureException);
-    }
-
-
-    public static MessageEmbed wrapTrackEmbed(Track track, Member member, String description) {
-        if (track == null) return null;
-        String title = track.getInfo().getTitle();
-        String author = track.getInfo().getAuthor();
-        String url = track.getInfo().getUri();
-        String artUrl = track.getInfo().getArtworkUrl();
-        String source = track.getInfo().getSourceName();
-        try {
-            URI uri = new URI("https", "cataas.com", "/cat/says/" + title, "fontSize=30&fontColor=red", null);
-            String thumbnailUrl = uri.toString();
-
-            System.out.println(thumbnailUrl);
-
-            return getMessageEmbed(url, title, description, source, thumbnailUrl, member, author, artUrl);
-        } catch (URISyntaxException e) {
-            Sentry.captureException(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static MessageEmbed getMessageEmbed(String url,
-                                               String title,
-                                               String description,
-                                               String source,
-                                               String thumbnailUrl,
-                                               Member member,
-                                               String author,
-                                               String artUrl
-    ) {
-        return new MessageEmbed(
-                url,
-                title,
-                description + "\nИсточник: " + source,
-                EmbedType.AUTO_MODERATION,
-                null,
-                member.getColorRaw(),
-                new MessageEmbed.Thumbnail(thumbnailUrl, thumbnailUrl, 100, 100),
-                null,
-                new MessageEmbed.AuthorInfo(author, url, null, null),
-                null,
-                new MessageEmbed.Footer(member.getEffectiveName(), member.getEffectiveAvatarUrl(), member.getEffectiveAvatarUrl()),
-                new MessageEmbed.ImageInfo(artUrl, artUrl, 100, 100),
-                null
-        );
     }
 
     public static void queue(Link link, Long guildId) {
@@ -94,7 +61,7 @@ public class VoiceHelper {
             if (isStopped) {
                 try {
                     logger.info("START QUEUE");
-                    TrackQueue.skip(guildId, false);
+                    TrackQueue.skip(guildId, true);
                 } catch (NoTracksInQueueException e) {
                     // Такое может произойти в очень редких случаях
                     // с учётом того что перед тем как запустить queue,

@@ -1,8 +1,6 @@
 package org.serje3.components.commands.music;
 
-import dev.arbjerg.lavalink.client.LavalinkClient;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
 import org.serje3.utils.VoiceHelper;
 
@@ -23,7 +21,7 @@ public class JoinCommand extends Command {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        VoiceHelper.joinHelper(event);
+        VoiceHelper.joinMemberVoiceChannel(event);
         event.reply(this.getReplyMessage(event)).queue();
     }
 

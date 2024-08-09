@@ -31,7 +31,7 @@ public class PauseButton extends Button {
 
     @Override
     public void handle(ButtonInteractionEvent event) {
-        musicService.pauseMusic(event.getGuild().getIdLong()).subscribe(player -> {
+        musicService.pauseMusic(event.getGuild().getIdLong(), player -> {
             event.editButton(player.getPaused() ? new PausePlayButton().asJDAButton() : new PauseButton().asJDAButton()).queue();
         });
     }

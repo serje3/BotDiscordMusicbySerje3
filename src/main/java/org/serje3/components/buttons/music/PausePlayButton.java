@@ -9,6 +9,7 @@ import org.serje3.services.MusicService;
 
 public class PausePlayButton extends Button {
     private final MusicService musicService = new MusicService();
+
     @Override
     public final String getComponentId() {
         return "pause-play";
@@ -31,7 +32,7 @@ public class PausePlayButton extends Button {
 
     @Override
     public void handle(ButtonInteractionEvent event) {
-        musicService.pauseMusic(event.getGuild().getIdLong()).subscribe(player -> {
+        musicService.pauseMusic(event.getGuild().getIdLong(), player -> {
             event.editButton(player.getPaused() ? new PausePlayButton().asJDAButton() : new PauseButton().asJDAButton()).queue();
         });
     }

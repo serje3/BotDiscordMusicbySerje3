@@ -4,12 +4,14 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.serje3.meta.interfaces.CommandExecutable;
 import org.serje3.rest.handlers.SunoRestHandler;
+import org.serje3.services.SunoService;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Feed implements CommandExecutable {
 
     private final SunoRestHandler sunoRestHandler = new SunoRestHandler();
+    private final SunoService sunoService = new SunoService();
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
@@ -17,14 +19,11 @@ public class Feed implements CommandExecutable {
 
         OptionMapping pageOption = event.getOption("page");
         int page;
-        if (pageOption != null) {
-            page = pageOption.getAsInt();
-            if (page < 0) {
-                event.getHook().sendMessage("Номер должен быть > 0!").queue();
-                return;
-            }
-        } else {
-            page = 0;
+        try{
+            page = sunoService.handlePageOptionMapping(pageOption);
+        } catch (IllegalArgumentException e) {
+            event.getHook().sendMessage(e.getLocalizedMessage()).queue();
+            return;
         }
 
         sunoRestHandler.feed(event.getUser().getIdLong(), page).thenAccept((clips) -> {

@@ -2,7 +2,6 @@ package org.serje3.services;
 
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.player.LavalinkPlayer;
-import dev.arbjerg.lavalink.client.player.PlayerUpdateBuilder;
 import dev.arbjerg.lavalink.client.player.Track;
 import dev.arbjerg.lavalink.internal.JsonParserKt;
 import dev.arbjerg.lavalink.protocol.v4.TrackInfo;
@@ -14,8 +13,6 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import org.serje3.components.buttons.music.*;
 import org.serje3.config.GuildConfig;
 import org.serje3.domain.TrackContext;
 import org.serje3.meta.enums.PlaySourceType;
@@ -27,13 +24,13 @@ import org.serje3.utils.VoiceHelper;
 import org.serje3.utils.exceptions.NoTrackIsPlayingNow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 public class MusicService {
@@ -41,20 +38,13 @@ public class MusicService {
     private final Logger logger = LoggerFactory.getLogger(MusicService.class);
 
     public void pauseMusic(SlashCommandInteractionEvent event) {
-        pauseMusic(event.getGuild().getIdLong())
-                .subscribe((player) -> {
-                    event.reply("Плеер " + (player.getPaused() ? "на паузе" : "возобновлён") + "!").queue();
-                },  Sentry::captureException);
+        pauseMusic(event.getGuild().getIdLong(), (player) -> {
+            event.reply("Плеер " + (player.getPaused() ? "на паузе" : "возобновлён") + "!").queue();
+        });
     }
 
-    public Mono<LavalinkPlayer> pauseMusic(Long guildId) {
-        return LavalinkService.getInstance().getLink(guildId)
-                .getPlayer()
-                .flatMap((player) -> {
-                    PlayerUpdateBuilder playerUpdateBuilder = player.setPaused(!player.getPaused());
-                    TrackQueue.pause(guildId, player.getPaused());
-                    return playerUpdateBuilder;
-                });
+    public void pauseMusic(Long guildId, Consumer<LavalinkPlayer> onSubscribe) {
+        TrackQueue.pause(guildId, onSubscribe);
     }
 
 
@@ -78,7 +68,7 @@ public class MusicService {
             description = positionTiming + " / " + lengthTiming;
         }
 
-        return VoiceHelper.wrapTrackEmbed(track, member, description);
+        return EmbedService.getInstance().wrapTrackEmbed(track, member, description);
     }
 
     public void skipTrack(SlashCommandInteractionEvent event) {
@@ -145,7 +135,7 @@ public class MusicService {
             return false;
         }
 
-        TrackQueue.add(guildId, SlashEventHelper.createTrackContextFromDiscordMeta(track, member, textChannel));
+        TrackQueue.add(guildId, SlashEventHelper.createTrackContextFromDiscordMeta(track, member, textChannel, null));
 
         logger.info("Размер очереди - {}", TrackQueue.size(guildId));
         Link link = LavalinkService.getInstance().getLink(guildId);
@@ -158,7 +148,7 @@ public class MusicService {
             return false;
         }
         List<TrackContext> trackContextList = tracks.stream()
-                .map(track -> SlashEventHelper.createTrackContextFromDiscordMeta(track, member, textChannel)).toList();
+                .map(track -> SlashEventHelper.createTrackContextFromDiscordMeta(track, member, textChannel, guildId, null)).toList();
         TrackQueue.addAll(guildId, trackContextList);
 
         logger.info("Размер очереди - {}", TrackQueue.size(guildId));

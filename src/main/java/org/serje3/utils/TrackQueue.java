@@ -1,9 +1,8 @@
 package org.serje3.utils;
 
-import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.player.Track;
-import org.serje3.config.GuildConfig;
+import dev.arbjerg.lavalink.client.player.LavalinkPlayer;
+import dev.arbjerg.lavalink.client.player.PlayerUpdateBuilder;
 import org.serje3.domain.TrackContext;
 import org.serje3.services.LavalinkService;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
@@ -12,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public class TrackQueue {
     private static final ConcurrentHashMap<Long, Deque<TrackContext>> tracksQueue = new ConcurrentHashMap<>();
@@ -33,7 +33,7 @@ public class TrackQueue {
 
     public static void addNextToFirst(Long guildId, TrackContext track) {
         init(guildId);
-        List<TrackContext> dequeList = new ArrayList<>(listQueue(guildId));
+        List<TrackContext> dequeList = new ArrayList<>(getQueueList(guildId));
         try {
             dequeList.add(1, track);
         } catch (IndexOutOfBoundsException e) {
@@ -51,13 +51,12 @@ public class TrackQueue {
         tracksQueue.get(guildId).addAll(tracks);
     }
 
-    public static TrackContext skip(Long guildId, boolean emitByEvent) throws NoTracksInQueueException {
-        // return: next track
+    public static TrackContext skip(Long guildId, boolean forceSkip) throws NoTracksInQueueException {
         init(guildId);
-        TrackContext trackNow = peekNow(guildId);
+        TrackContext trackContextNow = peekNow(guildId);
         TrackContext trackContext;
-        if (emitByEvent && trackNow != null && trackNow.isRepeat()) {
-            trackContext = trackNow;
+        if (!forceSkip && trackContextNow != null && trackContextNow.isRepeat()) {
+            trackContext = trackContextNow;
         } else {
             trackContext = TrackQueue.pop(guildId);
         }
@@ -66,11 +65,11 @@ public class TrackQueue {
             clearNow(guildId);
             throw new NoTracksInQueueException();
         }
-        Track track = trackContext.getTrack();
+
         logger.info("Guild: {}. Current tracks in queue is {}", guildId, TrackQueue.tracksQueue.get(guildId));
         Link link = LavalinkService.getInstance().getLink(guildId);
-        logger.info("Guild: {}. Next track is {}", guildId, track.getInfo().getTitle());
-        VoiceHelper.play(link, track, 35);
+        logger.info("Guild: {}. Next track", guildId);
+        VoiceHelper.play(link, trackContext, 35);
         tracksNow.put(guildId, trackContext);
         return trackContext;
     }
@@ -82,11 +81,18 @@ public class TrackQueue {
         });
     }
 
-    public static void pause(Long guildId, boolean paused) {
-        tracksNow.computeIfPresent(guildId, (id, trackContext) -> {
-            trackContext.setPaused(paused);
-            return trackContext;
-        });
+    public static void pause(Long guildId, Consumer<LavalinkPlayer> onSubscribe) {
+        LavalinkService.getInstance().getLink(guildId)
+                .getPlayer()
+                .flatMap((player) -> {
+                    boolean paused = !player.getPaused();
+                    PlayerUpdateBuilder playerUpdateBuilder = player.setPaused(paused);
+                    tracksNow.computeIfPresent(guildId, (id, trackContext) -> {
+                        trackContext.setPaused(paused);
+                        return trackContext;
+                    });
+                    return playerUpdateBuilder;
+                }).subscribe(onSubscribe);
     }
 
     public static Boolean toggleRepeat(Long guildId) {
@@ -125,7 +131,7 @@ public class TrackQueue {
         tracksQueue.get(guildId).clear();
     }
 
-    public static List<TrackContext> listQueue(Long guildId) {
+    public static List<TrackContext> getQueueList(Long guildId) {
         init(guildId);
         Deque<TrackContext> tracks = tracksQueue.get(guildId);
         if (tracks == null) {

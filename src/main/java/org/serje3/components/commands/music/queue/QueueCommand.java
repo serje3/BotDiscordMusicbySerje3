@@ -17,6 +17,7 @@ import org.serje3.meta.annotations.JoinVoiceChannel;
 import org.serje3.meta.enums.PlaySourceType;
 import org.serje3.rest.domain.Tracks;
 import org.serje3.rest.handlers.YoutubeRestHandler;
+import org.serje3.services.EmbedService;
 import org.serje3.services.LavalinkService;
 import org.serje3.services.MusicService;
 import org.serje3.utils.VoiceHelper;
@@ -143,7 +144,7 @@ public class QueueCommand extends Command {
     }
 
     public void play(SlashCommandInteractionEvent event,
-                     Long guildId, String identifier, Integer volume, Consumer<Track> onSuccess) {
+                     Long guildId, String identifier, Integer volume, Consumer<List<Track>> onSuccess) {
         System.out.println("IDENTIFIER:" + identifier);
 
         if (identifier == null) {
@@ -163,10 +164,10 @@ public class QueueCommand extends Command {
                         musicService.queue(track, guildId, event.getMember(), event.getChannel().asTextChannel());
 
                         if (onSuccess != null){
-                            onSuccess.accept(track);
+                            onSuccess.accept(List.of(track));
                             return;
                         }
-                        event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
+                        event.getHook().sendMessageEmbeds(EmbedService.getInstance().wrapTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
                                 .addActionRow(new AddToQueueButton().asJDAButton())
                                 .queue();
                     } else if (item instanceof PlaylistLoaded playlistLoaded) {
@@ -179,10 +180,15 @@ public class QueueCommand extends Command {
                             return;
                         }
 
+
                         tracks = musicService.cockinizeTrackIfNowIsTheTime(guildId, tracks);
 
                         musicService.queue(tracks, guildId, event.getMember(), event.getChannel().asTextChannel());
 
+                        if (onSuccess != null){
+                            onSuccess.accept(tracks);
+                            return;
+                        }
                         final int trackCount = tracks.size();
                         event.getHook().sendMessage("Этот плейлист имеет " + trackCount + " треков! Запускаю - " + tracks.get(0).getInfo().getTitle())
                                 .queue();
@@ -198,7 +204,7 @@ public class QueueCommand extends Command {
 
                         musicService.queue(firstTrack, guildId, event.getMember(), event.getChannel().asTextChannel());
 
-                        event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(firstTrack, event.getMember(), "Добавлен в очередь"))
+                        event.getHook().sendMessageEmbeds(EmbedService.getInstance().wrapTrackEmbed(firstTrack, event.getMember(), "Добавлен в очередь"))
                                 .addActionRow(new AddToQueueButton().asJDAButton())
                                 .queue();
 

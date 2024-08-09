@@ -94,7 +94,9 @@ public class NodeService {
                         return;
                     TrackQueue.add(data.getGuildId(), SlashEventHelper.createTrackContextFromDiscordMeta(data.getTrack(),
                             settings.getLastInteractedMember(),
-                            settings.getLastInteractionChannel()));
+                            settings.getLastInteractionChannel(),
+                            data.getGuildId(),
+                            null));
                     settings.getLastInteractionChannel().sendMessage("Бляздец. Ещё раз").queue();
                     return;
                 }
@@ -104,7 +106,7 @@ public class NodeService {
                     return;
                 }
 
-                TrackContext track = SlashEventHelper.createTrackContextFromDiscordMeta(data.getTrack(), now.getMember(), now.getTextChannel());
+                TrackContext track = SlashEventHelper.createTrackContextFromDiscordMeta(data.getTrack(), now.getMember(), now.getTextChannel(), data.getGuildId(), null);
                 if (track.getTextChannel() != null) {
                     track.getTextChannel().sendMessage("Бля кажется пизда треку, попробую перезапустить").queue();
                 }
@@ -124,9 +126,10 @@ public class NodeService {
                 }
                 Long guildId = data.getGuildId();
                 try {
-                    TrackContext newTrack = TrackQueue.skip(guildId, true);
+                    TrackContext newTrack = TrackQueue.skip(guildId, false);
                     TextChannel textChannel = newTrack.getTextChannel();
-                    textChannel.sendMessage("Включаю следующий трек: " + newTrack.getTrack().getInfo().getAuthor() + " - " + newTrack.getTrack().getInfo().getTitle()).queue();
+                    String nextTrackInfo = newTrack.getTrack() != null ? newTrack.getTrack().getInfo().getAuthor() + " - " + newTrack.getTrack().getInfo().getTitle() : newTrack.getTitle();
+                    textChannel.sendMessage("Включаю следующий трек: " + nextTrackInfo).queue();
                 } catch (NoTracksInQueueException e) {
                     //pass
                     logger.warn("No Tracks in Queue in guild {}", guildId);
