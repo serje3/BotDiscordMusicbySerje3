@@ -10,6 +10,7 @@ import org.serje3.rest.handlers.SunoRestHandler;
 import org.serje3.services.SunoService;
 import org.serje3.utils.SlashEventHelper;
 import org.serje3.utils.TrackQueue;
+import org.serje3.utils.VoiceHelper;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,9 +42,11 @@ public class Playlist implements CommandExecutable {
         sunoRestHandler.feed(event.getUser().getIdLong(), page).thenAccept((clips) -> {
             if (clips.isEmpty()) {
                 event.getHook().sendMessage("Страница пуста").queue();
+                return;
             }
 
             SunoClip firstClip = clips.get(0);
+            VoiceHelper.joinMemberVoiceChannel(event);
             new QueueCommand().play(event, guildId, firstClip.getAudioUrl(), 35, tracks -> {
                 if (clips.size() > 1) {
                     TrackQueue.addAll(guildId, clips.subList(1, clips.size()).stream()
