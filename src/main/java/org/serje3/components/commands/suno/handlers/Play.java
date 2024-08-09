@@ -1,17 +1,20 @@
 package org.serje3.components.commands.suno.handlers;
 
+import dev.arbjerg.lavalink.client.player.Track;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.serje3.components.buttons.music.AddToQueueButton;
 import org.serje3.components.commands.music.queue.QueueCommand;
 import org.serje3.meta.interfaces.CommandExecutable;
 import org.serje3.rest.domain.SunoClip;
 import org.serje3.rest.handlers.SunoRestHandler;
+import org.serje3.rest.requests.SaveRecentTrackRequest;
+import org.serje3.services.MusicService;
 import org.serje3.services.EmbedService;
 import org.serje3.utils.VoiceHelper;
 
 public class Play implements CommandExecutable {
     private final SunoRestHandler sunoRestHandler = new SunoRestHandler();
-
+    private final MusicService musicService = new MusicService();
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
@@ -49,6 +52,11 @@ public class Play implements CommandExecutable {
                             )
                     ).addActionRow(new AddToQueueButton().asJDAButton()).queue();
                 });
+                musicService.saveRecentTrack(SaveRecentTrackRequest.builder()
+                                .trackName(clip.getTitle())
+                                .url(clip.getAudioUrl())
+                                .guildId(event.getGuild().getIdLong())
+                        .build() );
             } catch (IndexOutOfBoundsException e) {
                 event.getHook().sendMessage("Индекс неверный: " + e.getLocalizedMessage()).queue();
             }

@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.interactions.commands.Command;
 import org.serje3.meta.abs.AutoComplete;
 import org.serje3.meta.enums.PlaySourceType;
+import org.serje3.rest.domain.RecentTrack;
 import org.serje3.rest.domain.Tracks;
 import org.serje3.rest.handlers.YoutubeRestHandler;
 import org.serje3.services.LavalinkService;
@@ -42,11 +43,15 @@ public class SearchAutocomplete extends AutoComplete {
         }
         String subCommand = event.getSubcommandName();
         PlaySourceType playSourceType = PlaySourceType.valueOf(subCommand.toUpperCase());
-        if (identifier.isEmpty() || identifier.startsWith("https://") || playSourceType.equals(PlaySourceType.TEXT_TO_SPEECH)) {
-            event.replyChoices(Collections.emptyList()).queue();
+        if (playSourceType.equals(PlaySourceType.RECENT)) {
+            recentAutocomplete(identifier, event);
             return;
         }
-        if (playSourceType.equals(PlaySourceType.YOUTUBE)) {
+        else if (identifier.isEmpty() || identifier.startsWith("https://") || playSourceType.equals(PlaySourceType.TEXT_TO_SPEECH)) {
+            emptyChoices(event);
+            return;
+        }
+        else if (playSourceType.equals(PlaySourceType.YOUTUBE)) {
             try {
                 logger.info("CACHED YOUTUBE SEARCH");
                 cachedYoutubeAutocomplete(identifier, event);
@@ -75,19 +80,19 @@ public class SearchAutocomplete extends AutoComplete {
                                             String title = PlaySourceType.YOUTUBE.equals(playSourceType) ? track.getInfo().getTitle() : track.getInfo().getTitle() + " - " + track.getInfo().getAuthor();
                                             if (title.length() > 100) title = title.substring(0, 100);
                                             return new Command.Choice(title, url != null ? url : title);
-                                        }).toList();
+                                        }).toList().subList(25, tracks.size());
                                 logger.info(options.toString());
-                                event.replyChoices(options).queue();
+                                sendChoices(options, event);
                             } else if (item instanceof LoadFailed loadFailed) {
                                 logger.error("{} {}", loadFailed.getException().getMessage(), loadFailed.getException().getCause());
-                                event.replyChoices(Collections.emptyList()).queue();
+                                emptyChoices(event);
                             }
                         }
                 );
 
     }
 
-    private void  cachedYoutubeAutocomplete(String identifier, CommandAutoCompleteInteractionEvent event) {
+    private void cachedYoutubeAutocomplete(String identifier, CommandAutoCompleteInteractionEvent event) {
         Tracks tracks;
         try {
             tracks = youtubeRestHandler.searchCached(identifier);
@@ -102,22 +107,47 @@ public class SearchAutocomplete extends AutoComplete {
             return;
         }
 
-        List<Command.Choice> options = tracks.getItems().stream()
-                .map(track -> {
-                    String url = track.getYoutubeURL();
-                    String title = track.title();
-                    return new Command.Choice(title.length() > 99 ? title.substring(0, 99) : title, url != null ? url : title);
-                }).toList().subList(0, 25);
+        List<Command.Choice> choices = tracks.getItems().stream()
+                .map(track -> createChoice(track.title(), track.getYoutubeURL())).toList()
+                .subList(0, Math.min(25, tracks.getItems().size()));
 
-        event.replyChoices(options).queue((s) -> {
-            logger.info("success");
-        }, (e) -> {
+        sendChoices(choices, event);
+    }
+
+    private void recentAutocomplete(String identifier, CommandAutoCompleteInteractionEvent event) {
+        musicService.getRecentTracks(event.getGuild().getIdLong()).thenAccept(tracks -> {
+            tracks = tracks.stream().filter(track -> {
+                if (identifier.isEmpty()){
+                    return true;
+                }
+                return track.getName().toLowerCase().contains(identifier.toLowerCase());
+            }).toList();
+            List<Command.Choice> choices = tracks.stream()
+                    .map(track -> createChoice(!track.getName().isEmpty() ? track.getName() : track.getUrl(), track.getUrl()))
+                    .toList().subList(0, Math.min(25, tracks.size()));
+            logger.warn("Recent {}", tracks.stream().map(RecentTrack::getName).toList());
+            sendChoices(choices, event);
+        }).exceptionally(e -> {
             logger.info("Error {}", e.getMessage());
-            Sentry.captureException(e);
+            emptyChoices(event);
+            return null;
         });
     }
 
     private void emptyChoices(CommandAutoCompleteInteractionEvent event) {
         event.replyChoices(Collections.emptyList()).queue();
+    }
+
+    private Command.Choice createChoice(String title, String url) {
+        return new Command.Choice(title.length() > 99 ? title.substring(0, 99) : title, url != null ? url : title);
+    }
+
+    private void sendChoices(List<Command.Choice> choices, CommandAutoCompleteInteractionEvent event) {
+        event.replyChoices(choices).queue((s) -> {
+            logger.info("success");
+        }, (e) -> {
+            logger.info("Error {}", e.getMessage());
+            Sentry.captureException(e);
+        });
     }
 }

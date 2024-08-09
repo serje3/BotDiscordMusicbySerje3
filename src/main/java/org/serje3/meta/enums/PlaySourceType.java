@@ -12,6 +12,7 @@ public enum PlaySourceType {
     YANDEXMUSIC("yandexmusic", "ymsearch:"),
     SPOTIFY("spotify", "spsearch:"),
     TEXT_TO_SPEECH("tts", null),
+    RECENT("recent", null),
     LOCAL("local", "local:");
 
 

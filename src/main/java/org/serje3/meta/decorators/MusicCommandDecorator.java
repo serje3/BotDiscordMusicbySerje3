@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.serje3.meta.abs.Command;
 import org.serje3.meta.annotations.JoinVoiceChannel;
 import org.serje3.utils.VoiceHelper;
+import org.serje3.utils.exceptions.PoshelNaxyiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,12 +36,16 @@ public class MusicCommandDecorator extends Command {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        this.preExecute(event);
-        this.command.execute(event);
+        try {
+            this.preExecute(event);
+            this.command.execute(event);
+        } catch (PoshelNaxyiException e) {
+            event.reply(e.getMessage()).queue();
+        }
     }
 
 
-    private void preExecute(SlashCommandInteractionEvent event) {
+    private void preExecute(SlashCommandInteractionEvent event) throws PoshelNaxyiException {
         Class<?> commandClass = this.command.getClass();
         try {
             JoinVoiceChannel joinAnnotation = commandClass.getDeclaredMethod(
@@ -55,7 +60,7 @@ public class MusicCommandDecorator extends Command {
             throw new RuntimeException(e);
         } catch (NullPointerException e) {
             System.out.println("Null joinVoiceChannel annotation");
-            // do nothing, its ok
+            throw new PoshelNaxyiException("Нет голосового канала, к которому можно присоединиться");
         }
     }
 

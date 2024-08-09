@@ -43,50 +43,27 @@ public class QueueCommand extends Command {
         return "Включает музыку. Доступно для выбора несколько источников воспроизведения";
     }
 
+    private SubcommandData addTextField(SubcommandData obj){
+        return obj
+                .addOption(
+                        OptionType.STRING,
+                        "текст",
+                        obj.getDescription(),
+                        true,
+                        true
+                );
+    }
+
     @Override
     public SlashCommandData getSlashCommand() {
         return super.getSlashCommand()
                 .addSubcommands(
-                        new SubcommandData(PlaySourceType.YOUTUBE.name().toLowerCase(), "Поиск из ютуба")
-                                .addOption(
-                                        OptionType.STRING,
-                                        "текст".toLowerCase(),
-                                        "Строка поиска youtube",
-                                        true,
-                                        true
-                                ),
-                        new SubcommandData(PlaySourceType.SOUNDCLOUD.name().toLowerCase(), "Поиск из soundclound")
-                                .addOption(
-                                        OptionType.STRING,
-                                        "текст",
-                                        "Строка поиска soundcloud",
-                                        true,
-                                        true
-                                ),
-                        new SubcommandData(PlaySourceType.YANDEXMUSIC.name().toLowerCase(), "Поиск из Yandex Music")
-                                .addOption(
-                                        OptionType.STRING,
-                                        "текст",
-                                        "Строка поиска Yandex Music",
-                                        true,
-                                        true
-                                ),
-                        new SubcommandData(PlaySourceType.SPOTIFY.name().toLowerCase(), "Поиск из spotify")
-                                .addOption(
-                                        OptionType.STRING,
-                                        "текст",
-                                        "Строка поиска Spotify",
-                                        true,
-                                        true
-                                ),
-                        new SubcommandData(PlaySourceType.YOUTUBEMUSIC.name().toLowerCase(), "Поиск из Youtube Music")
-                                .addOption(
-                                        OptionType.STRING,
-                                        "текст",
-                                        "Строка поиска Youtube Music",
-                                        true,
-                                        true
-                                ),
+                        addTextField(new SubcommandData(PlaySourceType.YOUTUBE.name().toLowerCase(), "Поиск из ютуба")),
+                        addTextField(new SubcommandData(PlaySourceType.SOUNDCLOUD.name().toLowerCase(), "Поиск из soundclound")),
+                        addTextField(new SubcommandData(PlaySourceType.YANDEXMUSIC.name().toLowerCase(), "Поиск из Yandex Music")),
+                        addTextField(new SubcommandData(PlaySourceType.SPOTIFY.name().toLowerCase(), "Поиск из spotify")),
+                        addTextField(new SubcommandData(PlaySourceType.YOUTUBEMUSIC.name().toLowerCase(), "Поиск из Youtube Music")),
+                        addTextField(new SubcommandData(PlaySourceType.RECENT.name().toLowerCase(), "Последние воспроизведенные треки")),
                         new SubcommandData(PlaySourceType.LOCAL.name().toLowerCase(), "Проигрывание из локальных файлов")
                                 .addOption(OptionType.ATTACHMENT, "файл", "wdasdksdaasdjasdjkl")
                 );
@@ -181,7 +158,7 @@ public class QueueCommand extends Command {
                         }
 
 
-                        tracks = musicService.cockinizeTrackIfNowIsTheTime(guildId, tracks);
+                        tracks = musicService.cockinizeTracksIfNowIsTheTime(guildId, tracks);
 
                         musicService.queue(tracks, guildId, event.getMember(), event.getChannel().asTextChannel());
 

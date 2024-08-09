@@ -16,7 +16,10 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 import org.serje3.config.GuildConfig;
 import org.serje3.domain.TrackContext;
 import org.serje3.meta.enums.PlaySourceType;
+import org.serje3.rest.domain.RecentTrack;
 import org.serje3.rest.handlers.DickRestHandler;
+import org.serje3.rest.handlers.MusicRestHandler;
+import org.serje3.rest.requests.SaveRecentTrackRequest;
 import org.serje3.rest.responses.DickResponse;
 import org.serje3.utils.SlashEventHelper;
 import org.serje3.utils.TrackQueue;
@@ -31,10 +34,12 @@ import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 public class MusicService {
     private final DickRestHandler dickRestHandler = new DickRestHandler();
+    private final MusicRestHandler musicRestHandler = new MusicRestHandler();
     private final Logger logger = LoggerFactory.getLogger(MusicService.class);
 
     public void pauseMusic(SlashCommandInteractionEvent event) {
@@ -168,13 +173,32 @@ public class MusicService {
     }
 
 
-    public List<Track> cockinizeTrackIfNowIsTheTime(Long guildId, List<Track> tracks) {
+    public List<Track> cockinizeTracksIfNowIsTheTime(Long guildId, List<Track> tracks) {
         LocalDateTime now = LocalDateTime.now();
 
         if (now.getMonth() == Month.APRIL && now.getDayOfMonth() == 1 || GuildConfig.getSettings(guildId).isCockinize()) {
             return wrapDickTrack(tracks);
         }
         return tracks;
+    }
+
+    public void saveRecentTrack(Long guildId, Track track) {
+        String trackName = track.getInfo().getAuthor() + " - " + track.getInfo().getTitle();
+
+
+        saveRecentTrack(SaveRecentTrackRequest.builder()
+                .guildId(guildId)
+                .trackName(trackName)
+                .url(track.getInfo().getUri())
+                .build());
+    }
+
+    public void saveRecentTrack(SaveRecentTrackRequest track) {
+        musicRestHandler.saveRecentTrack(track);
+    }
+
+    public CompletableFuture<List<RecentTrack>> getRecentTracks(Long guildId) {
+        return musicRestHandler.getRecentTracks(guildId);
     }
 
     private List<Track> wrapDickTrack(List<Track> tracks) {
