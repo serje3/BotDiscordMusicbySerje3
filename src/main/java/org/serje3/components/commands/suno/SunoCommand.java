@@ -43,7 +43,11 @@ public class SunoCommand extends Command {
             SunoHandler handler = SunoHandler.valueOf(event.getSubcommandName().toUpperCase());
             handler.execute(event);
         } catch (IllegalArgumentException e) {
-            event.reply("Invalid subcommand `" + event.getSubcommandName() + "`").queue();
+            if (!event.isAcknowledged()){
+                event.reply("Something went wrong with `" + event.getSubcommandName() + "`").queue();
+            } else {
+                event.getHook().sendMessage("ПИСЬКА!!!!!!!ERROR").queue();
+            }
         }
     }
 
