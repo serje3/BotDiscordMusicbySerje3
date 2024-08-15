@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import org.serje3.meta.abs.Command;
 import org.serje3.services.LavalinkService;
 import org.serje3.utils.TrackQueue;
+import org.serje3.utils.VoiceHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +32,12 @@ public class LeaveCommand extends Command {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        TrackQueue.clear(event.getGuild().getIdLong());
-        event.getJDA().getDirectAudioController().disconnect(Objects.requireNonNull(event.getGuild()));
-        LavalinkService.getInstance().destroyLink(event.getGuild().getIdLong());
+        if (event.getGuild() == null) {
+            event.reply("Это команда для сообщества").queue();
+            return;
+        }
+
+        VoiceHelper.disconnect(event.getJDA(), event.getGuild());
         event.reply(this.getReplyMessage(event)).queue();
     }
 

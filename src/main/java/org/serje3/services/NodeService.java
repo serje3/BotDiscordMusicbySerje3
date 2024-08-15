@@ -8,14 +8,18 @@ import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.player.Track;
 import dev.arbjerg.lavalink.protocol.v4.Message;
 import io.sentry.Sentry;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
+import net.dv8tion.jda.internal.JDAImpl;
+import net.dv8tion.jda.internal.entities.GuildImpl;
 import org.serje3.config.GuildConfig;
 import org.serje3.domain.TrackContext;
 import org.serje3.rest.handlers.NodeRestHandler;
 import org.serje3.utils.SlashEventHelper;
 import org.serje3.utils.TrackQueue;
+import org.serje3.utils.VoiceHelper;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -207,6 +211,10 @@ public class NodeService {
 
                 logger.error("CODE 4006");
                 Bot.getDirectAudioController().reconnect(connectedChannel);
+            } else if (event.getCode() == 4014) {
+                // means disconnected
+                VoiceHelper.disconnect(Bot, new GuildImpl((JDAImpl) Bot, event.getGuildId()));
+                logger.warn("Disconnected successfully from {}", event.getGuildId());
             }
         });
     }

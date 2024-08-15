@@ -3,12 +3,16 @@ package org.serje3.utils;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.player.Track;
 import io.sentry.Sentry;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import org.serje3.domain.TrackContext;
+import org.serje3.services.LavalinkService;
 import org.serje3.utils.exceptions.NoTracksInQueueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
 
 
 public class VoiceHelper {
@@ -71,5 +75,12 @@ public class VoiceHelper {
                 }
             }
         }, Sentry::captureException);
+    }
+
+
+    public static void disconnect(JDA jda, Guild guild) {
+        TrackQueue.clear(guild.getIdLong());
+        jda.getDirectAudioController().disconnect(Objects.requireNonNull(guild));
+        LavalinkService.getInstance().destroyLink(guild.getIdLong());
     }
 }
