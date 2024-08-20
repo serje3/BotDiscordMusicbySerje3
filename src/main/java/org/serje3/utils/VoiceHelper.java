@@ -79,8 +79,12 @@ public class VoiceHelper {
 
 
     public static void disconnect(JDA jda, Guild guild) {
-        TrackQueue.clear(guild.getIdLong());
         jda.getDirectAudioController().disconnect(Objects.requireNonNull(guild));
+        clearPlayerForGuild(guild);
+    }
+
+    public static void clearPlayerForGuild(Guild guild) {
+        TrackQueue.clear(guild.getIdLong());
         LavalinkService.getInstance().destroyLink(guild.getIdLong());
     }
 }

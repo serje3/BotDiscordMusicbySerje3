@@ -137,7 +137,9 @@ public class NodeService {
                     TrackContext newTrack = TrackQueue.skip(guildId, false);
                     TextChannel textChannel = newTrack.getTextChannel();
                     String nextTrackInfo = newTrack.getTrack() != null ? newTrack.getTrack().getInfo().getAuthor() + " - " + newTrack.getTrack().getInfo().getTitle() : newTrack.getTitle();
-                    textChannel.sendMessage("Включаю следующий трек: " + nextTrackInfo).queue();
+                    if (!newTrack.isRepeat()){
+                        textChannel.sendMessage("Включаю следующий трек: " + nextTrackInfo).queue();
+                    }
                 } catch (NoTracksInQueueException e) {
                     //pass
                     logger.warn("No Tracks in Queue in guild {}", guildId);
@@ -213,7 +215,7 @@ public class NodeService {
                 Bot.getDirectAudioController().reconnect(connectedChannel);
             } else if (event.getCode() == 4014) {
                 // means disconnected
-                VoiceHelper.disconnect(Bot, new GuildImpl((JDAImpl) Bot, event.getGuildId()));
+                VoiceHelper.clearPlayerForGuild(new GuildImpl((JDAImpl) Bot, event.getGuildId()));
                 logger.warn("Disconnected successfully from {}", event.getGuildId());
             }
         });
