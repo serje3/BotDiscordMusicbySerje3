@@ -88,7 +88,7 @@ public class NodeService {
                         chosenNode.getName(),
                         event.getTrack().getInfo()
                 );
-                if (!event.getTrack().getInfo().getTitle().equals("Unknown title")){
+                if (!event.getTrack().getInfo().getTitle().equals("Unknown title")) {
                     musicService.saveRecentTrack(event.getGuildId(), event.getTrack());
                 }
             });
@@ -137,7 +137,7 @@ public class NodeService {
                     TrackContext newTrack = TrackQueue.skip(guildId, false);
                     TextChannel textChannel = newTrack.getTextChannel();
                     String nextTrackInfo = newTrack.getTrack() != null ? newTrack.getTrack().getInfo().getAuthor() + " - " + newTrack.getTrack().getInfo().getTitle() : newTrack.getTitle();
-                    if (!newTrack.isRepeat()){
+                    if (!newTrack.isRepeat()) {
                         textChannel.sendMessage("Включаю следующий трек: " + nextTrackInfo).queue();
                     }
                 } catch (NoTracksInQueueException e) {
@@ -215,7 +215,11 @@ public class NodeService {
                 Bot.getDirectAudioController().reconnect(connectedChannel);
             } else if (event.getCode() == 4014) {
                 // means disconnected
-                VoiceHelper.clearPlayerForGuild(new GuildImpl((JDAImpl) Bot, event.getGuildId()));
+                Guild guild = Bot.getGuildById(event.getGuildId());
+                boolean inAudioChannel = guild.getSelfMember().getVoiceState().inAudioChannel();
+                logger.warn("Is bot in audio channel - {}", inAudioChannel);
+                if (inAudioChannel) return;
+                VoiceHelper.clearPlayerForGuild(guild);
                 logger.warn("Disconnected successfully from {}", event.getGuildId());
             }
         });
