@@ -5,6 +5,7 @@ import org.serje3.components.buttons.music.*;
 import org.serje3.components.commands.music.*;
 import org.serje3.components.commands.music.filters.BassBoostCommand;
 import org.serje3.components.commands.music.filters.EBANUTIYBassBoostCommand;
+import org.serje3.components.commands.music.filters.FilterCommand;
 import org.serje3.components.commands.music.filters.NormalizeFilterCommand;
 import org.serje3.components.commands.music.queue.*;
 import org.serje3.meta.abs.AdapterContext;
@@ -29,6 +30,7 @@ public class MusicAdapterContext extends AdapterContext {
                 add(EBANUTIYBassBoostCommand.class);
                 add(QueueCockinizeCommand.class);
                 add(RecentCommand.class);
+                add(FilterCommand.class);
             }
         });
         this.setButtons(new ArrayList<>(){

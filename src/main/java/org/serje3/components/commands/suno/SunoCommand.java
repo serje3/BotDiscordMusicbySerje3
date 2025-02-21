@@ -33,7 +33,9 @@ public class SunoCommand extends Command {
                         new SubcommandData(SunoHandler.PLAY.name().toLowerCase(), "Play track of feed")
                                 .addOption(OptionType.INTEGER, "index", "Feed index", true),
                         new SubcommandData(SunoHandler.CREDITS.name().toLowerCase(), "Credits left"),
-                        new SubcommandData(SunoHandler.HELP.name().toLowerCase(), "Show how use Suno service")
+                        new SubcommandData(SunoHandler.HELP.name().toLowerCase(), "Show how use Suno service"),
+                        new SubcommandData(SunoHandler.ID.name().toLowerCase(), "Track by id")
+                                .addOption(OptionType.STRING, "id", "Track id")
                 );
     }
 
@@ -58,7 +60,8 @@ public class SunoCommand extends Command {
         PLAY(Play.class),
         PLAYLIST(Playlist.class),
         CREDITS(Credits.class),
-        HELP(Help.class);
+        HELP(Help.class),
+        ID(Id.class);
 
         private final CommandExecutable handler;
 

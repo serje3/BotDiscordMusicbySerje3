@@ -4,9 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import org.serje3.components.buttons.music.AddToQueueButton;
+import org.serje3.config.BotConfig;
 import org.serje3.utils.gson.LocalDateTimeTypeAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -21,9 +26,13 @@ public abstract class AbstractBaseClient {
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
             .create();
     protected final HttpClient httpClient;
+    private final Logger logger;
+
+
 
     public AbstractBaseClient() {
         this.httpClient = HttpClient.newHttpClient();
+        this.logger = LoggerFactory.getLogger(this.getClass());
     }
 
     protected <T> CompletableFuture<T> get(String url, Class<T> responseClass) {
@@ -35,7 +44,7 @@ public abstract class AbstractBaseClient {
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
                     String body = response.body();
-                    System.out.println(response + " body:" + (body.length() > 300 ? body.substring(0, 300) + "(truncated " + (body.length() - 300) + " symbols)" : body) + " " + responseClass);
+                    logger.debug("{} body:{} {}", response, body.length() > 300 ? body.substring(0, 300) + "(truncated " + (body.length() - 300) + " symbols)" : body, responseClass);
                     return fromJson(response.body(), responseClass);
                 });
     }
@@ -116,14 +125,13 @@ public abstract class AbstractBaseClient {
     }
 
     protected IllegalArgumentException fromJsonError(String json) {
-        String errorMsg;
-        errorMsg = json;
-//        TODO: UNCOMMENT ON PROD
-//        try {
-//            errorMsg = BotConfig.getPropertyAsBoolean("test") ? json : "";
-//        } catch (IOException ex) {
-//            errorMsg = "";
-//        }
+        String errorMsg = json;
+
+        try {
+            errorMsg = BotConfig.getPropertyAsBoolean("test") ? json : "";
+        } catch (IOException ex) {
+            errorMsg = "";
+        }
         return new IllegalArgumentException("Cannot parse json, maybe another type received " + errorMsg);
     }
 }

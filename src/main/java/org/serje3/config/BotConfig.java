@@ -40,6 +40,10 @@ public class BotConfig {
         return Boolean.parseBoolean(getProperty(key));
     }
 
+    public static Integer getPropertyAsInteger(String key) throws IOException {
+        return Integer.parseInt(getProperty(key));
+    }
+
 
     public static BotConfig getInstance() throws IOException {
         if (instance == null) {

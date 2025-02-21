@@ -71,12 +71,7 @@ public class NodeService {
         }
 
         if (nodes == null || nodes.isEmpty()) {
-            nodes = List.of(new NodeOptions.Builder()
-                    .setName("base")
-                    .setServerUri("wss://amsterdam.serje3.ru:443")
-                    .setPassword("DIcsG6lG49wY7rkk")
-                    .setRegionFilter(RegionGroup.EUROPE)
-                    .build());
+            throw new RuntimeException("No nodes found");
         }
 
         nodes.stream().map(lavalinkService.getClient()::addNode).toList().forEach((node) -> {
@@ -218,7 +213,7 @@ public class NodeService {
                 Guild guild = Bot.getGuildById(event.getGuildId());
                 boolean inAudioChannel = guild.getSelfMember().getVoiceState().inAudioChannel();
                 logger.warn("Is bot in audio channel - {}", inAudioChannel);
-                if (inAudioChannel) return;
+
                 VoiceHelper.clearPlayerForGuild(guild);
                 logger.warn("Disconnected successfully from {}", event.getGuildId());
             }
