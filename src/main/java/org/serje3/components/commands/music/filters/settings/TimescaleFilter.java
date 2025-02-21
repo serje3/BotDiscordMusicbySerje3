@@ -71,8 +71,8 @@ public class TimescaleFilter implements CommandExecutable {
     private Double getParam(String name, SlashCommandInteractionEvent event) {
         Double param;
         try {
-            param = Objects.requireNonNull(event.getOption(name)).getAsDouble();
-        } catch (NullPointerException e) {
+            param = Math.max(Objects.requireNonNull(event.getOption(name)).getAsDouble(), 0);
+        } catch (NullPointerException | IllegalStateException e) {
             param = null;
         }
         return param;
