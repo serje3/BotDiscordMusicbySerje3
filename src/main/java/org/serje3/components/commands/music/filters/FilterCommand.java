@@ -25,9 +25,9 @@ public class FilterCommand extends Command {
         return super.getSlashCommand()
                 .addSubcommands(
                         new SubcommandData(FilterHandler.TIMESCALE.name().toLowerCase(), "Changes the speed, pitch, and rate. All default to 1.0.")
-                                .addOption(OptionType.STRING, "speed", "The playback speed 0.0 ≤ x", false)
-                                .addOption(OptionType.STRING, "pitch", "The pitch 0.0 ≤ x", false)
-                                .addOption(OptionType.STRING, "rate", "The rate 0.0 ≤ x", false)
+                                .addOption(OptionType.NUMBER, "speed", "The playback speed 0.0 ≤ x", false)
+                                .addOption(OptionType.NUMBER, "pitch", "The pitch 0.0 ≤ x", false)
+                                .addOption(OptionType.NUMBER, "rate", "The rate 0.0 ≤ x", false)
                 );
     }
 
