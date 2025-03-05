@@ -1,4 +1,4 @@
-# Bod Discord By Serje3
+# Bot Discord By Serje3
 
 ## Deploy
 Python 3.10
