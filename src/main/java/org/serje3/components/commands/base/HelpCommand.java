@@ -8,7 +8,8 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import org.serje3.meta.abs.Command;
 import org.serje3.utils.context.DefaultAdapterContext;
 import org.serje3.utils.context.LogAdapterContext;
@@ -36,11 +37,11 @@ public class HelpCommand extends Command {
     @Override
     public void execute(SlashCommandInteractionEvent event) {
         event.replyEmbeds(createHelpEmbed(event))
-                .addActionRow(
+                .addComponents(ActionRow.of(
                         Button.link("https://vk.com/club200458779", Emoji.fromFormatted("<:VK_EMOJI:1170054842077683842>")),
                         Button.link("https://pay.cloudtips.ru/p/47dd3faa", "Оставить чаевые")
                                 .withEmoji(Emoji.fromFormatted("\uD83E\uDE99"))
-                )
+                ))
                 .queue();
     }
 

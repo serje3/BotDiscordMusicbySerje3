@@ -13,8 +13,9 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.components.buttons.Button;
 import org.serje3.components.buttons.music.*;
 import org.serje3.config.GuildConfig;
 import org.serje3.domain.TrackContext;
@@ -143,13 +144,13 @@ public class MusicService {
         try {
             if (track == null) throw new NoTrackIsPlayingNow();
             textChannel.sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track.getTrack(), track.getMember(), ""))
-                    .addActionRow(
+                    .addComponents(ActionRow.of(
                             new AddToQueueButton().asJDAButton(),
                             track.isRepeat() ? new RepeatButton.On().asJDAButton() : new RepeatButton().asJDAButton(),
                             track.isPaused() ? new PausePlayButton().asJDAButton() : new PauseButton().asJDAButton(),
                             new SkipButton().asJDAButton(),
                             Button.link(track.getTrack().getInfo().getUri(), "Ссылка на трек")
-                    ).queue();
+                    )).queue();
         } catch (NoTrackIsPlayingNow e) {
             // ниче не делаем
         }

@@ -2,6 +2,7 @@ package org.serje3.components.commands.music;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -93,9 +94,9 @@ public class RadioCommand extends Command {
                             song.getArtist(),
                             song.getArt()
                     )
-            ).addActionRow(
+            ).addComponents(ActionRow.of(
                     new AddToQueueButton().asJDAButton()
-            ).queue();
+            )).queue();
         } catch (ExecutionException | InterruptedException e) {
             logger.error(e.getMessage());
             event.getHook().sendMessage("Все пошло по пиздец").queue();

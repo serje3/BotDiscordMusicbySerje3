@@ -3,7 +3,7 @@ package org.serje3.meta.abs;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.dv8tion.jda.api.components.buttons.ButtonStyle;
 import org.serje3.config.BotConfig;
 
 import java.io.IOException;
@@ -31,7 +31,7 @@ public abstract class Button {
         return null;
     }
 
-    public net.dv8tion.jda.api.interactions.components.buttons.Button asJDAButton() {
+    public net.dv8tion.jda.api.components.buttons.Button asJDAButton() {
         ButtonType type = getButtonType();
         String label = getLabel();
         if (label == null || label.isEmpty()){
@@ -49,39 +49,40 @@ public abstract class Button {
     }
 
 
-    private net.dv8tion.jda.api.interactions.components.buttons.Button createButtonWithLabel(ButtonType type){
+    private net.dv8tion.jda.api.components.buttons.Button createButtonWithLabel(ButtonType type){
         switch (type) {
             case PRIMARY -> {
-                return net.dv8tion.jda.api.interactions.components.buttons.Button.primary(getButtonComponentId(), getLabel());
+                return net.dv8tion.jda.api.components.buttons.Button.primary(getButtonComponentId(), getLabel());
             }
             case DANGER -> {
-                return net.dv8tion.jda.api.interactions.components.buttons.Button.danger(getButtonComponentId(), getLabel());
+                return net.dv8tion.jda.api.components.buttons.Button.danger(getButtonComponentId(), getLabel());
             }
             case SECONDARY -> {
-                return net.dv8tion.jda.api.interactions.components.buttons.Button.secondary(getButtonComponentId(), getLabel());
+                return net.dv8tion.jda.api.components.buttons.Button.secondary(getButtonComponentId(), getLabel());
             }
             case SUCCESS -> {
-                return net.dv8tion.jda.api.interactions.components.buttons.Button.success(getButtonComponentId(), getLabel());
+                return net.dv8tion.jda.api.components.buttons.Button.success(getButtonComponentId(), getLabel());
             }
         }
-        return net.dv8tion.jda.api.interactions.components.buttons.Button.of(ButtonStyle.UNKNOWN, getButtonComponentId(), getLabel());
+        return net.dv8tion.jda.api.components.buttons.Button.of(ButtonStyle.UNKNOWN, getButtonComponentId(), getLabel());
     }
 
-    private net.dv8tion.jda.api.interactions.components.buttons.Button createButtonWithEmoji(ButtonType type){
+    private net.dv8tion.jda.api.components.buttons.Button createButtonWithEmoji(ButtonType type){
         switch (type) {
             case PRIMARY -> {
-                return net.dv8tion.jda.api.interactions.components.buttons.Button.primary(getButtonComponentId(), getLabelEmoji());
+                return net.dv8tion.jda.api.components.buttons.Button.primary(getButtonComponentId(), getLabelEmoji());
             }
             case DANGER -> {
-                return net.dv8tion.jda.api.interactions.components.buttons.Button.danger(getButtonComponentId(), getLabelEmoji());
+                return net.dv8tion.jda.api.components.buttons.Button.danger(getButtonComponentId(), getLabelEmoji());
             }
             case SECONDARY -> {
-                return net.dv8tion.jda.api.interactions.components.buttons.Button.secondary(getButtonComponentId(), getLabelEmoji());
+                return net.dv8tion.jda.api.components.buttons.Button.secondary(getButtonComponentId(), getLabelEmoji());
             }
             case SUCCESS -> {
-                return net.dv8tion.jda.api.interactions.components.buttons.Button.success(getButtonComponentId(), getLabelEmoji());
+                return net.dv8tion.jda.api.components.buttons.Button.success(getButtonComponentId(), getLabelEmoji());
             }
         }
-        return net.dv8tion.jda.api.interactions.components.buttons.Button.of(ButtonStyle.UNKNOWN, getButtonComponentId(), getLabelEmoji());
+        return net.dv8tion.jda.api.components.buttons.Button.of(ButtonStyle.UNKNOWN, getButtonComponentId(), getLabelEmoji());
     }
 }
+

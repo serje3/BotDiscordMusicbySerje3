@@ -49,7 +49,7 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-
+        logger.info("received slash command: name='{}', full='{}'", event.getName(), event.getFullCommandName());
         String commandName = event.getName();
         Command command = this.commands.get(commandName);
         if (command != null) {
@@ -61,6 +61,11 @@ public abstract class BaseListenerAdapter extends ListenerAdapter implements Con
                 Sentry.captureException(e);
                 throw e;
             }
+        } else {
+            logger.debug("slash command '{}' is not registered in adapter {}. Registered commands: {}",
+                    commandName,
+                    this.getClass().getSimpleName(),
+                    this.commands.keySet());
         }
     }
 

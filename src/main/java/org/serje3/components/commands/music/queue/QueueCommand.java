@@ -5,6 +5,7 @@ import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.LinkState;
 import dev.arbjerg.lavalink.client.player.*;
 import io.sentry.Sentry;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -163,7 +164,7 @@ public class QueueCommand extends Command {
 
 
                         event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(track, event.getMember(), "Добавлен в очередь"))
-                                .addActionRow(new AddToQueueButton().asJDAButton())
+                                .addComponents(ActionRow.of(new AddToQueueButton().asJDAButton()))
                                 .queue();
                     } else if (item instanceof PlaylistLoaded playlistLoaded) {
                         List<Track> tracks = playlistLoaded.getTracks();
@@ -195,7 +196,7 @@ public class QueueCommand extends Command {
                         musicService.queue(firstTrack, guildId, event.getMember(), event.getChannel().asTextChannel());
 
                         event.getHook().sendMessageEmbeds(VoiceHelper.wrapTrackEmbed(firstTrack, event.getMember(), "Добавлен в очередь"))
-                                .addActionRow(new AddToQueueButton().asJDAButton())
+                                .addComponents(ActionRow.of(new AddToQueueButton().asJDAButton()))
                                 .queue();
 
                     } else if (item instanceof NoMatches) {

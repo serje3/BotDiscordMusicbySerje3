@@ -1,7 +1,5 @@
 package org.serje3;
 
-import dev.arbjerg.lavalink.client.Helpers;
-import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener;
 import io.sentry.Sentry;
 import io.sentry.SentryLevel;

@@ -28,7 +28,9 @@ def local_deploy(hostname, username, password, local_build, app_dir):
     commands = [
         "cd " + os.environ.get('APP_DIR'),
         f"systemctl stop {service_name}",
+        "rm -rf java-discord-bot-1.0",
         "unzip -o " + file_name,
+        "ls -1 java-discord-bot-1.0/lib | grep -i '^JDA-' || true",
         f"systemctl start {service_name}"
     ]
 
