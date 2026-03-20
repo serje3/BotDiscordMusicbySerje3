@@ -1,6 +1,8 @@
 package org.serje3.utils;
 
 import dev.arbjerg.lavalink.client.Link;
+import dev.arbjerg.lavalink.client.LinkState;
+import dev.arbjerg.lavalink.client.player.LavalinkPlayer;
 import dev.arbjerg.lavalink.client.player.Track;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.entities.*;
@@ -11,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 
 public class VoiceHelper {
     private static final Logger logger = LoggerFactory.getLogger(VoiceHelper.class);
@@ -28,13 +31,16 @@ public class VoiceHelper {
     }
 
     public static void play(Link link, Track track, Integer volume) {
-        link.createOrUpdatePlayer()
-                .setTrack(track)
-                .setVolume(volume)
-                .setNoReplace(true)
-                .setEndTime(track.getInfo().getLength())
-                .subscribe((ignored) -> {
-                }, Sentry::captureException);
+        try {
+            link.createOrUpdatePlayer()
+                    .setTrack(track)
+                    .setVolume(volume)
+                    .setNoReplace(false)
+                    .setEndTime(track.getInfo().getLength())
+                    .block(Duration.ofSeconds(30));
+        } catch (Exception e) {
+            Sentry.captureException(e);
+        }
     }
 
 
@@ -85,24 +91,51 @@ public class VoiceHelper {
     }
 
     public static void queue(Link link, Long guildId) {
-        link.getPlayer().subscribe((player) -> {
-
-            logger.info("Queue. Player state - {}", player.getState());
-            boolean isStopped = !player.getState().getConnected() || player.getTrack() == null
-                    || player.getPosition() >= player.getTrack().getInfo().getLength();
-
-            if (isStopped) {
-                try {
-                    logger.info("START QUEUE");
-                    TrackQueue.skip(guildId, false);
-                } catch (NoTracksInQueueException e) {
-                    // Такое может произойти в очень редких случаях
-                    // с учётом того что перед тем как запустить queue,
-                    // мы добавляем трек в TrackQueue
-                    // В случае если это все-таки произошло - удалите system32,
-                    // а если вы на linux или macos, то напишите rm -rf /. И проблема исчезнет
+        synchronized (TrackQueue.playbackLock(guildId)) {
+            try {
+                LavalinkPlayer player = link.getPlayer().block(Duration.ofSeconds(15));
+                if (player == null) {
+                    return;
                 }
+                logger.info("Queue. Player state - {}", player.getState());
+                if (!shouldStartNextFromQueue(link, player)) {
+                    return;
+                }
+                logger.info("START QUEUE");
+                TrackQueue.skip(guildId, false);
+            } catch (NoTracksInQueueException e) {
+                // гонка: очередь опустели между add и skip
+            } catch (Exception e) {
+                Sentry.captureException(e);
             }
-        }, Sentry::captureException);
+        }
+    }
+
+    /**
+     * True, если плеер не воспроизводит трек сейчас и нужно взять следующий из очереди.
+     * Учитывает link/voice, паузу, конец трека и стримы (длина ~∞).
+     */
+    static boolean shouldStartNextFromQueue(Link link, LavalinkPlayer player) {
+        if (link.getState() != LinkState.CONNECTED) {
+            return true;
+        }
+        if (!player.getState().getConnected()) {
+            return true;
+        }
+        if (player.getTrack() == null) {
+            return true;
+        }
+        if (player.getPaused()) {
+            return false;
+        }
+        Track track = player.getTrack();
+        if (track.getInfo().isStream()) {
+            return false;
+        }
+        long length = track.getInfo().getLength();
+        if (length <= 0) {
+            return false;
+        }
+        return player.getPosition() >= length;
     }
 }

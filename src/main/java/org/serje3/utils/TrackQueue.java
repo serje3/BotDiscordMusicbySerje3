@@ -15,7 +15,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TrackQueue {
     private static final ConcurrentHashMap<Long, Deque<TrackContext>> tracksQueue = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Long, TrackContext> tracksNow = new ConcurrentHashMap<>();
+    /** Сериализация skip() между TrackEndEvent и VoiceHelper.queue (один guild). */
+    private static final ConcurrentHashMap<Long, Object> playbackLocks = new ConcurrentHashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(TrackQueue.class);
+
+    static Object playbackLock(Long guildId) {
+        return playbackLocks.computeIfAbsent(guildId, k -> new Object());
+    }
 
     private static void init(Long guildId) {
         Set<Long> keySet = tracksQueue.keySet();
@@ -37,27 +43,29 @@ public class TrackQueue {
     }
 
     public static TrackContext skip(Long guildId, boolean emitByEvent) throws NoTracksInQueueException {
-        // return: next track
-        init(guildId);
-        TrackContext trackNow = peekNow(guildId);
-        TrackContext trackContext;
-        if (emitByEvent && trackNow != null && trackNow.isRepeat()) {
-            trackContext = trackNow;
-        } else {
-            trackContext = TrackQueue.pop(guildId);
-        }
+        synchronized (playbackLock(guildId)) {
+            // return: next track
+            init(guildId);
+            TrackContext trackNow = peekNow(guildId);
+            TrackContext trackContext;
+            if (emitByEvent && trackNow != null && trackNow.isRepeat()) {
+                trackContext = trackNow;
+            } else {
+                trackContext = TrackQueue.pop(guildId);
+            }
 
-        if (trackContext == null) {
-            clearNow(guildId);
-            throw new NoTracksInQueueException();
+            if (trackContext == null) {
+                clearNow(guildId);
+                throw new NoTracksInQueueException();
+            }
+            Track track = trackContext.getTrack();
+            logger.info("Guild: {}. Current tracks in queue is {}", guildId, TrackQueue.tracksQueue.get(guildId));
+            Link link = LavalinkService.getInstance().getLink(guildId);
+            logger.info("Guild: {}. Next track is {}", guildId, track.getInfo().getTitle());
+            VoiceHelper.play(link, track, 35);
+            tracksNow.put(guildId, trackContext);
+            return trackContext;
         }
-        Track track = trackContext.getTrack();
-        logger.info("Guild: {}. Current tracks in queue is {}",guildId, TrackQueue.tracksQueue.get(guildId));
-        Link link = LavalinkService.getInstance().getLink(guildId);
-        logger.info("Guild: {}. Next track is {}", guildId, track.getInfo().getTitle());
-        VoiceHelper.play(link, track, 35);
-        tracksNow.put(guildId, trackContext);
-        return trackContext;
     }
 
     public static TrackContext repeat(Long guildId, Boolean repeat) {

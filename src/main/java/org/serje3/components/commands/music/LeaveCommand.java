@@ -31,9 +31,11 @@ public class LeaveCommand extends Command {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        TrackQueue.clear(event.getGuild().getIdLong());
+        long guildId = event.getGuild().getIdLong();
+        TrackQueue.clear(guildId);
+        TrackQueue.clearNow(guildId);
         event.getJDA().getDirectAudioController().disconnect(Objects.requireNonNull(event.getGuild()));
-        LavalinkService.getInstance().destroyLink(event.getGuild().getIdLong());
+        LavalinkService.getInstance().destroyLink(guildId);
         event.reply(this.getReplyMessage(event)).queue();
     }
 
@@ -41,7 +43,8 @@ public class LeaveCommand extends Command {
     private String getReplyMessage(SlashCommandInteractionEvent event) {
         Random random = new Random();
         List<String> responses = new ArrayList<>();
-        String channelName = event.getMember().getVoiceState().getChannel().getName();
+        var voiceChannel = event.getMember().getVoiceState().getChannel();
+        String channelName = voiceChannel != null ? voiceChannel.getName() : "голосовой";
         String memberName = event.getMember().getEffectiveName();
         responses.add("Честно говоря я ваш " + channelName + " в рот ебал, отключаюсь");
         responses.add("От вас воняет я по съебам");
